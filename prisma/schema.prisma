@@ -1,0 +1,635 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum UserTier {
+  STANDARD
+  PREMIUM
+  PRIVATE
+  BUSINESS
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  CLOSED
+}
+
+enum KycStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum AccountType {
+  CURRENT
+  SAVINGS
+  FIXED_DEPOSIT
+  BUSINESS
+  INVESTMENT
+}
+
+enum AccountStatus {
+  ACTIVE
+  FROZEN
+  CLOSED
+}
+
+enum TransactionType {
+  CREDIT
+  DEBIT
+}
+
+enum TransactionCategory {
+  TRANSFER
+  PAYMENT
+  SALARY
+  WITHDRAWAL
+  DEPOSIT
+  CARD_PAYMENT
+  REFUND
+  FX
+  INTEREST
+  FEE
+  INVESTMENT
+  LOAN_PAYMENT
+  GOAL_CONTRIBUTION
+  GOAL_WITHDRAWAL
+}
+
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REVERSED
+}
+
+enum TransferType {
+  INTERNAL
+  DOMESTIC
+  INTERNATIONAL
+  SCHEDULED
+}
+
+enum TransferStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum CardType {
+  DEBIT
+  CREDIT
+  VIRTUAL
+  PREPAID
+}
+
+enum CardTier {
+  STANDARD
+  GOLD
+  PLATINUM
+}
+
+enum CardStatus {
+  ACTIVE
+  FROZEN
+  BLOCKED
+  EXPIRED
+  CANCELLED
+}
+
+enum AssetType {
+  EQUITY
+  ETF
+  BOND
+  CRYPTO
+  COMMODITY
+  CASH
+}
+
+enum LoanType {
+  PERSONAL
+  MORTGAGE
+  AUTO
+  BUSINESS
+  OVERDRAFT
+}
+
+enum LoanStatus {
+  PENDING
+  ACTIVE
+  PAID_OFF
+  DEFAULTED
+  REJECTED
+}
+
+enum LoanPaymentStatus {
+  SCHEDULED
+  PAID
+  MISSED
+}
+
+enum NotificationType {
+  TRANSACTION
+  TRANSFER
+  SECURITY
+  SYSTEM
+  MARKETING
+  LOAN
+  CARD
+}
+
+enum DeviceType {
+  MOBILE
+  DESKTOP
+  TABLET
+  UNKNOWN
+}
+
+enum GoalStatus {
+  ACTIVE
+  ACHIEVED
+  CANCELLED
+}
+
+enum DisputeStatus {
+  OPEN
+  UNDER_REVIEW
+  RESOLVED
+  REJECTED
+}
+
+enum InsuranceType {
+  LIFE
+  HOME
+  CAR
+  TRAVEL
+  HEALTH
+  BUSINESS
+}
+
+enum InsuranceStatus {
+  REQUESTED
+  QUOTED
+  ACCEPTED
+  DECLINED
+}
+
+enum FxRateSource {
+  MOCK
+  EXTERNAL_API
+}
+
+// ─── Models ──────────────────────────────────────────────────────────────────
+
+model User {
+  id                  String     @id @default(uuid())
+  email               String     @unique
+  phone               String?    @unique
+  passwordHash        String
+  firstName           String
+  lastName            String
+  gender              String?
+  dateOfBirth         DateTime?
+  nationality         String?
+  address             Json?
+  kycStatus           KycStatus  @default(PENDING)
+  kycDocuments        Json?
+  tier                UserTier   @default(STANDARD)
+  role                Role       @default(USER)
+  isEmailVerified     Boolean    @default(false)
+  isPhoneVerified     Boolean    @default(false)
+  twoFactorEnabled    Boolean    @default(false)
+  twoFactorSecret     String?
+  status              UserStatus @default(ACTIVE)
+  failedLoginAttempts Int        @default(0)
+  lockedUntil         DateTime?
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+
+  profile       Profile?
+  accounts      Account[]
+  cards         Card[]
+  beneficiaries Beneficiary[]
+  portfolio     Portfolio?
+  loans         Loan[]
+  goals         SavingsGoal[]
+  notifications Notification[]
+  devices       Device[]
+  refreshTokens RefreshToken[]
+  auditLogs     AuditLog[]
+  otpCodes      OtpCode[]
+  disputes         Dispute[]
+  insuranceQuotes  InsuranceQuote[]
+
+  @@index([email])
+  @@index([status])
+}
+
+model Profile {
+  id                      String   @id @default(uuid())
+  userId                  String   @unique
+  avatarUrl               String?
+  occupation              String?
+  employer                String?
+  annualIncome            Decimal? @db.Decimal(18, 4)
+  preferredCurrency       String   @default("USD")
+  notificationPreferences Json     @default("{\"email\":true,\"sms\":true,\"push\":true,\"marketing\":false}")
+  updatedAt               DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Account {
+  id               String        @id @default(uuid())
+  userId           String
+  accountNumber    String        @unique
+  iban             String        @unique
+  sortCode         String        @default("20-45-78")
+  type             AccountType
+  currency         String        @default("USD")
+  balance          Decimal       @default(0) @db.Decimal(18, 4)
+  availableBalance Decimal       @default(0) @db.Decimal(18, 4)
+  interestRate     Decimal?      @db.Decimal(5, 4)
+  maturityDate     DateTime?
+  status           AccountStatus @default(ACTIVE)
+  isDefault        Boolean       @default(false)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions  Transaction[]
+  fromTransfers Transfer[]    @relation("FromAccount")
+  toTransfers   Transfer[]    @relation("ToAccount")
+  cards         Card[]
+  goals         SavingsGoal[]
+
+  @@index([userId])
+  @@index([accountNumber])
+  @@index([status])
+}
+
+model Transaction {
+  id                        String              @id @default(uuid())
+  reference                 String              @unique
+  accountId                 String
+  type                      TransactionType
+  category                  TransactionCategory
+  amount                    Decimal             @db.Decimal(18, 4)
+  currency                  String
+  balanceBefore             Decimal             @db.Decimal(18, 4)
+  balanceAfter              Decimal             @db.Decimal(18, 4)
+  description               String
+  merchantName              String?
+  merchantCategory          String?
+  counterpartyName          String?
+  counterpartyAccountNumber String?
+  counterpartyBank          String?
+  status                    TransactionStatus   @default(COMPLETED)
+  failureReason             String?
+  metadata                  Json?
+  valueDate                 DateTime            @default(now())
+  createdAt                 DateTime            @default(now())
+
+  account      Account   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  fromTransfer Transfer? @relation("FromTransaction")
+  toTransfer   Transfer? @relation("ToTransaction")
+
+  @@index([accountId])
+  @@index([createdAt])
+  @@index([status])
+  @@index([category])
+  @@index([reference])
+}
+
+model Transfer {
+  id                String         @id @default(uuid())
+  fromAccountId     String
+  toAccountId       String?
+  toAccountNumber   String?
+  toBank            String?
+  toBankCode        String?
+  toBeneficiaryId   String?
+  fromTransactionId String?        @unique
+  toTransactionId   String?        @unique
+  amount            Decimal        @db.Decimal(18, 4)
+  currency          String
+  fxRate            Decimal?       @db.Decimal(18, 8)
+  fxFee             Decimal        @default(0) @db.Decimal(18, 4)
+  transferFee       Decimal        @default(0) @db.Decimal(18, 4)
+  description       String
+  scheduledAt       DateTime?
+  executedAt        DateTime?
+  status            TransferStatus @default(PENDING)
+  type              TransferType
+  createdAt         DateTime       @default(now())
+
+  fromAccount     Account      @relation("FromAccount", fields: [fromAccountId], references: [id])
+  toAccount       Account?     @relation("ToAccount", fields: [toAccountId], references: [id])
+  beneficiary     Beneficiary? @relation(fields: [toBeneficiaryId], references: [id])
+  fromTransaction Transaction? @relation("FromTransaction", fields: [fromTransactionId], references: [id])
+  toTransaction   Transaction? @relation("ToTransaction", fields: [toTransactionId], references: [id])
+
+  @@index([fromAccountId])
+  @@index([status])
+  @@index([scheduledAt])
+}
+
+model Beneficiary {
+  id            String   @id @default(uuid())
+  userId        String
+  nickname      String
+  accountName   String
+  accountNumber String
+  bankName      String
+  bankCode      String
+  iban          String?
+  swiftCode     String?
+  country       String   @default("US")
+  currency      String   @default("USD")
+  isFavorite    Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transfers Transfer[]
+
+  @@index([userId])
+}
+
+model Card {
+  id              String     @id @default(uuid())
+  accountId       String
+  userId          String
+  type            CardType   @default(DEBIT)
+  tier            CardTier   @default(STANDARD)
+  maskedPan       String
+  expiryMonth     Int
+  expiryYear      Int
+  cardholderName  String
+  currency        String     @default("USD")
+  creditLimit     Decimal?   @db.Decimal(18, 4)
+  availableCredit Decimal?   @db.Decimal(18, 4)
+  spendingLimits  Json       @default("{\"daily\":5000,\"monthly\":20000,\"perTransaction\":2000}")
+  controls        Json       @default("{\"online\":true,\"contactless\":true,\"international\":true,\"atm\":true}")
+  status          CardStatus @default(ACTIVE)
+  isFrozen        Boolean    @default(false)
+  isVirtual       Boolean    @default(false)
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([accountId])
+  @@index([status])
+}
+
+model Portfolio {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  name      String   @default("My Portfolio")
+  currency  String   @default("USD")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  holdings  Investment[]
+  watchlist Watchlist[]
+}
+
+model Investment {
+  id               String    @id @default(uuid())
+  portfolioId      String
+  ticker           String
+  assetType        AssetType
+  assetName        String
+  quantity         Decimal   @db.Decimal(18, 8)
+  averageCostBasis Decimal   @db.Decimal(18, 4)
+  currency         String    @default("USD")
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  portfolio Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  @@unique([portfolioId, ticker])
+  @@index([portfolioId])
+}
+
+model Watchlist {
+  id          String    @id @default(uuid())
+  portfolioId String
+  ticker      String
+  assetName   String
+  assetType   AssetType
+  addedAt     DateTime  @default(now())
+
+  portfolio Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  @@unique([portfolioId, ticker])
+}
+
+model Loan {
+  id                 String     @id @default(uuid())
+  userId             String
+  type               LoanType
+  principalAmount    Decimal    @db.Decimal(18, 4)
+  outstandingBalance Decimal    @db.Decimal(18, 4)
+  interestRate       Decimal    @db.Decimal(5, 4)
+  termMonths         Int
+  monthlyPayment     Decimal    @db.Decimal(18, 4)
+  nextPaymentDate    DateTime?
+  nextPaymentAmount  Decimal?   @db.Decimal(18, 4)
+  status             LoanStatus @default(PENDING)
+  disbursedAt        DateTime?
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+
+  user     User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  payments LoanPayment[]
+
+  @@index([userId])
+  @@index([status])
+}
+
+model LoanPayment {
+  id               String            @id @default(uuid())
+  loanId           String
+  amount           Decimal           @db.Decimal(18, 4)
+  principalPortion Decimal           @db.Decimal(18, 4)
+  interestPortion  Decimal           @db.Decimal(18, 4)
+  paymentDate      DateTime
+  status           LoanPaymentStatus @default(SCHEDULED)
+
+  loan Loan @relation(fields: [loanId], references: [id], onDelete: Cascade)
+
+  @@index([loanId])
+}
+
+model SavingsGoal {
+  id            String     @id @default(uuid())
+  userId        String
+  accountId     String?
+  name          String
+  targetAmount  Decimal    @db.Decimal(18, 4)
+  currentAmount Decimal    @default(0) @db.Decimal(18, 4)
+  targetDate    DateTime?
+  emoji         String?
+  status        GoalStatus @default(ACTIVE)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  account Account? @relation(fields: [accountId], references: [id])
+
+  @@index([userId])
+}
+
+model Notification {
+  id        String           @id @default(uuid())
+  userId    String
+  type      NotificationType
+  title     String
+  body      String
+  metadata  Json?
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isRead])
+  @@index([createdAt])
+}
+
+model Device {
+  id         String     @id @default(uuid())
+  userId     String
+  deviceName String
+  deviceType DeviceType @default(UNKNOWN)
+  os         String?
+  browser    String?
+  ipAddress  String?
+  userAgent  String?
+  isTrusted  Boolean    @default(false)
+  lastSeenAt DateTime   @default(now())
+  createdAt  DateTime   @default(now())
+
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  refreshTokens RefreshToken[]
+
+  @@index([userId])
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid())
+  userId    String
+  tokenHash String    @unique
+  deviceId  String?
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  device Device? @relation(fields: [deviceId], references: [id])
+
+  @@index([userId])
+  @@index([tokenHash])
+}
+
+model OtpCode {
+  id        String    @id @default(uuid())
+  userId    String
+  code      String
+  type      String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, type])
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  userId     String?
+  action     String
+  resource   String?
+  resourceId String?
+  ipAddress  String?
+  userAgent  String?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+}
+
+model ExchangeRate {
+  id            String       @id @default(uuid())
+  baseCurrency  String
+  quoteCurrency String
+  rate          Decimal      @db.Decimal(18, 8)
+  spread        Decimal      @default(0.015) @db.Decimal(5, 4)
+  source        FxRateSource @default(MOCK)
+  fetchedAt     DateTime     @default(now())
+
+  @@unique([baseCurrency, quoteCurrency])
+  @@index([baseCurrency, quoteCurrency])
+}
+
+model Dispute {
+  id            String        @id @default(uuid())
+  userId        String
+  transactionId String?
+  subject       String
+  description   String
+  status        DisputeStatus @default(OPEN)
+  resolution    String?
+  resolvedAt    DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model InsuranceQuote {
+  id        String          @id @default(uuid())
+  userId    String
+  type      InsuranceType
+  status    InsuranceStatus @default(REQUESTED)
+  details   Json
+  premium   Decimal?        @db.Decimal(18, 4)
+  notes     String?
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
