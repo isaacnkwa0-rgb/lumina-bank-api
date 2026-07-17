@@ -2,6 +2,7 @@ import { createApp } from './app';
 import { prisma } from './config/database';
 import { env } from './config/env';
 import { logger } from './config/logger';
+import { ratesService } from './modules/rates/rates.service';
 
 async function bootstrap() {
   try {
@@ -9,6 +10,10 @@ async function bootstrap() {
     logger.info('✅ Database connected');
 
     const app = createApp();
+
+    // Fetch live rates on startup then every hour
+    ratesService.refreshRates();
+    setInterval(() => ratesService.refreshRates(), 60 * 60 * 1000);
 
     const server = app.listen(env.PORT, () => {
       logger.info(`🚀 Lumina Bank API running on http://localhost:${env.PORT}`);

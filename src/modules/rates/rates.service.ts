@@ -1,11 +1,38 @@
 import { prisma } from '../../config/database';
 import { AppError } from '../../middleware/error.middleware';
 import { ErrorCodes } from '../../shared/utils/api-response';
+import { logger } from '../../config/logger';
 
 const BANK_SPREAD = 0.015;
 const STANDARD_FX_FEE_PCT = 0.005;
+const RATES_API_URL = 'https://open.er-api.com/v6/latest/GBP';
 
 export class RatesService {
+  async refreshRates(): Promise<void> {
+    try {
+      const res = await fetch(RATES_API_URL);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json = await res.json() as { result: string; rates: Record<string, number>; time_last_update_utc: string };
+      if (json.result !== 'success') throw new Error('API returned non-success');
+
+      const now = new Date();
+      const upserts = Object.entries(json.rates)
+        .filter(([code]) => code !== 'GBP')
+        .map(([quoteCurrency, rate]) =>
+          prisma.exchangeRate.upsert({
+            where: { baseCurrency_quoteCurrency: { baseCurrency: 'GBP', quoteCurrency } },
+            update: { rate, fetchedAt: now },
+            create: { baseCurrency: 'GBP', quoteCurrency, rate, fetchedAt: now },
+          })
+        );
+
+      await Promise.all(upserts);
+      logger.info(`Refreshed ${upserts.length} exchange rates from live API`);
+    } catch (err: unknown) {
+      logger.error('Failed to refresh exchange rates', { err: (err as Error).message });
+    }
+  }
+
   async getRate(baseCurrency: string, quoteCurrency: string) {
     if (baseCurrency === quoteCurrency) return { mid: 1, customerRate: 1, spread: 0 };
 
@@ -47,16 +74,24 @@ export class RatesService {
   }
 
   async getAllRates() {
-    return prisma.exchangeRate.findMany({ orderBy: [{ baseCurrency: 'asc' }, { quoteCurrency: 'asc' }] });
+    const rows = await prisma.exchangeRate.findMany({
+      orderBy: [{ baseCurrency: 'asc' }, { quoteCurrency: 'asc' }],
+    });
+    return rows.map((r) => ({
+      from: r.baseCurrency,
+      to: r.quoteCurrency,
+      rate: Number(r.rate),
+      fetchedAt: r.fetchedAt,
+    }));
   }
 
-  async convert(fromCurrency: string, toCurrency: string, amount: number) {
-    const { customerRate } = await this.getRate(fromCurrency, toCurrency);
+  async convert(from: string, to: string, amount: number) {
+    const { customerRate } = await this.getRate(from, to);
     return {
-      fromCurrency,
-      toCurrency,
+      from,
+      to,
       amount,
-      convertedAmount: amount * customerRate,
+      converted: amount * customerRate,
       rate: customerRate,
     };
   }
