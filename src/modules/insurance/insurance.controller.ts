@@ -31,7 +31,7 @@ export class InsuranceController {
   async getQuote(req: Request, res: Response, next: NextFunction) {
     try {
       const userId = (req as any).user.id;
-      const data = await insuranceService.getQuote(req.params.id, userId);
+      const data = await insuranceService.getQuote(req.params.id as string, userId);
       sendSuccess(res, data, 'Quote retrieved');
     } catch (err) {
       next(err);
@@ -41,7 +41,7 @@ export class InsuranceController {
   async acceptQuote(req: Request, res: Response, next: NextFunction) {
     try {
       const userId = (req as any).user.id;
-      const data = await insuranceService.acceptQuote(req.params.id, userId);
+      const data = await insuranceService.acceptQuote(req.params.id as string, userId);
       sendSuccess(res, data, 'Quote accepted');
     } catch (err) {
       next(err);
