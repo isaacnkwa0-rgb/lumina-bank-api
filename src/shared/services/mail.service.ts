@@ -1,3 +1,4 @@
+import { Resend } from 'resend';
 import nodemailer, { type Transporter } from 'nodemailer';
 import { env } from '../../config/env';
 import { logger } from '../../config/logger';
@@ -8,11 +9,12 @@ interface MailOptions {
   html: string;
 }
 
-function createTransporter(): Transporter | null {
-  if (!env.SMTP_HOST || !env.SMTP_USER || !env.SMTP_PASS) {
-    logger.warn('SMTP not configured — emails will be logged only');
-    return null;
-  }
+// ── Transport setup ────────────────────────────────────────────────────────────
+
+const resend = env.RESEND_API_KEY ? new Resend(env.RESEND_API_KEY) : null;
+
+function createSmtpTransporter(): Transporter | null {
+  if (!env.SMTP_HOST || !env.SMTP_USER || !env.SMTP_PASS) return null;
   return nodemailer.createTransport({
     host: env.SMTP_HOST,
     port: env.SMTP_PORT,
@@ -21,27 +23,32 @@ function createTransporter(): Transporter | null {
   });
 }
 
-const transporter = createTransporter();
+const smtpTransporter = createSmtpTransporter();
 
 async function send(opts: MailOptions): Promise<void> {
-  if (!transporter) {
-    logger.info('[MAIL STUB]', { to: opts.to, subject: opts.subject });
+  const from = `${env.FROM_NAME} <${env.FROM_EMAIL}>`;
+
+  // 1. Resend (preferred)
+  if (resend) {
+    const { error } = await resend.emails.send({ from, to: opts.to, subject: opts.subject, html: opts.html });
+    if (error) {
+      logger.error('Resend failed', { to: opts.to, error });
+      throw new Error(error.message);
+    }
     return;
   }
-  try {
-    await transporter.sendMail({
-      from: `"${env.FROM_NAME}" <${env.FROM_EMAIL}>`,
-      to: opts.to,
-      subject: opts.subject,
-      html: opts.html,
-    });
-  } catch (err) {
-    logger.error('Failed to send email', { to: opts.to, err });
-    throw err;
+
+  // 2. SMTP fallback
+  if (smtpTransporter) {
+    await smtpTransporter.sendMail({ from, to: opts.to, subject: opts.subject, html: opts.html });
+    return;
   }
+
+  // 3. No transport — log only
+  logger.info('[MAIL STUB] no transport configured', { to: opts.to, subject: opts.subject });
 }
 
-// ── Branded email wrapper ──────────────────────────────────────────────────────
+// ── Branded HTML wrapper ───────────────────────────────────────────────────────
 
 function layout(title: string, body: string): string {
   return `<!DOCTYPE html>
@@ -70,7 +77,7 @@ function layout(title: string, body: string): string {
     <p>Secure Banking</p>
   </div>
   <div class="body">${body}</div>
-  <div class="foot">© ${new Date().getFullYear()} Lumina Bank · This email was sent to you because an action was taken on your account.</div>
+  <div class="foot">© ${new Date().getFullYear()} Lumina Bank · This email was sent because an action was taken on your account.</div>
 </div>
 </body>
 </html>`;
