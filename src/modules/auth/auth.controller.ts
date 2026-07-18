@@ -131,6 +131,15 @@ export class AuthController {
     }
   }
 
+  async regenerateRecoveryCodes(req: Request, res: Response, next: NextFunction) {
+    try {
+      const result = await authService.getRecoveryCodes(req.user!.id);
+      sendSuccess(res, result, 'Recovery codes regenerated');
+    } catch (err) {
+      next(err);
+    }
+  }
+
   async me(req: Request, res: Response, next: NextFunction) {
     try {
       const user = await (await import('../../config/database')).prisma.user.findUnique({

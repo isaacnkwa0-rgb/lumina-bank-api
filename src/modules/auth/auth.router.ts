@@ -31,6 +31,7 @@ router.post('/2fa/setup', authenticate, authController.setup2FA);
 router.post('/2fa/enable', authenticate, validate(twoFaEnableSchema), authController.enable2FA);
 router.post('/2fa/disable', authenticate, validate(twoFaDisableSchema), authController.disable2FA);
 router.post('/2fa/verify', authLimiter, validate(twoFaVerifySchema), authController.verifyTwoFactor);
+router.post('/2fa/regenerate-recovery-codes', authenticate, authController.regenerateRecoveryCodes);
 router.get('/me', authenticate, authController.me);
 
 export { router as authRouter };

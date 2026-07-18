@@ -47,6 +47,10 @@ export function sendNoContent(res: Response): Response {
   return res.status(204).send();
 }
 
+export function successResponse<T>(data: T, message = 'Success'): ApiSuccessResponse<T> {
+  return { success: true, message, data };
+}
+
 export function sendError(
   res: Response,
   code: string,

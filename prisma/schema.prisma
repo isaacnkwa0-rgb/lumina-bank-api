@@ -215,6 +215,7 @@ model User {
   isPhoneVerified     Boolean    @default(false)
   twoFactorEnabled    Boolean    @default(false)
   twoFactorSecret     String?
+  twoFactorRecoveryCodes Json?
   status              UserStatus @default(ACTIVE)
   failedLoginAttempts Int        @default(0)
   lockedUntil         DateTime?
@@ -235,6 +236,7 @@ model User {
   otpCodes      OtpCode[]
   disputes         Dispute[]
   insuranceQuotes  InsuranceQuote[]
+  standingOrders   StandingOrder[]
 
   @@index([email])
   @@index([status])
@@ -278,6 +280,7 @@ model Account {
   cards         Card[]
   goals         SavingsGoal[]
   loans         Loan[]
+  standingOrders StandingOrder[]
 
   @@index([userId])
   @@index([accountNumber])
@@ -635,4 +638,43 @@ model InsuranceQuote {
   @@index([userId])
   @@index([status])
   @@index([createdAt])
+}
+
+enum StandingOrderFreq {
+  WEEKLY
+  BIWEEKLY
+  MONTHLY
+  QUARTERLY
+}
+
+enum StandingOrderStatus {
+  ACTIVE
+  PAUSED
+  CANCELLED
+}
+
+model StandingOrder {
+  id                String              @id @default(uuid())
+  userId            String
+  fromAccountId     String
+  toAccountNumber   String
+  toBankCode        String
+  toAccountName     String
+  amount            Decimal             @db.Decimal(18, 4)
+  currency          String              @default("GBP")
+  description       String
+  frequency         StandingOrderFreq
+  nextExecutionDate DateTime
+  endDate           DateTime?
+  status            StandingOrderStatus @default(ACTIVE)
+  lastExecutedAt    DateTime?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fromAccount Account @relation(fields: [fromAccountId], references: [id])
+
+  @@index([userId])
+  @@index([status])
+  @@index([nextExecutionDate])
 }

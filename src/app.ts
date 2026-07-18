@@ -112,6 +112,7 @@ export function createApp() {
   mountIfExists(app, `${v}/kyc`, './modules/kyc/kyc.router');
   mountIfExists(app, `${v}/disputes`, './modules/disputes/disputes.router');
   mountIfExists(app, `${v}/insurance`, './modules/insurance/insurance.router');
+  mountIfExists(app, `${v}/standing-orders`, './modules/standing-orders/standing-orders.router');
   mountIfExists(app, `${v}/admin`, './modules/admin/admin.router');
 
   // 404 + error handler

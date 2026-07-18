@@ -2,6 +2,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import speakeasy from 'speakeasy';
 import QRCode from 'qrcode';
+import { randomBytes, createHash } from 'crypto';
 import { prisma } from '../../config/database';
 import { env } from '../../config/env';
 import { logger } from '../../config/logger';
@@ -282,8 +283,29 @@ export class AuthService {
 
     if (!valid) throw new AppError('Invalid 2FA code', 401, ErrorCodes.AUTH_006);
 
-    await prisma.user.update({ where: { id: userId }, data: { twoFactorEnabled: true } });
-    return { message: '2FA enabled successfully' };
+    const codes = Array.from({ length: 10 }, () => randomBytes(4).toString('hex').toUpperCase());
+    const hashedCodes = codes.map(c => createHash('sha256').update(c).digest('hex'));
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: { twoFactorEnabled: true, twoFactorRecoveryCodes: hashedCodes },
+    });
+    return { message: 'Two-factor authentication enabled', recoveryCodes: codes };
+  }
+
+  async getRecoveryCodes(userId: string) {
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new AppError('User not found', 404, ErrorCodes.NOT_FOUND);
+    if (!user.twoFactorEnabled) throw new AppError('2FA is not enabled', 400, ErrorCodes.AUTH_005);
+
+    const codes = Array.from({ length: 10 }, () => randomBytes(4).toString('hex').toUpperCase());
+    const hashedCodes = codes.map(c => createHash('sha256').update(c).digest('hex'));
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: { twoFactorRecoveryCodes: hashedCodes },
+    });
+    return { recoveryCodes: codes };
   }
 
   async disable2FA(userId: string, password: string, token: string) {
