@@ -253,6 +253,68 @@ export class AdminController {
       sendSuccess(res, data, 'Loans retrieved');
     } catch (err) { next(err); }
   }
+
+  // ── User tier / delete / lockout / email ─────────────────────────────────────
+
+  async changeUserTier(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { tier } = req.body;
+      if (!tier) { res.status(400).json({ message: 'Tier is required' }); return; }
+      const data = await adminService.changeUserTier(req.params.id as string, tier);
+      sendSuccess(res, data, 'User tier updated');
+    } catch (err) { next(err); }
+  }
+
+  async deleteUser(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = await adminService.deleteUser(req.params.id as string);
+      sendSuccess(res, data, 'User deleted');
+    } catch (err) { next(err); }
+  }
+
+  async resetLockout(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = await adminService.resetLockout(req.params.id as string);
+      sendSuccess(res, data, 'Account lockout reset');
+    } catch (err) { next(err); }
+  }
+
+  async verifyUserEmail(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = await adminService.verifyUserEmail(req.params.id as string);
+      sendSuccess(res, data, 'Email verified');
+    } catch (err) { next(err); }
+  }
+
+  // ── Account management ────────────────────────────────────────────────────────
+
+  async getUserAccounts(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = await adminService.getUserAccounts(req.params.userId as string);
+      sendSuccess(res, data, 'Accounts retrieved');
+    } catch (err) { next(err); }
+  }
+
+  async freezeAccount(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = await adminService.freezeAccount(req.params.accountId as string);
+      sendSuccess(res, data, 'Account frozen');
+    } catch (err) { next(err); }
+  }
+
+  async unfreezeAccount(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = await adminService.unfreezeAccount(req.params.accountId as string);
+      sendSuccess(res, data, 'Account unfrozen');
+    } catch (err) { next(err); }
+  }
+
+  async closeAccount(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = await adminService.closeAccount(req.params.accountId as string);
+      sendSuccess(res, data, 'Account closed');
+    } catch (err) { next(err); }
+  }
 }
 
 export default new AdminController();

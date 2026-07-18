@@ -501,6 +501,77 @@ export class AdminService {
       orderBy: { createdAt: 'desc' },
     });
   }
+
+  // ── User tier management ──────────────────────────────────────────────────────
+
+  async changeUserTier(id: string, tier: string) {
+    const validTiers = ['STANDARD', 'PREMIUM', 'PRIVATE', 'BUSINESS'];
+    if (!validTiers.includes(tier)) throw new AppError(`Invalid tier: ${tier}`, 400, ErrorCodes.CONFLICT);
+    const user = await prisma.user.findUnique({ where: { id } });
+    if (!user) throw new AppError('User not found', 404, ErrorCodes.NOT_FOUND);
+    const updated = await prisma.user.update({ where: { id }, data: { tier: tier as any }, select: { id: true, email: true, tier: true } });
+    await prisma.notification.create({
+      data: { userId: id, type: NotificationType.SYSTEM, title: 'Account Tier Updated', body: `Your account has been upgraded to ${tier.charAt(0) + tier.slice(1).toLowerCase()} tier. Enjoy your new benefits.` },
+    });
+    return updated;
+  }
+
+  // ── User deletion ─────────────────────────────────────────────────────────────
+
+  async deleteUser(id: string) {
+    const user = await prisma.user.findUnique({ where: { id } });
+    if (!user) throw new AppError('User not found', 404, ErrorCodes.NOT_FOUND);
+    if (user.role === 'ADMIN') throw new AppError('Cannot delete admin accounts', 403, ErrorCodes.FORBIDDEN);
+    await prisma.user.delete({ where: { id } });
+    return { id, deleted: true };
+  }
+
+  // ── Reset account lockout ─────────────────────────────────────────────────────
+
+  async resetLockout(id: string) {
+    const user = await prisma.user.findUnique({ where: { id } });
+    if (!user) throw new AppError('User not found', 404, ErrorCodes.NOT_FOUND);
+    await prisma.user.update({ where: { id }, data: { failedLoginAttempts: 0, lockedUntil: null } });
+    return { id, unlocked: true };
+  }
+
+  // ── Verify email override ─────────────────────────────────────────────────────
+
+  async verifyUserEmail(id: string) {
+    const user = await prisma.user.findUnique({ where: { id } });
+    if (!user) throw new AppError('User not found', 404, ErrorCodes.NOT_FOUND);
+    await prisma.user.update({ where: { id }, data: { isEmailVerified: true } });
+    return { id, isEmailVerified: true };
+  }
+
+  // ── Account management ────────────────────────────────────────────────────────
+
+  async getUserAccounts(userId: string) {
+    return prisma.account.findMany({
+      where: { userId },
+      select: { id: true, accountNumber: true, type: true, status: true, currency: true, balance: true, availableBalance: true, isFrozen: true },
+      orderBy: { createdAt: 'asc' },
+    });
+  }
+
+  async freezeAccount(accountId: string) {
+    const account = await prisma.account.findUnique({ where: { id: accountId } });
+    if (!account) throw new AppError('Account not found', 404, ErrorCodes.NOT_FOUND);
+    return prisma.account.update({ where: { id: accountId }, data: { status: 'FROZEN', isFrozen: true } });
+  }
+
+  async unfreezeAccount(accountId: string) {
+    const account = await prisma.account.findUnique({ where: { id: accountId } });
+    if (!account) throw new AppError('Account not found', 404, ErrorCodes.NOT_FOUND);
+    return prisma.account.update({ where: { id: accountId }, data: { status: 'ACTIVE', isFrozen: false } });
+  }
+
+  async closeAccount(accountId: string) {
+    const account = await prisma.account.findUnique({ where: { id: accountId } });
+    if (!account) throw new AppError('Account not found', 404, ErrorCodes.NOT_FOUND);
+    if (Number(account.balance) !== 0) throw new AppError('Account must have zero balance before closing', 400, ErrorCodes.CONFLICT);
+    return prisma.account.update({ where: { id: accountId }, data: { status: 'CLOSED' } });
+  }
 }
 
 export const adminService = new AdminService();

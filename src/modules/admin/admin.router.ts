@@ -50,4 +50,16 @@ router.get('/investments', adminController.getAdminInvestments.bind(adminControl
 // Savings Goals
 router.get('/goals', adminController.getAdminGoals.bind(adminController));
 
+// User tier / delete / lockout / email
+router.patch('/users/:id/tier', adminController.changeUserTier.bind(adminController));
+router.delete('/users/:id', adminController.deleteUser.bind(adminController));
+router.patch('/users/:id/reset-lockout', adminController.resetLockout.bind(adminController));
+router.patch('/users/:id/verify-email', adminController.verifyUserEmail.bind(adminController));
+
+// Account management
+router.get('/users/:userId/accounts', adminController.getUserAccounts.bind(adminController));
+router.patch('/accounts/:accountId/freeze', adminController.freezeAccount.bind(adminController));
+router.patch('/accounts/:accountId/unfreeze', adminController.unfreezeAccount.bind(adminController));
+router.patch('/accounts/:accountId/close', adminController.closeAccount.bind(adminController));
+
 export default router;
