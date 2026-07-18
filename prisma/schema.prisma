@@ -20,8 +20,8 @@ enum Language {
   EN
   ES
   FR
-  AR
-  ZH
+  PT
+  DE
 }
 
 enum UserStatus {
