@@ -1,3 +1,4 @@
+import { Language } from '@prisma/client';
 import { prisma } from '../../config/database';
 import { AppError } from '../../middleware/error.middleware';
 import { ErrorCodes } from '../../shared/utils/api-response';
@@ -30,6 +31,7 @@ export class UsersService {
             employer: true,
             annualIncome: true,
             preferredCurrency: true,
+            preferredLanguage: true,
             notificationPreferences: true,
           },
         },
@@ -52,15 +54,17 @@ export class UsersService {
       employer?: string;
       annualIncome?: number;
       preferredCurrency?: string;
+      preferredLanguage?: Language;
     }
   ) {
-    const { occupation, employer, annualIncome, preferredCurrency, ...userFields } = data;
+    const { occupation, employer, annualIncome, preferredCurrency, preferredLanguage, ...userFields } = data;
 
     const profileData: any = {};
     if (occupation !== undefined) profileData.occupation = occupation;
     if (employer !== undefined) profileData.employer = employer;
     if (annualIncome !== undefined) profileData.annualIncome = annualIncome;
     if (preferredCurrency !== undefined) profileData.preferredCurrency = preferredCurrency;
+    if (preferredLanguage !== undefined) profileData.preferredLanguage = preferredLanguage;
 
     const [user] = await Promise.all([
       prisma.user.update({

@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import multer from 'multer';
 import path from 'path';
+import { Language } from '@prisma/client';
 import { usersController } from './users.controller';
 import { authenticate } from '../../middleware/auth.middleware';
 import { validate } from '../../middleware/validate.middleware';
@@ -35,6 +36,7 @@ const updateProfileSchema = z.object({
   employer: z.string().max(100).optional(),
   annualIncome: z.number().positive().optional(),
   preferredCurrency: z.string().length(3).toUpperCase().optional(),
+  preferredLanguage: z.nativeEnum(Language).optional(),
 });
 
 router.get('/profile', usersController.getProfile);

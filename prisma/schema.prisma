@@ -16,6 +16,14 @@ enum UserTier {
   BUSINESS
 }
 
+enum Language {
+  EN
+  ES
+  FR
+  AR
+  ZH
+}
+
 enum UserStatus {
   ACTIVE
   SUSPENDED
@@ -252,6 +260,7 @@ model Profile {
   employer                String?
   annualIncome            Decimal? @db.Decimal(18, 4)
   preferredCurrency       String   @default("USD")
+  preferredLanguage       Language @default(EN)
   notificationPreferences Json     @default("{\"email\":true,\"sms\":true,\"push\":true,\"marketing\":false}")
   updatedAt               DateTime @updatedAt
 
