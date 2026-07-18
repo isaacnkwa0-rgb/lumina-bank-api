@@ -26,7 +26,9 @@ router.patch('/loans/:id/reject', adminController.rejectLoan.bind(adminControlle
 
 // Disputes
 router.get('/disputes', adminController.getDisputes.bind(adminController));
+router.patch('/disputes/:id/review', adminController.reviewDispute.bind(adminController));
 router.patch('/disputes/:id/resolve', adminController.resolveDispute.bind(adminController));
+router.patch('/disputes/:id/reject', adminController.rejectDispute.bind(adminController));
 
 // Insurance
 router.get('/insurance', adminController.getInsuranceQuotes.bind(adminController));

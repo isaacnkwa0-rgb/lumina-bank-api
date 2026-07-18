@@ -19,21 +19,21 @@ export const standingOrdersController = {
 
   async cancel(req: Request, res: Response, next: NextFunction) {
     try {
-      const data = await standingOrdersService.cancel(req.params.id, req.user!.id);
+      const data = await standingOrdersService.cancel(req.params.id as string, req.user!.id);
       res.json(successResponse(data));
     } catch (e) { next(e); }
   },
 
   async pause(req: Request, res: Response, next: NextFunction) {
     try {
-      const data = await standingOrdersService.pause(req.params.id, req.user!.id);
+      const data = await standingOrdersService.pause(req.params.id as string, req.user!.id);
       res.json(successResponse(data));
     } catch (e) { next(e); }
   },
 
   async resume(req: Request, res: Response, next: NextFunction) {
     try {
-      const data = await standingOrdersService.resume(req.params.id, req.user!.id);
+      const data = await standingOrdersService.resume(req.params.id as string, req.user!.id);
       res.json(successResponse(data));
     } catch (e) { next(e); }
   },

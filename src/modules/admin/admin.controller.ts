@@ -159,6 +159,22 @@ export class AdminController {
     } catch (err) { next(err); }
   }
 
+  async reviewDispute(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = await adminService.reviewDispute(req.params.id as string);
+      sendSuccess(res, data, 'Dispute moved to review');
+    } catch (err) { next(err); }
+  }
+
+  async rejectDispute(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { reason } = req.body;
+      if (!reason) { res.status(400).json({ message: 'Reason is required' }); return; }
+      const data = await adminService.rejectDispute(req.params.id as string, reason);
+      sendSuccess(res, data, 'Dispute rejected');
+    } catch (err) { next(err); }
+  }
+
   // ── Insurance ────────────────────────────────────────────────────────────────
 
   async getInsuranceQuotes(req: Request, res: Response, next: NextFunction) {

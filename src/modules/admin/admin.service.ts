@@ -381,16 +381,39 @@ export class AdminService {
     });
   }
 
+  async reviewDispute(id: string) {
+    const dispute = await prisma.dispute.findUnique({ where: { id } });
+    if (!dispute) throw new AppError('Dispute not found', 404, ErrorCodes.NOT_FOUND);
+    if (dispute.status !== DisputeStatus.OPEN)
+      throw new AppError('Only open disputes can be moved to review', 400, ErrorCodes.VAL_001);
+
+    await prisma.dispute.update({ where: { id }, data: { status: DisputeStatus.UNDER_REVIEW } });
+    await prisma.notification.create({
+      data: { userId: dispute.userId, type: NotificationType.SYSTEM, title: 'Dispute Under Review', body: `Your dispute "${dispute.subject}" is now under review. We'll notify you once a decision has been reached.` },
+    });
+    return { id, status: DisputeStatus.UNDER_REVIEW };
+  }
+
   async resolveDispute(id: string, resolution: string) {
     const dispute = await prisma.dispute.findUnique({ where: { id } });
     if (!dispute) throw new AppError('Dispute not found', 404, ErrorCodes.NOT_FOUND);
 
     await prisma.dispute.update({ where: { id }, data: { status: DisputeStatus.RESOLVED, resolution, resolvedAt: new Date() } });
     await prisma.notification.create({
-      data: { userId: dispute.userId, type: NotificationType.SYSTEM, title: 'Dispute Resolved', body: `Your dispute has been resolved. ${resolution}` },
+      data: { userId: dispute.userId, type: NotificationType.SYSTEM, title: 'Dispute Resolved', body: `Your dispute "${dispute.subject}" has been resolved. ${resolution}` },
     });
-
     return { id, status: DisputeStatus.RESOLVED, resolution };
+  }
+
+  async rejectDispute(id: string, reason: string) {
+    const dispute = await prisma.dispute.findUnique({ where: { id } });
+    if (!dispute) throw new AppError('Dispute not found', 404, ErrorCodes.NOT_FOUND);
+
+    await prisma.dispute.update({ where: { id }, data: { status: DisputeStatus.REJECTED, resolution: reason, resolvedAt: new Date() } });
+    await prisma.notification.create({
+      data: { userId: dispute.userId, type: NotificationType.SYSTEM, title: 'Dispute Rejected', body: `Your dispute "${dispute.subject}" has been reviewed and could not be upheld. ${reason}` },
+    });
+    return { id, status: DisputeStatus.REJECTED, reason };
   }
 
   // ── Insurance ────────────────────────────────────────────────────────────────

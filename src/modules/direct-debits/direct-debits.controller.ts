@@ -19,21 +19,21 @@ export const directDebitsController = {
 
   async cancel(req: Request, res: Response, next: NextFunction) {
     try {
-      const dd = await directDebitsService.cancel(req.params.id, req.user!.id);
+      const dd = await directDebitsService.cancel(req.params.id as string, req.user!.id);
       sendSuccess(res, dd, 'Direct debit cancelled');
     } catch (e) { next(e); }
   },
 
   async suspend(req: Request, res: Response, next: NextFunction) {
     try {
-      const dd = await directDebitsService.suspend(req.params.id, req.user!.id);
+      const dd = await directDebitsService.suspend(req.params.id as string, req.user!.id);
       sendSuccess(res, dd, 'Direct debit suspended');
     } catch (e) { next(e); }
   },
 
   async resume(req: Request, res: Response, next: NextFunction) {
     try {
-      const dd = await directDebitsService.resume(req.params.id, req.user!.id);
+      const dd = await directDebitsService.resume(req.params.id as string, req.user!.id);
       sendSuccess(res, dd, 'Direct debit resumed');
     } catch (e) { next(e); }
   },
