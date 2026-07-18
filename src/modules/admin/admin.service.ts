@@ -295,25 +295,63 @@ export class AdminService {
     if (!loan) throw new AppError('Loan not found', 404, ErrorCodes.NOT_FOUND);
     if (loan.status !== LoanStatus.PENDING) throw new AppError('Loan is not pending', 400, ErrorCodes.CONFLICT);
 
+    // Find disbursement account: use stored accountId or fall back to user's default account
+    const account = loan.accountId
+      ? await prisma.account.findFirst({ where: { id: loan.accountId, userId: loan.userId } })
+      : await prisma.account.findFirst({ where: { userId: loan.userId, isDefault: true } });
+
+    if (!account) throw new AppError('No eligible account found for disbursement', 400, ErrorCodes.NOT_FOUND);
+
+    const principal = loan.principalAmount.toNumber();
     const annualRate = loan.interestRate.toNumber();
     const r = annualRate / 12;
     const n = loan.termMonths;
     const monthly = loan.monthlyPayment.toNumber();
-    let balance = loan.principalAmount.toNumber();
+    let balance = principal;
     const payments = [];
     for (let i = 1; i <= n; i++) {
       const interest = Math.round(balance * r * 100) / 100;
-      const principal = Math.round((monthly - interest) * 100) / 100;
-      balance = Math.round((balance - principal) * 100) / 100;
+      const principal_portion = Math.round((monthly - interest) * 100) / 100;
+      balance = Math.round((balance - principal_portion) * 100) / 100;
       const date = new Date();
       date.setMonth(date.getMonth() + i);
-      payments.push({ loanId: id, amount: monthly, principalPortion: principal, interestPortion: interest, paymentDate: date, status: LoanPaymentStatus.SCHEDULED });
+      payments.push({ loanId: id, amount: monthly, principalPortion: principal_portion, interestPortion: interest, paymentDate: date, status: LoanPaymentStatus.SCHEDULED });
     }
 
+    const reference = generateTransactionReference();
+    const balanceBefore = account.balance.toNumber();
+    const balanceAfter = balanceBefore + principal;
+
     await prisma.$transaction([
-      prisma.loan.update({ where: { id }, data: { status: LoanStatus.ACTIVE, disbursedAt: new Date() } }),
+      prisma.loan.update({ where: { id }, data: { status: LoanStatus.ACTIVE, disbursedAt: new Date(), accountId: account.id } }),
       prisma.loanPayment.createMany({ data: payments }),
-      prisma.notification.create({ data: { userId: loan.userId, type: NotificationType.LOAN as any, title: 'Loan Approved', body: `Your ${loan.type.toLowerCase()} loan of £${Number(loan.principalAmount).toLocaleString()} has been approved and will be disbursed shortly.` } }),
+      // Credit the disbursement account
+      prisma.account.update({
+        where: { id: account.id },
+        data: { balance: { increment: principal }, availableBalance: { increment: principal } },
+      }),
+      prisma.transaction.create({
+        data: {
+          accountId: account.id,
+          type: TransactionType.CREDIT,
+          category: TransactionCategory.LOAN_PAYMENT,
+          amount: principal,
+          currency: account.currency,
+          balanceBefore,
+          balanceAfter,
+          description: `${loan.type.charAt(0) + loan.type.slice(1).toLowerCase()} loan disbursement`,
+          reference,
+          status: 'COMPLETED',
+        },
+      }),
+      prisma.notification.create({
+        data: {
+          userId: loan.userId,
+          type: NotificationType.LOAN,
+          title: 'Loan Disbursed',
+          body: `Your ${loan.type.toLowerCase()} loan of £${principal.toLocaleString()} has been approved and credited to your ${account.type.replace('_', ' ').toLowerCase()} account ending ${account.accountNumber.slice(-4)}.`,
+        },
+      }),
     ]);
 
     return prisma.loan.findUnique({ where: { id } });

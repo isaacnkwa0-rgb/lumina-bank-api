@@ -87,9 +87,9 @@ export class LoansService {
 
   async applyForLoan(
     userId: string,
-    data: { type: string; amount: number; termMonths: number },
+    data: { type: string; amount: number; termMonths: number; accountId?: string },
   ) {
-    const { type, amount, termMonths } = data;
+    const { type, amount, termMonths, accountId } = data;
     const limit = LOAN_LIMITS[type] ?? 10000;
 
     if (amount > limit) {
@@ -102,12 +102,19 @@ export class LoansService {
       throw new AppError('Term must be between 1 and 360 months', 400);
     }
 
+    // Validate disbursement account belongs to user
+    if (accountId) {
+      const account = await prisma.account.findFirst({ where: { id: accountId, userId, status: 'ACTIVE' } });
+      if (!account) throw new AppError('Invalid disbursement account', 400);
+    }
+
     const annualRate = ANNUAL_RATES[type] ?? 0.1;
     const monthlyPayment = calcMonthlyPayment(amount, annualRate, termMonths);
 
     const loan = await prisma.loan.create({
       data: {
         userId,
+        accountId: accountId ?? null,
         type: type as LoanType,
         principalAmount: amount,
         termMonths,
