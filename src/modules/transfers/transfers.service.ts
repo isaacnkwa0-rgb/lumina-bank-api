@@ -1,5 +1,5 @@
 import { Decimal } from '@prisma/client/runtime/library';
-import { TransferType, TransferStatus, TransactionType, TransactionCategory, AccountStatus, Account, User } from '@prisma/client';
+import { TransferType, TransferStatus, TransactionType, TransactionCategory, AccountStatus, Account, User, UserTier } from '@prisma/client';
 import { prisma } from '../../config/database';
 import { AppError } from '../../middleware/error.middleware';
 import { ErrorCodes } from '../../shared/utils/api-response';
@@ -7,6 +7,15 @@ import { generateTransactionReference } from '../../shared/utils/transaction-ref
 import { getPagination, buildPaginationMeta } from '../../shared/utils/pagination';
 import { getBankByCode } from '../../shared/constants/banks';
 import { ratesService } from '../rates/rates.service';
+import { mailService } from '../../shared/services/mail.service';
+
+const DAILY_LIMITS: Record<UserTier, number> = {
+  STANDARD: 5_000,
+  PREMIUM: 25_000,
+  PRIVATE: 100_000,
+  BUSINESS: 100_000,
+};
+const ALERT_THRESHOLD = 1_000;
 
 export class TransfersService {
   // Own-accounts internal transfer (same user)
@@ -199,6 +208,8 @@ export class TransfersService {
     if (!fromAccount) throw new AppError('Source account not found', 404, ErrorCodes.ACCT_001);
     if (fromAccount.status === AccountStatus.FROZEN) throw new AppError('Source account is frozen', 400, ErrorCodes.ACCT_002);
 
+    await this.checkDailyLimit(userId, data.amount);
+
     // Detect Lumina-to-Lumina
     const luminaAccount = await prisma.account.findFirst({
       where: { accountNumber: data.toAccountNumber },
@@ -295,6 +306,7 @@ export class TransfersService {
     }
 
     await this.notify(userId, 'Transfer submitted', `£${data.amount.toFixed(2)} to ${data.toAccountName} is being processed (1–2 business days)`);
+    await this.alertIfLarge(userId, data.amount, fromAccount.currency, data.toAccountName, transfer.id);
     return transfer;
   }
 
@@ -315,6 +327,8 @@ export class TransfersService {
     const fromAccount = await prisma.account.findFirst({ where: { id: data.fromAccountId, userId } });
     if (!fromAccount) throw new AppError('Source account not found', 404, ErrorCodes.ACCT_001);
     if (fromAccount.status === AccountStatus.FROZEN) throw new AppError('Source account is frozen', 400, ErrorCodes.ACCT_002);
+
+    await this.checkDailyLimit(userId, data.amount);
 
     const quote = await ratesService.getQuote(fromAccount.currency, data.toCurrency, data.amount);
     const amount = new Decimal(data.amount);
@@ -381,6 +395,7 @@ export class TransfersService {
     });
 
     await this.notify(userId, 'International transfer submitted', `£${data.amount.toFixed(2)} to ${data.toAccountName} is being processed (3–5 business days)`);
+    await this.alertIfLarge(userId, data.amount, fromAccount.currency, data.toAccountName, transfer.id);
     return { transfer, quote };
   }
 
@@ -460,6 +475,50 @@ export class TransfersService {
 
   private async notify(userId: string, title: string, body: string) {
     await prisma.notification.create({ data: { userId, type: 'TRANSFER', title, body } }).catch(() => {});
+  }
+
+  private async checkDailyLimit(userId: string, amountGbp: number) {
+    const user = await prisma.user.findUnique({ where: { id: userId }, select: { tier: true } });
+    if (!user) throw new AppError('User not found', 404, ErrorCodes.NOT_FOUND);
+
+    const limit = DAILY_LIMITS[user.tier];
+    const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+    const accounts = await prisma.account.findMany({ where: { userId }, select: { id: true } });
+    const accountIds = accounts.map((a) => a.id);
+
+    const result = await prisma.transfer.aggregate({
+      where: {
+        fromAccountId: { in: accountIds },
+        type: { in: [TransferType.DOMESTIC, TransferType.INTERNATIONAL] },
+        status: { in: [TransferStatus.PENDING, TransferStatus.COMPLETED] },
+        createdAt: { gte: since },
+      },
+      _sum: { amount: true },
+    });
+
+    const spent = Number(result._sum.amount ?? 0);
+    if (spent + amountGbp > limit) {
+      throw new AppError(
+        `Daily transfer limit of £${limit.toLocaleString()} exceeded. You have £${(limit - spent).toFixed(2)} remaining today.`,
+        400,
+        ErrorCodes.TRNF_004
+      );
+    }
+  }
+
+  private async alertIfLarge(userId: string, amount: number, currency: string, recipient: string, reference: string) {
+    if (amount < ALERT_THRESHOLD) return;
+    const user = await prisma.user.findUnique({ where: { id: userId }, select: { email: true } });
+    if (!user) return;
+    mailService
+      .sendTransferNotification(user.email, {
+        amount: amount.toFixed(2),
+        currency,
+        recipient,
+        reference,
+      })
+      .catch(() => {});
   }
 }
 

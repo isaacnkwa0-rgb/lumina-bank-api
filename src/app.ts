@@ -22,6 +22,9 @@ import { ratesRouter } from './modules/rates/rates.router';
 export function createApp() {
   const app = express();
 
+  // Trust Railway's reverse proxy so rate limiter sees real client IPs
+  app.set('trust proxy', 1);
+
   // CORS — validate origin against allowlist
   const allowedOrigins = new Set(
     env.ALLOWED_ORIGINS.split(',').map((o) => o.trim()).filter(Boolean)
@@ -42,6 +45,7 @@ export function createApp() {
   // Security headers
   app.use(helmet({
     crossOriginResourcePolicy: { policy: 'same-site' },
+    hsts: { maxAge: 31536000, includeSubDomains: true, preload: true },
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
@@ -51,6 +55,7 @@ export function createApp() {
         connectSrc: ["'self'"],
         fontSrc: ["'self'"],
         objectSrc: ["'none'"],
+        frameAncestors: ["'none'"],
         upgradeInsecureRequests: [],
       },
     },

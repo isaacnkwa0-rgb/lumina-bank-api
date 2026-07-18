@@ -99,4 +99,5 @@ export const ErrorCodes = {
   NOT_FOUND: 'NOT_FOUND',
   FORBIDDEN: 'FORBIDDEN',
   CONFLICT: 'CONFLICT',
+  RATE_LIMIT: 'RATE_LIMIT',
 } as const;

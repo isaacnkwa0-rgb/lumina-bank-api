@@ -241,6 +241,12 @@ export class AuthService {
     await this.sendEmailOtp(user.id, email, 'PASSWORD_RESET');
   }
 
+  async resendOtp(email: string, type: 'EMAIL_VERIFICATION' | 'PASSWORD_RESET' | 'LOGIN') {
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) return;
+    await this.sendEmailOtp(user.id, email, type);
+  }
+
   async resetPassword(email: string, code: string, newPassword: string) {
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) throw new AppError('User not found', 404, ErrorCodes.NOT_FOUND);
@@ -326,7 +332,13 @@ export class AuthService {
   }
 
   private async sendEmailOtp(userId: string, email: string, type: string) {
-    const code = String(Math.floor(100000 + Math.random() * 900000));
+    const recent = await prisma.otpCode.findFirst({
+      where: { userId, type, createdAt: { gte: new Date(Date.now() - 60_000) } },
+    });
+    if (recent) throw new AppError('Please wait 60 seconds before requesting another code', 429, ErrorCodes.RATE_LIMIT);
+
+    const { randomInt } = await import('crypto');
+    const code = String(randomInt(100000, 1000000));
     const expiresAt = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000);
 
     await prisma.otpCode.deleteMany({ where: { userId, type } });
