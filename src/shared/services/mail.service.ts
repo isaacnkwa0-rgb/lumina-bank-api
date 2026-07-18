@@ -127,4 +127,141 @@ export const mailService = {
       : `<p>Unfortunately your identity verification was <strong>not approved</strong>.</p>${reason ? `<p><strong>Reason:</strong> ${reason}</p>` : ''}<p>Please log in and resubmit your documents.</p>`;
     await send({ to, subject: `KYC ${approved ? 'Approved' : 'Rejected'} — Lumina Bank`, html: layout('Identity Verification Update', body) });
   },
+
+  async sendAccountLockout(to: string, lockDurationMinutes: number): Promise<void> {
+    const body = `
+      <p>Your Lumina Bank account has been <strong>temporarily locked</strong> due to too many failed sign-in attempts.</p>
+      <p>Your account will unlock automatically in <strong>${lockDurationMinutes} minutes</strong>.</p>
+      <p>If this wasn't you, your password may be compromised. Once your account unlocks, please <strong>change your password immediately</strong>.</p>
+      <p class="note">If you need urgent assistance, contact our support team.</p>`;
+    await send({ to, subject: 'Security alert: account temporarily locked — Lumina Bank', html: layout('Account Locked', body) });
+  },
+
+  async sendPasswordChanged(to: string): Promise<void> {
+    const body = `
+      <p>Your Lumina Bank password was successfully changed.</p>
+      <p>If you made this change, no action is needed.</p>
+      <p><strong>If you did not request this change</strong>, your account may be compromised. Please contact our support team immediately and we will secure your account.</p>
+      <p class="note">For your security, all active sessions have been signed out.</p>`;
+    await send({ to, subject: 'Your password has been changed — Lumina Bank', html: layout('Password Changed', body) });
+  },
+
+  async sendLoanDecision(to: string, opts: { approved: boolean; loanType: string; amount?: number; reason?: string }): Promise<void> {
+    const { approved, loanType, amount, reason } = opts;
+    const type = loanType.charAt(0).toUpperCase() + loanType.slice(1).toLowerCase();
+    const body = approved
+      ? `<p>Great news! Your <strong>${type} loan application</strong> has been approved.</p>
+         <p><strong>Amount:</strong> £${amount?.toLocaleString() ?? '—'}<br/>The funds have been credited to your account and are available immediately.</p>
+         <p class="note">Log in to your Lumina Bank app to view your repayment schedule.</p>`
+      : `<p>We regret to inform you that your <strong>${type} loan application</strong> has not been approved at this time.</p>
+         ${reason ? `<p><strong>Reason:</strong> ${reason}</p>` : ''}
+         <p>You are welcome to reapply in the future or contact our support team to discuss your options.</p>`;
+    await send({
+      to,
+      subject: `Loan application ${approved ? 'approved' : 'update'} — Lumina Bank`,
+      html: layout(`Loan Application ${approved ? 'Approved' : 'Update'}`, body),
+    });
+  },
+
+  async sendAccountSuspended(to: string): Promise<void> {
+    const body = `
+      <p>Your Lumina Bank account has been <strong>temporarily suspended</strong>.</p>
+      <p>During this period you will not be able to log in or access your funds.</p>
+      <p>Please contact our support team for more information or to appeal this decision.</p>`;
+    await send({ to, subject: 'Your account has been suspended — Lumina Bank', html: layout('Account Suspended', body) });
+  },
+
+  async sendAccountReactivated(to: string): Promise<void> {
+    const body = `
+      <p>Your Lumina Bank account has been <strong>reactivated</strong> and you can now log in as normal.</p>
+      <p>If you have any questions, please don't hesitate to contact our support team.</p>`;
+    await send({ to, subject: 'Your account has been reactivated — Lumina Bank', html: layout('Account Reactivated', body) });
+  },
+
+  async sendTransferRejected(to: string, opts: { amount: string; currency: string; reason?: string }): Promise<void> {
+    const { amount, currency, reason } = opts;
+    const body = `
+      <p>Your transfer of <strong>${currency} ${amount}</strong> has been <strong>rejected</strong> by our compliance team.</p>
+      ${reason ? `<p><strong>Reason:</strong> ${reason}</p>` : ''}
+      <p>The full amount has been <strong>refunded to your account</strong> and is available immediately.</p>
+      <p class="note">If you believe this was in error, please contact support.</p>`;
+    await send({ to, subject: 'Transfer rejected — Lumina Bank', html: layout('Transfer Rejected', body) });
+  },
+
+  async sendDisputeOutcome(to: string, opts: { resolved: boolean; subject: string; resolution: string }): Promise<void> {
+    const { resolved, subject: disputeSubject, resolution } = opts;
+    const body = resolved
+      ? `<p>Your dispute <strong>"${disputeSubject}"</strong> has been <strong>resolved</strong>.</p>
+         <p><strong>Resolution:</strong> ${resolution}</p>
+         <p class="note">If you have further questions, please contact support.</p>`
+      : `<p>After careful review, your dispute <strong>"${disputeSubject}"</strong> could not be upheld.</p>
+         <p><strong>Reason:</strong> ${resolution}</p>
+         <p class="note">If you believe this is incorrect, please contact support to discuss further options.</p>`;
+    await send({
+      to,
+      subject: `Dispute ${resolved ? 'resolved' : 'update'} — Lumina Bank`,
+      html: layout(`Dispute ${resolved ? 'Resolved' : 'Update'}`, body),
+    });
+  },
+
+  async sendInsuranceDecision(to: string, opts: { accepted: boolean; insuranceType: string; premium?: number; notes?: string }): Promise<void> {
+    const { accepted, insuranceType, premium, notes } = opts;
+    const type = insuranceType.charAt(0).toUpperCase() + insuranceType.slice(1).toLowerCase();
+    const body = accepted
+      ? `<p>Your <strong>${type} insurance</strong> quote has been <strong>accepted</strong>.</p>
+         ${premium ? `<p><strong>Monthly premium:</strong> £${premium.toFixed(2)}</p>` : ''}
+         <p>Your policy is now active. Log in to the Lumina Bank app to view your policy details.</p>`
+      : `<p>Unfortunately your <strong>${type} insurance</strong> quote could not be processed at this time.</p>
+         ${notes ? `<p><strong>Reason:</strong> ${notes}</p>` : ''}
+         <p>Please contact our insurance team to discuss your options.</p>`;
+    await send({
+      to,
+      subject: `Insurance quote ${accepted ? 'accepted' : 'update'} — Lumina Bank`,
+      html: layout(`Insurance Quote ${accepted ? 'Accepted' : 'Update'}`, body),
+    });
+  },
+
+  async send2FAChanged(to: string, enabled: boolean): Promise<void> {
+    const body = enabled
+      ? `<p>Two-factor authentication has been <strong>enabled</strong> on your Lumina Bank account.</p>
+         <p>Your account is now more secure. You will need your authenticator app each time you sign in.</p>
+         <p class="note">If you did not make this change, contact support immediately.</p>`
+      : `<p>Two-factor authentication has been <strong>disabled</strong> on your Lumina Bank account.</p>
+         <p>Your account is now protected by password only. We strongly recommend re-enabling 2FA.</p>
+         <p class="note">If you did not make this change, your account may be compromised — contact support immediately.</p>`;
+    await send({
+      to,
+      subject: `Two-factor authentication ${enabled ? 'enabled' : 'disabled'} — Lumina Bank`,
+      html: layout(`2FA ${enabled ? 'Enabled' : 'Disabled'}`, body),
+    });
+  },
+
+  async sendCardBlocked(to: string, last4: string): Promise<void> {
+    const body = `
+      <p>Your Lumina Bank card ending in <strong>${last4}</strong> has been <strong>blocked</strong> by our team.</p>
+      <p>The card cannot be used for any transactions until it is unblocked.</p>
+      <p class="note">If this was unexpected, please contact support immediately.</p>`;
+    await send({ to, subject: `Card ending ${last4} blocked — Lumina Bank`, html: layout('Card Blocked', body) });
+  },
+
+  async sendCryptoOrderDecision(to: string, opts: { approved: boolean; coin: string; amountGbp: number; reference: string; reason?: string }): Promise<void> {
+    const { approved, coin, amountGbp, reference, reason } = opts;
+    const body = approved
+      ? `<p>Your crypto purchase order has been <strong>approved</strong> and is being processed.</p>
+         <p><strong>Asset:</strong> ${coin}<br/>
+         <strong>Amount:</strong> £${amountGbp.toFixed(2)}<br/>
+         <strong>Reference:</strong> ${reference}</p>
+         <p class="note">Your crypto will be sent to the wallet address you provided within 1–2 business days.</p>`
+      : `<p>Unfortunately your crypto purchase order could not be processed.</p>
+         <p><strong>Asset:</strong> ${coin}<br/>
+         <strong>Amount:</strong> £${amountGbp.toFixed(2)}<br/>
+         <strong>Reference:</strong> ${reference}</p>
+         ${reason ? `<p><strong>Reason:</strong> ${reason}</p>` : ''}
+         <p>The full amount including the processing fee has been <strong>refunded to your account</strong>.</p>`;
+    await send({
+      to,
+      subject: `Crypto order ${approved ? 'approved' : 'rejected'} — Lumina Bank`,
+      html: layout(`Crypto Order ${approved ? 'Approved' : 'Rejected'}`, body),
+    });
+  },
 };

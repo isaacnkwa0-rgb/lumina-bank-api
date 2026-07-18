@@ -86,13 +86,17 @@ export class AdminService {
     const user = await prisma.user.findUnique({ where: { id } });
     if (!user) throw new AppError('User not found', 404, ErrorCodes.NOT_FOUND);
     if (user.status === UserStatus.SUSPENDED) throw new AppError('User is already suspended', 400, ErrorCodes.CONFLICT);
-    return prisma.user.update({ where: { id }, data: { status: UserStatus.SUSPENDED }, select: { id: true, email: true, status: true } });
+    const updated = await prisma.user.update({ where: { id }, data: { status: UserStatus.SUSPENDED }, select: { id: true, email: true, status: true } });
+    mailService.sendAccountSuspended(user.email).catch(() => {});
+    return updated;
   }
 
   async activateUser(id: string) {
     const user = await prisma.user.findUnique({ where: { id } });
     if (!user) throw new AppError('User not found', 404, ErrorCodes.NOT_FOUND);
-    return prisma.user.update({ where: { id }, data: { status: UserStatus.ACTIVE }, select: { id: true, email: true, status: true } });
+    const updated = await prisma.user.update({ where: { id }, data: { status: UserStatus.ACTIVE }, select: { id: true, email: true, status: true } });
+    mailService.sendAccountReactivated(user.email).catch(() => {});
+    return updated;
   }
 
   async approveKyc(userId: string) {
@@ -221,7 +225,7 @@ export class AdminService {
   async rejectTransfer(id: string, reason?: string) {
     const transfer = await prisma.transfer.findUnique({
       where: { id },
-      include: { fromAccount: { include: { user: { select: { id: true } } } } },
+      include: { fromAccount: { include: { user: { select: { id: true, email: true } } } } },
     });
     if (!transfer) throw new AppError('Transfer not found', 404, ErrorCodes.NOT_FOUND);
     if (transfer.status !== TransferStatus.PENDING) throw new AppError('Transfer is not pending', 400, ErrorCodes.CONFLICT);
@@ -275,6 +279,12 @@ export class AdminService {
         body: `Your transfer of £${amount} was rejected${reason ? ': ' + reason : ''}. Funds have been returned to your account.`,
       },
     });
+
+    mailService.sendTransferRejected(transfer.fromAccount.user.email, {
+      amount,
+      currency: transfer.currency,
+      reason,
+    }).catch(() => {});
 
     return prisma.transfer.findUnique({ where: { id } });
   }
@@ -354,6 +364,12 @@ export class AdminService {
       }),
     ]);
 
+    mailService.sendLoanDecision(loan.user.email, {
+      approved: true,
+      loanType: loan.type,
+      amount: principal,
+    }).catch(() => {});
+
     return prisma.loan.findUnique({ where: { id } });
   }
 
@@ -366,6 +382,12 @@ export class AdminService {
       prisma.loan.update({ where: { id }, data: { status: LoanStatus.REJECTED } }),
       prisma.notification.create({ data: { userId: loan.userId, type: NotificationType.LOAN as any, title: 'Loan Application Rejected', body: `Your loan application was not approved${reason ? ': ' + reason : ''}. Please contact support for more information.` } }),
     ]);
+
+    mailService.sendLoanDecision(loan.user.email, {
+      approved: false,
+      loanType: loan.type,
+      reason,
+    }).catch(() => {});
 
     return { id, status: LoanStatus.REJECTED, reason };
   }
@@ -395,24 +417,26 @@ export class AdminService {
   }
 
   async resolveDispute(id: string, resolution: string) {
-    const dispute = await prisma.dispute.findUnique({ where: { id } });
+    const dispute = await prisma.dispute.findUnique({ where: { id }, include: { user: { select: { email: true } } } });
     if (!dispute) throw new AppError('Dispute not found', 404, ErrorCodes.NOT_FOUND);
 
     await prisma.dispute.update({ where: { id }, data: { status: DisputeStatus.RESOLVED, resolution, resolvedAt: new Date() } });
     await prisma.notification.create({
       data: { userId: dispute.userId, type: NotificationType.SYSTEM, title: 'Dispute Resolved', body: `Your dispute "${dispute.subject}" has been resolved. ${resolution}` },
     });
+    mailService.sendDisputeOutcome(dispute.user.email, { resolved: true, subject: dispute.subject, resolution }).catch(() => {});
     return { id, status: DisputeStatus.RESOLVED, resolution };
   }
 
   async rejectDispute(id: string, reason: string) {
-    const dispute = await prisma.dispute.findUnique({ where: { id } });
+    const dispute = await prisma.dispute.findUnique({ where: { id }, include: { user: { select: { email: true } } } });
     if (!dispute) throw new AppError('Dispute not found', 404, ErrorCodes.NOT_FOUND);
 
     await prisma.dispute.update({ where: { id }, data: { status: DisputeStatus.REJECTED, resolution: reason, resolvedAt: new Date() } });
     await prisma.notification.create({
       data: { userId: dispute.userId, type: NotificationType.SYSTEM, title: 'Dispute Rejected', body: `Your dispute "${dispute.subject}" has been reviewed and could not be upheld. ${reason}` },
     });
+    mailService.sendDisputeOutcome(dispute.user.email, { resolved: false, subject: dispute.subject, resolution: reason }).catch(() => {});
     return { id, status: DisputeStatus.REJECTED, reason };
   }
 
@@ -428,7 +452,7 @@ export class AdminService {
   }
 
   async processInsuranceQuote(id: string, status: string, premium?: number, notes?: string) {
-    const quote = await prisma.insuranceQuote.findUnique({ where: { id } });
+    const quote = await prisma.insuranceQuote.findUnique({ where: { id }, include: { user: { select: { email: true } } } });
     if (!quote) throw new AppError('Insurance quote not found', 404, ErrorCodes.NOT_FOUND);
 
     const data: Prisma.InsuranceQuoteUpdateInput = { status: status as InsuranceStatus };
@@ -447,6 +471,16 @@ export class AdminService {
       : `Your insurance quote status has been updated.`;
 
     await prisma.notification.create({ data: { userId: quote.userId, type: NotificationType.SYSTEM, title, body } });
+
+    if (status === 'ACCEPTED' || status === 'DECLINED') {
+      mailService.sendInsuranceDecision(quote.user.email, {
+        accepted: status === 'ACCEPTED',
+        insuranceType: quote.type,
+        premium: status === 'ACCEPTED' ? Number(premium ?? quote.premium) : undefined,
+        notes: status === 'DECLINED' ? (notes ?? undefined) : undefined,
+      }).catch(() => {});
+    }
+
     return updated;
   }
 
@@ -473,11 +507,13 @@ export class AdminService {
   }
 
   async blockCard(id: string) {
-    const card = await prisma.card.findUnique({ where: { id } });
+    const card = await prisma.card.findUnique({ where: { id }, include: { user: { select: { email: true } } } });
     if (!card) throw new AppError('Card not found', 404, ErrorCodes.NOT_FOUND);
     if (card.status === CardStatus.BLOCKED) throw new AppError('Card is already blocked', 400, ErrorCodes.CONFLICT);
     const updated = await prisma.card.update({ where: { id }, data: { status: CardStatus.BLOCKED } });
-    await prisma.notification.create({ data: { userId: card.userId, type: NotificationType.SYSTEM, title: 'Card Blocked', body: `Your card ending ${card.maskedPan.slice(-4)} has been blocked. Please contact support if this was unexpected.` } });
+    const last4 = card.maskedPan.slice(-4);
+    await prisma.notification.create({ data: { userId: card.userId, type: NotificationType.SYSTEM, title: 'Card Blocked', body: `Your card ending ${last4} has been blocked. Please contact support if this was unexpected.` } });
+    mailService.sendCardBlocked(card.user.email, last4).catch(() => {});
     return updated;
   }
 
@@ -646,7 +682,7 @@ export class AdminService {
   }
 
   async approveCryptoOrder(id: string, notes?: string) {
-    const order = await prisma.cryptoOrder.findUnique({ where: { id } });
+    const order = await prisma.cryptoOrder.findUnique({ where: { id }, include: { user: true } });
     if (!order) throw new AppError('Crypto order not found', 404, ErrorCodes.NOT_FOUND);
     if (order.status !== CryptoOrderStatus.PENDING) throw new AppError('Order is not pending', 400, ErrorCodes.CONFLICT);
 
@@ -668,13 +704,20 @@ export class AdminService {
       },
     });
 
+    mailService.sendCryptoOrderDecision(order.user.email, {
+      approved: true,
+      coin: order.coin,
+      amountGbp: order.amountGbp.toNumber(),
+      reference: order.reference,
+    }).catch(() => {});
+
     return updated;
   }
 
   async rejectCryptoOrder(id: string, reason: string) {
     const order = await prisma.cryptoOrder.findUnique({
       where: { id },
-      include: { account: true },
+      include: { account: true, user: true },
     });
     if (!order) throw new AppError('Crypto order not found', 404, ErrorCodes.NOT_FOUND);
     if (order.status !== CryptoOrderStatus.PENDING) throw new AppError('Order is not pending', 400, ErrorCodes.CONFLICT);
@@ -720,6 +763,14 @@ export class AdminService {
         body: `Your ${order.coin} purchase (Ref: ${order.reference}) could not be processed. Reason: ${reason}. Funds have been returned to your account.`,
       },
     });
+
+    mailService.sendCryptoOrderDecision(order.user.email, {
+      approved: false,
+      coin: order.coin,
+      amountGbp: order.amountGbp.toNumber(),
+      reference: order.reference,
+      reason,
+    }).catch(() => {});
 
     return { id, status: CryptoOrderStatus.REJECTED, reason };
   }

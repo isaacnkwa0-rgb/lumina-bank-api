@@ -118,6 +118,7 @@ export class AuthService {
       if (attempts >= MAX_LOGIN_ATTEMPTS) {
         updateData.lockedUntil = new Date(Date.now() + LOCK_DURATION_MINUTES * 60 * 1000);
         updateData.failedLoginAttempts = 0;
+        mailService.sendAccountLockout(user.email, LOCK_DURATION_MINUTES).catch(() => {});
       }
 
       await prisma.user.update({ where: { id: user.id }, data: updateData });
@@ -257,6 +258,7 @@ export class AuthService {
     const passwordHash = await bcrypt.hash(newPassword, SALT_ROUNDS);
     await prisma.user.update({ where: { id: user.id }, data: { passwordHash } });
     await this.logoutAll(user.id);
+    mailService.sendPasswordChanged(user.email).catch(() => {});
     return { message: 'Password reset successfully' };
   }
 
@@ -290,6 +292,7 @@ export class AuthService {
       where: { id: userId },
       data: { twoFactorEnabled: true, twoFactorRecoveryCodes: hashedCodes },
     });
+    mailService.send2FAChanged(user.email, true).catch(() => {});
     return { message: 'Two-factor authentication enabled', recoveryCodes: codes };
   }
 
@@ -325,6 +328,7 @@ export class AuthService {
       where: { id: userId },
       data: { twoFactorEnabled: false, twoFactorSecret: null },
     });
+    mailService.send2FAChanged(user.email, false).catch(() => {});
     return { message: '2FA disabled successfully' };
   }
 
