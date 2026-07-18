@@ -337,8 +337,7 @@ export class AuthService {
     });
     if (recent) throw new AppError('Please wait 60 seconds before requesting another code', 429, ErrorCodes.RATE_LIMIT);
 
-    const { randomInt } = await import('crypto');
-    const code = String(randomInt(100000, 1000000));
+    const code = String(require('crypto').randomInt(100000, 1000000));
     const expiresAt = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000);
 
     await prisma.otpCode.deleteMany({ where: { userId, type } });
