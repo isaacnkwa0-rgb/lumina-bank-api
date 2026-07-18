@@ -192,7 +192,28 @@ export class AuthService {
 
     const stored = await prisma.refreshToken.findUnique({ where: { tokenHash } });
 
-    if (!stored || stored.revokedAt || stored.expiresAt < new Date()) {
+    if (!stored) {
+      throw new AppError('Invalid or expired refresh token', 401, ErrorCodes.AUTH_003);
+    }
+
+    // Reuse detected: token was already revoked but is being replayed — possible theft
+    if (stored.revokedAt && stored.expiresAt > new Date()) {
+      await prisma.refreshToken.updateMany({
+        where: { userId: stored.userId, revokedAt: null },
+        data: { revokedAt: new Date() },
+      });
+      const victim = await prisma.user.findUnique({ where: { id: stored.userId }, select: { email: true } });
+      if (victim) {
+        mailService.sendSecurityAlert(victim.email, {
+          event: 'Suspicious session activity detected',
+          detail: 'A previously used refresh token was replayed. This may indicate your session was stolen.',
+        }).catch(() => {});
+      }
+      logger.warn('Refresh token reuse detected — all sessions revoked', { userId: stored.userId });
+      throw new AppError('Invalid or expired refresh token', 401, ErrorCodes.AUTH_003);
+    }
+
+    if (stored.revokedAt || stored.expiresAt < new Date()) {
       throw new AppError('Invalid or expired refresh token', 401, ErrorCodes.AUTH_003);
     }
 

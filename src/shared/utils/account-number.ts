@@ -1,15 +1,17 @@
-import { randomBytes } from 'crypto';
+import { randomBytes, randomInt } from 'crypto';
+
+function randomDigits(count: number): string {
+  return Array.from({ length: count }, () => randomInt(0, 10)).join('');
+}
 
 export function generateAccountNumber(): string {
   // UK standard: 8 digits, first digit non-zero
-  const first = Math.floor(Math.random() * 9) + 1;
-  const rest = Array.from({ length: 7 }, () => Math.floor(Math.random() * 10));
-  return `${first}${rest.join('')}`;
+  return `${randomInt(1, 10)}${randomDigits(7)}`;
 }
 
 export function generateSortCode(): string {
   // UK sort code: 6 digits formatted as XX-XX-XX
-  const digits = Array.from({ length: 6 }, () => Math.floor(Math.random() * 10)).join('');
+  const digits = randomDigits(6);
   return `${digits.slice(0, 2)}-${digits.slice(2, 4)}-${digits.slice(4, 6)}`;
 }
 
@@ -17,7 +19,7 @@ export function generateIBAN(currency: string = 'GBP'): string {
   if (currency === 'GBP') {
     // UK IBAN: GB + 2 check digits + 4-char bank code + 6-digit sort code + 8-digit account number = 22 chars
     const bankCode = 'LUMI';
-    const sortCode = Array.from({ length: 6 }, () => Math.floor(Math.random() * 10)).join('');
+    const sortCode = randomDigits(6);
     const accountNumber = generateAccountNumber();
     const bban = `${bankCode}${sortCode}${accountNumber}`;
     const checkDigits = computeIBANCheckDigits(bban, 'GB');
@@ -27,8 +29,8 @@ export function generateIBAN(currency: string = 'GBP'): string {
   // Other currencies — keep simple format
   const countryCode = currencyToCountryCode(currency);
   const bankCode = '0824';
-  const checkDigits = String(Math.floor(Math.random() * 90) + 10);
-  const accountPart = Array.from({ length: 16 }, () => Math.floor(Math.random() * 10)).join('');
+  const checkDigits = String(randomInt(10, 100));
+  const accountPart = randomDigits(16);
   return `${countryCode}${checkDigits}${bankCode}${accountPart}`;
 }
 
@@ -63,7 +65,7 @@ export function maskAccountNumber(accountNumber: string): string {
 
 export function generateVirtualCardPan(): string {
   // Luhn-valid 16-digit number starting with 4 (Visa-like)
-  const partial = `4${Array.from({ length: 14 }, () => Math.floor(Math.random() * 10)).join('')}`;
+  const partial = `4${randomDigits(14)}`;
   const check = luhnCheckDigit(partial);
   return `${partial}${check}`;
 }

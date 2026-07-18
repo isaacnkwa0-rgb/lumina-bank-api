@@ -3,6 +3,8 @@ import { prisma } from './config/database';
 import { env } from './config/env';
 import { logger } from './config/logger';
 import { ratesService } from './modules/rates/rates.service';
+import { standingOrdersService } from './modules/standing-orders/standing-orders.service';
+import { directDebitsService } from './modules/direct-debits/direct-debits.service';
 
 async function bootstrap() {
   try {
@@ -14,6 +16,17 @@ async function bootstrap() {
     // Fetch live rates on startup then every hour
     ratesService.refreshRates();
     setInterval(() => ratesService.refreshRates(), 60 * 60 * 1000);
+
+    // Process due standing orders and direct debits every minute
+    const runStandingOrders = () =>
+      standingOrdersService.executeDue().catch((e: Error) => logger.error('Standing orders cron failed', { error: e.message }));
+    const runDirectDebits = () =>
+      directDebitsService.collectDue().catch((e: Error) => logger.error('Direct debits cron failed', { error: e.message }));
+
+    runStandingOrders();
+    runDirectDebits();
+    setInterval(runStandingOrders, 60 * 1000);
+    setInterval(runDirectDebits, 60 * 1000);
 
     const server = app.listen(env.PORT, () => {
       logger.info(`🚀 Lumina Bank API running on http://localhost:${env.PORT}`);

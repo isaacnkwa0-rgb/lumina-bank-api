@@ -244,6 +244,15 @@ export const mailService = {
     await send({ to, subject: `Card ending ${last4} blocked — Lumina Bank`, html: layout('Card Blocked', body) });
   },
 
+  async sendSecurityAlert(to: string, opts: { event: string; detail?: string }): Promise<void> {
+    const body = `
+      <p>A security event was detected on your Lumina Bank account: <strong>${opts.event}</strong>.</p>
+      ${opts.detail ? `<p>${opts.detail}</p>` : ''}
+      <p>All active sessions have been signed out as a precaution.</p>
+      <p class="note">If this was you, simply log back in. If you did not take this action, please <strong>change your password immediately</strong> and contact support.</p>`;
+    await send({ to, subject: `Security alert — Lumina Bank`, html: layout('Security Alert', body) });
+  },
+
   async sendCryptoOrderDecision(to: string, opts: { approved: boolean; coin: string; amountGbp: number; reference: string; reason?: string }): Promise<void> {
     const { approved, coin, amountGbp, reference, reason } = opts;
     const body = approved
