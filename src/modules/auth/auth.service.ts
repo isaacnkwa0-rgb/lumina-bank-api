@@ -400,6 +400,18 @@ export class AuthService {
     logger.info(`OTP sent for ${type}`, { email });
   }
 
+  async changePassword(userId: string, currentPassword: string, newPassword: string) {
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new AppError('User not found', 404, ErrorCodes.NOT_FOUND);
+    const match = await bcrypt.compare(currentPassword, user.passwordHash);
+    if (!match) throw new AppError('Current password is incorrect', 401, ErrorCodes.AUTH_001);
+    const passwordHash = await bcrypt.hash(newPassword, SALT_ROUNDS);
+    await prisma.user.update({ where: { id: userId }, data: { passwordHash } });
+    await this.logoutAll(userId);
+    mailService.sendPasswordChanged(user.email).catch(() => {});
+    return { message: 'Password changed successfully' };
+  }
+
   async verifyPassword(userId: string, password: string) {
     const user = await prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new AppError('User not found', 404, ErrorCodes.NOT_FOUND);
