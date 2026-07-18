@@ -87,9 +87,32 @@ export class InsuranceService {
     if (!quote) throw new AppError('Quote not found', 404);
     if (quote.status !== InsuranceStatus.QUOTED) throw new AppError('Quote is not in QUOTED status', 400);
 
-    return prisma.insuranceQuote.update({
+    const updated = await prisma.insuranceQuote.update({
       where: { id },
       data: { status: InsuranceStatus.ACCEPTED },
+    });
+
+    await prisma.notification.create({
+      data: {
+        userId,
+        type: NotificationType.SYSTEM,
+        title: 'Insurance Policy Activated',
+        body: `Your ${quote.type.toLowerCase()} insurance policy has been activated. Welcome to Lumina Protect!`,
+      },
+    });
+
+    return updated;
+  }
+
+  async cancelQuote(id: string, userId: string) {
+    const quote = await prisma.insuranceQuote.findFirst({ where: { id, userId } });
+    if (!quote) throw new AppError('Quote not found', 404);
+    if (quote.status === InsuranceStatus.ACCEPTED) throw new AppError('An accepted policy cannot be cancelled here. Please contact support.', 400);
+    if (quote.status === InsuranceStatus.DECLINED) throw new AppError('Quote is already closed', 400);
+
+    return prisma.insuranceQuote.update({
+      where: { id },
+      data: { status: InsuranceStatus.DECLINED, notes: 'Cancelled by customer' },
     });
   }
 }
