@@ -26,6 +26,11 @@ export function globalErrorHandler(
   res: Response,
   _next: NextFunction
 ): void {
+  if ((err as any).code === 'P2002') {
+    sendError(res, ErrorCodes.ACCT_004, 'An account of this type already exists', 409, undefined, req.requestId);
+    return;
+  }
+
   if (err instanceof AppError) {
     if (!err.isOperational) {
       logger.error('Non-operational error', { error: err.message, stack: err.stack });

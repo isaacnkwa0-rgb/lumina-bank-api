@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { accountsService } from './accounts.service';
-import { sendSuccess, sendCreated } from '../../shared/utils/api-response';
+import { sendSuccess, sendCreated, sendError, ErrorCodes } from '../../shared/utils/api-response';
 
 export class AccountsController {
   async list(req: Request, res: Response, next: NextFunction) {
@@ -25,7 +25,11 @@ export class AccountsController {
     try {
       const account = await accountsService.createAccount(req.user!.id, req.body);
       sendCreated(res, account, 'Account opened successfully');
-    } catch (err) {
+    } catch (err: any) {
+      if (err?.code === 'P2002' || err?.statusCode === 409) {
+        sendError(res, ErrorCodes.ACCT_004, err?.message || 'An account of this type already exists', 409, undefined, req.requestId);
+        return;
+      }
       next(err);
     }
   }
