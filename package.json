@@ -17,7 +17,9 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "lint": "eslint src --ext .ts",
-    "format": "prettier --write src/**/*.ts"
+    "format": "prettier --write src/**/*.ts",
+    "cleanup:accounts": "tsx scripts/cleanup-duplicate-accounts.ts",
+    "cleanup:accounts:execute": "tsx scripts/cleanup-duplicate-accounts.ts --execute"
   },
   "keywords": [
     "banking",
