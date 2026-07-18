@@ -237,6 +237,7 @@ model User {
   disputes         Dispute[]
   insuranceQuotes  InsuranceQuote[]
   standingOrders   StandingOrder[]
+  directDebits     DirectDebit[]
 
   @@index([email])
   @@index([status])
@@ -281,6 +282,7 @@ model Account {
   goals         SavingsGoal[]
   loans         Loan[]
   standingOrders StandingOrder[]
+  directDebits   DirectDebit[]
 
   @@index([userId])
   @@index([accountNumber])
@@ -677,4 +679,34 @@ model StandingOrder {
   @@index([userId])
   @@index([status])
   @@index([nextExecutionDate])
+}
+
+enum DirectDebitStatus {
+  ACTIVE
+  SUSPENDED
+  CANCELLED
+}
+
+model DirectDebit {
+  id                 String             @id @default(uuid())
+  userId             String
+  accountId          String
+  originatorName     String
+  originatorRef      String
+  userRef            String
+  amount             Decimal?           @db.Decimal(18, 4)
+  currency           String             @default("GBP")
+  frequency          StandingOrderFreq
+  nextCollectionDate DateTime
+  lastCollectedAt    DateTime?
+  status             DirectDebitStatus  @default(ACTIVE)
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  account Account @relation(fields: [accountId], references: [id])
+
+  @@index([userId])
+  @@index([status])
+  @@index([nextCollectionDate])
 }
