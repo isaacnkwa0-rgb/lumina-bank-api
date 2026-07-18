@@ -172,7 +172,7 @@ export class AdminController {
     try {
       const { status, premium, notes } = req.body;
       if (!status) { res.status(400).json({ message: 'Status is required' }); return; }
-      const data = await adminService.processInsuranceQuote(req.params.id, status, premium ? Number(premium) : undefined, notes);
+      const data = await adminService.processInsuranceQuote(req.params.id as string, status, premium ? Number(premium) : undefined, notes);
       sendSuccess(res, data, 'Insurance quote processed');
     } catch (err) { next(err); }
   }
@@ -189,14 +189,14 @@ export class AdminController {
 
   async blockCard(req: Request, res: Response, next: NextFunction) {
     try {
-      const data = await adminService.blockCard(req.params.id);
+      const data = await adminService.blockCard(req.params.id as string);
       sendSuccess(res, data, 'Card blocked');
     } catch (err) { next(err); }
   }
 
   async unblockCard(req: Request, res: Response, next: NextFunction) {
     try {
-      const data = await adminService.unblockCard(req.params.id);
+      const data = await adminService.unblockCard(req.params.id as string);
       sendSuccess(res, data, 'Card unblocked');
     } catch (err) { next(err); }
   }
