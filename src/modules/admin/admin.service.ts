@@ -1,11 +1,12 @@
 import { prisma } from '../../config/database';
 import { AppError } from '../../middleware/error.middleware';
-import { KycStatus, UserStatus, NotificationType, Prisma, TransferStatus, TransactionType, TransactionCategory, LoanStatus, LoanPaymentStatus, DisputeStatus } from '@prisma/client';
+import { KycStatus, UserStatus, NotificationType, Prisma, TransferStatus, TransactionType, TransactionCategory, LoanStatus, LoanPaymentStatus, DisputeStatus, InsuranceStatus, CardStatus, LoanType, GoalStatus } from '@prisma/client';
 import { mailService } from '../../shared/services/mail.service';
 import { Decimal } from '@prisma/client/runtime/library';
 import { getPagination, buildPaginationMeta } from '../../shared/utils/pagination';
 import { ErrorCodes } from '../../shared/utils/api-response';
 import { generateTransactionReference } from '../../shared/utils/transaction-ref';
+import { ratesService } from '../rates/rates.service';
 
 interface UserFilters {
   page?: number;
@@ -352,6 +353,153 @@ export class AdminService {
     });
 
     return { id, status: DisputeStatus.RESOLVED, resolution };
+  }
+
+  // ── Insurance ────────────────────────────────────────────────────────────────
+
+  async getInsuranceQuotes(status?: string) {
+    const where = status ? { status: status as InsuranceStatus } : {};
+    return prisma.insuranceQuote.findMany({
+      where,
+      include: { user: { select: { id: true, firstName: true, lastName: true, email: true } } },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async processInsuranceQuote(id: string, status: string, premium?: number, notes?: string) {
+    const quote = await prisma.insuranceQuote.findUnique({ where: { id } });
+    if (!quote) throw new AppError('Insurance quote not found', 404, ErrorCodes.NOT_FOUND);
+
+    const data: Prisma.InsuranceQuoteUpdateInput = { status: status as InsuranceStatus };
+    if (premium !== undefined) data.premium = premium;
+    if (notes !== undefined) data.notes = notes;
+
+    const updated = await prisma.insuranceQuote.update({ where: { id }, data });
+
+    const title = status === 'ACCEPTED' ? 'Insurance Quote Accepted'
+      : status === 'DECLINED' ? 'Insurance Quote Declined'
+      : 'Insurance Quote Updated';
+    const body = status === 'ACCEPTED'
+      ? `Your ${quote.type.toLowerCase()} insurance quote has been accepted at £${Number(premium ?? quote.premium).toFixed(2)}/month.`
+      : status === 'DECLINED'
+      ? `Your ${quote.type.toLowerCase()} insurance quote could not be processed at this time.`
+      : `Your insurance quote status has been updated.`;
+
+    await prisma.notification.create({ data: { userId: quote.userId, type: NotificationType.SYSTEM, title, body } });
+    return updated;
+  }
+
+  // ── Cards ────────────────────────────────────────────────────────────────────
+
+  async getAdminCards(filters: { status?: string; page?: number; limit?: number }) {
+    const { status, page = 1, limit = 20 } = filters;
+    const { skip, take } = getPagination({ page, limit });
+    const where: Prisma.CardWhereInput = status ? { status: status as CardStatus } : {};
+
+    const [cards, total] = await Promise.all([
+      prisma.card.findMany({
+        where, skip, take,
+        include: {
+          user: { select: { id: true, firstName: true, lastName: true, email: true } },
+          account: { select: { accountNumber: true, type: true, currency: true } },
+        },
+        orderBy: { createdAt: 'desc' },
+      }),
+      prisma.card.count({ where }),
+    ]);
+
+    return { cards, meta: buildPaginationMeta(total, page, limit) };
+  }
+
+  async blockCard(id: string) {
+    const card = await prisma.card.findUnique({ where: { id } });
+    if (!card) throw new AppError('Card not found', 404, ErrorCodes.NOT_FOUND);
+    if (card.status === CardStatus.BLOCKED) throw new AppError('Card is already blocked', 400, ErrorCodes.CONFLICT);
+    const updated = await prisma.card.update({ where: { id }, data: { status: CardStatus.BLOCKED } });
+    await prisma.notification.create({ data: { userId: card.userId, type: NotificationType.SYSTEM, title: 'Card Blocked', body: `Your card ending ${card.maskedPan.slice(-4)} has been blocked. Please contact support if this was unexpected.` } });
+    return updated;
+  }
+
+  async unblockCard(id: string) {
+    const card = await prisma.card.findUnique({ where: { id } });
+    if (!card) throw new AppError('Card not found', 404, ErrorCodes.NOT_FOUND);
+    if (card.status === CardStatus.CANCELLED || card.status === CardStatus.EXPIRED) {
+      throw new AppError('Cannot unblock a cancelled or expired card', 400, ErrorCodes.CONFLICT);
+    }
+    const updated = await prisma.card.update({ where: { id }, data: { status: CardStatus.ACTIVE } });
+    await prisma.notification.create({ data: { userId: card.userId, type: NotificationType.SYSTEM, title: 'Card Unblocked', body: `Your card ending ${card.maskedPan.slice(-4)} has been unblocked and is ready to use.` } });
+    return updated;
+  }
+
+  // ── Transactions ─────────────────────────────────────────────────────────────
+
+  async getAdminTransactions(filters: { page?: number; limit?: number; status?: string; type?: string }) {
+    const { page = 1, limit = 30, status, type } = filters;
+    const { skip, take } = getPagination({ page, limit });
+
+    const where: Prisma.TransactionWhereInput = {};
+    if (status) where.status = status as any;
+    if (type) where.type = type as TransactionType;
+
+    const [transactions, total] = await Promise.all([
+      prisma.transaction.findMany({
+        where, skip, take,
+        include: {
+          account: { include: { user: { select: { id: true, firstName: true, lastName: true, email: true } } } },
+        },
+        orderBy: { createdAt: 'desc' },
+      }),
+      prisma.transaction.count({ where }),
+    ]);
+
+    return { transactions, meta: buildPaginationMeta(total, page, limit) };
+  }
+
+  // ── Exchange Rates ───────────────────────────────────────────────────────────
+
+  async getAdminRates() {
+    return prisma.exchangeRate.findMany({ orderBy: { quoteCurrency: 'asc' } });
+  }
+
+  async refreshAdminRates() {
+    await ratesService.refreshRates();
+    return prisma.exchangeRate.findMany({ orderBy: { quoteCurrency: 'asc' } });
+  }
+
+  // ── Investments ──────────────────────────────────────────────────────────────
+
+  async getAdminInvestments() {
+    return prisma.portfolio.findMany({
+      include: {
+        user: { select: { id: true, firstName: true, lastName: true, email: true } },
+        investments: { orderBy: { createdAt: 'desc' } },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  // ── Savings Goals ─────────────────────────────────────────────────────────────
+
+  async getAdminGoals(status?: string) {
+    const where: Prisma.SavingsGoalWhereInput = status ? { status: status as GoalStatus } : {};
+    return prisma.savingsGoal.findMany({
+      where,
+      include: { user: { select: { id: true, firstName: true, lastName: true, email: true } } },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  // ── Loans with type filter ───────────────────────────────────────────────────
+
+  async getLoansByType(status?: string, type?: string) {
+    const where: Prisma.LoanWhereInput = {};
+    if (status) where.status = status as LoanStatus;
+    if (type) where.type = type as LoanType;
+    return prisma.loan.findMany({
+      where,
+      include: { user: { select: { id: true, firstName: true, lastName: true, email: true } } },
+      orderBy: { createdAt: 'desc' },
+    });
   }
 }
 

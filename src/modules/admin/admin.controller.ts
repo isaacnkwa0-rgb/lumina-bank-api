@@ -158,6 +158,101 @@ export class AdminController {
       sendSuccess(res, data, 'Dispute resolved');
     } catch (err) { next(err); }
   }
+
+  // ── Insurance ────────────────────────────────────────────────────────────────
+
+  async getInsuranceQuotes(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = await adminService.getInsuranceQuotes(req.query.status as string | undefined);
+      sendSuccess(res, data, 'Insurance quotes retrieved');
+    } catch (err) { next(err); }
+  }
+
+  async processInsuranceQuote(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { status, premium, notes } = req.body;
+      if (!status) { res.status(400).json({ message: 'Status is required' }); return; }
+      const data = await adminService.processInsuranceQuote(req.params.id, status, premium ? Number(premium) : undefined, notes);
+      sendSuccess(res, data, 'Insurance quote processed');
+    } catch (err) { next(err); }
+  }
+
+  // ── Cards ────────────────────────────────────────────────────────────────────
+
+  async getAdminCards(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { status, page, limit } = req.query as any;
+      const data = await adminService.getAdminCards({ status, page: Number(page) || 1, limit: Number(limit) || 20 });
+      sendSuccess(res, data.cards, 'Cards retrieved', 200, data.meta);
+    } catch (err) { next(err); }
+  }
+
+  async blockCard(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = await adminService.blockCard(req.params.id);
+      sendSuccess(res, data, 'Card blocked');
+    } catch (err) { next(err); }
+  }
+
+  async unblockCard(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = await adminService.unblockCard(req.params.id);
+      sendSuccess(res, data, 'Card unblocked');
+    } catch (err) { next(err); }
+  }
+
+  // ── Transactions ─────────────────────────────────────────────────────────────
+
+  async getAdminTransactions(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { page, limit, status, type } = req.query as any;
+      const data = await adminService.getAdminTransactions({ page: Number(page) || 1, limit: Number(limit) || 30, status, type });
+      sendSuccess(res, data.transactions, 'Transactions retrieved', 200, data.meta);
+    } catch (err) { next(err); }
+  }
+
+  // ── Rates ────────────────────────────────────────────────────────────────────
+
+  async getAdminRates(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = await adminService.getAdminRates();
+      sendSuccess(res, data, 'Rates retrieved');
+    } catch (err) { next(err); }
+  }
+
+  async refreshAdminRates(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = await adminService.refreshAdminRates();
+      sendSuccess(res, data, 'Rates refreshed');
+    } catch (err) { next(err); }
+  }
+
+  // ── Investments ──────────────────────────────────────────────────────────────
+
+  async getAdminInvestments(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = await adminService.getAdminInvestments();
+      sendSuccess(res, data, 'Investments retrieved');
+    } catch (err) { next(err); }
+  }
+
+  // ── Savings Goals ─────────────────────────────────────────────────────────────
+
+  async getAdminGoals(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = await adminService.getAdminGoals(req.query.status as string | undefined);
+      sendSuccess(res, data, 'Goals retrieved');
+    } catch (err) { next(err); }
+  }
+
+  // ── Loans with type filter ───────────────────────────────────────────────────
+
+  async getLoansByType(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = await adminService.getLoansByType(req.query.status as string | undefined, req.query.type as string | undefined);
+      sendSuccess(res, data, 'Loans retrieved');
+    } catch (err) { next(err); }
+  }
 }
 
 export default new AdminController();

@@ -28,4 +28,26 @@ router.patch('/loans/:id/reject', adminController.rejectLoan.bind(adminControlle
 router.get('/disputes', adminController.getDisputes.bind(adminController));
 router.patch('/disputes/:id/resolve', adminController.resolveDispute.bind(adminController));
 
+// Insurance
+router.get('/insurance', adminController.getInsuranceQuotes.bind(adminController));
+router.patch('/insurance/:id/process', adminController.processInsuranceQuote.bind(adminController));
+
+// Cards
+router.get('/cards', adminController.getAdminCards.bind(adminController));
+router.patch('/cards/:id/block', adminController.blockCard.bind(adminController));
+router.patch('/cards/:id/unblock', adminController.unblockCard.bind(adminController));
+
+// Transactions
+router.get('/transactions', adminController.getAdminTransactions.bind(adminController));
+
+// Exchange Rates
+router.get('/rates', adminController.getAdminRates.bind(adminController));
+router.post('/rates/refresh', adminController.refreshAdminRates.bind(adminController));
+
+// Investments
+router.get('/investments', adminController.getAdminInvestments.bind(adminController));
+
+// Savings Goals
+router.get('/goals', adminController.getAdminGoals.bind(adminController));
+
 export default router;
