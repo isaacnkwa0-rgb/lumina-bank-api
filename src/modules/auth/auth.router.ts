@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { z } from 'zod';
 import { authController } from './auth.controller';
 import { validate } from '../../middleware/validate.middleware';
 import { authenticate } from '../../middleware/auth.middleware';
@@ -32,6 +33,7 @@ router.post('/2fa/enable', authenticate, validate(twoFaEnableSchema), authContro
 router.post('/2fa/disable', authenticate, validate(twoFaDisableSchema), authController.disable2FA);
 router.post('/2fa/verify', authLimiter, validate(twoFaVerifySchema), authController.verifyTwoFactor);
 router.post('/2fa/regenerate-recovery-codes', authenticate, authController.regenerateRecoveryCodes);
+router.post('/verify-password', authenticate, validate(z.object({ password: z.string().min(1) })), authController.verifyPassword);
 router.get('/me', authenticate, authController.me);
 
 export { router as authRouter };

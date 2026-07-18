@@ -375,6 +375,14 @@ export class AuthService {
     logger.info(`OTP sent for ${type}`, { email });
   }
 
+  async verifyPassword(userId: string, password: string) {
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new AppError('User not found', 404, ErrorCodes.NOT_FOUND);
+    const match = await bcrypt.compare(password, user.passwordHash);
+    if (!match) throw new AppError('Incorrect password', 401, ErrorCodes.AUTH_001);
+    return { verified: true };
+  }
+
   private async verifyOtp(userId: string, code: string, type: string) {
     const otp = await prisma.otpCode.findFirst({
       where: { userId, type, usedAt: null, expiresAt: { gt: new Date() } },

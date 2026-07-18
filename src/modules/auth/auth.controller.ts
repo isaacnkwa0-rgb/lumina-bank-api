@@ -140,6 +140,15 @@ export class AuthController {
     }
   }
 
+  async verifyPassword(req: Request, res: Response, next: NextFunction) {
+    try {
+      const result = await authService.verifyPassword(req.user!.id, req.body.password);
+      sendSuccess(res, result, 'Password verified');
+    } catch (err) {
+      next(err);
+    }
+  }
+
   async me(req: Request, res: Response, next: NextFunction) {
     try {
       const user = await (await import('../../config/database')).prisma.user.findUnique({
