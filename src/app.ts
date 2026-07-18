@@ -112,6 +112,7 @@ export function createApp() {
   mountIfExists(app, `${v}/kyc`, './modules/kyc/kyc.router');
   mountIfExists(app, `${v}/disputes`, './modules/disputes/disputes.router');
   mountIfExists(app, `${v}/insurance`, './modules/insurance/insurance.router');
+  mountIfExists(app, `${v}/crypto`, './modules/crypto/crypto.router');
   mountIfExists(app, `${v}/standing-orders`, './modules/standing-orders/standing-orders.router');
   mountIfExists(app, `${v}/direct-debits`, './modules/direct-debits/direct-debits.router');
   mountIfExists(app, `${v}/admin`, './modules/admin/admin.router');

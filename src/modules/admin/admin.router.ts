@@ -58,6 +58,11 @@ router.delete('/users/:id', adminController.deleteUser.bind(adminController));
 router.patch('/users/:id/reset-lockout', adminController.resetLockout.bind(adminController));
 router.patch('/users/:id/verify-email', adminController.verifyUserEmail.bind(adminController));
 
+// Crypto orders
+router.get('/crypto/orders', adminController.getAdminCryptoOrders.bind(adminController));
+router.patch('/crypto/orders/:id/approve', adminController.approveCryptoOrder.bind(adminController));
+router.patch('/crypto/orders/:id/reject', adminController.rejectCryptoOrder.bind(adminController));
+
 // Account management
 router.get('/users/:userId/accounts', adminController.getUserAccounts.bind(adminController));
 router.patch('/accounts/:accountId/freeze', adminController.freezeAccount.bind(adminController));

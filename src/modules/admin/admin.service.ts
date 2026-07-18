@@ -1,6 +1,6 @@
 import { prisma } from '../../config/database';
 import { AppError } from '../../middleware/error.middleware';
-import { KycStatus, UserStatus, NotificationType, Prisma, TransferStatus, TransactionType, TransactionCategory, LoanStatus, LoanPaymentStatus, DisputeStatus, InsuranceStatus, CardStatus, LoanType, GoalStatus } from '@prisma/client';
+import { KycStatus, UserStatus, NotificationType, Prisma, TransferStatus, TransactionType, TransactionCategory, LoanStatus, LoanPaymentStatus, DisputeStatus, InsuranceStatus, CardStatus, LoanType, GoalStatus, CryptoOrderStatus } from '@prisma/client';
 import { mailService } from '../../shared/services/mail.service';
 import { Decimal } from '@prisma/client/runtime/library';
 import { getPagination, buildPaginationMeta } from '../../shared/utils/pagination';
@@ -632,6 +632,96 @@ export class AdminService {
     if (!account) throw new AppError('Account not found', 404, ErrorCodes.NOT_FOUND);
     if (Number(account.balance) !== 0) throw new AppError('Account must have zero balance before closing', 400, ErrorCodes.CONFLICT);
     return prisma.account.update({ where: { id: accountId }, data: { status: 'CLOSED' } });
+  }
+
+  // ── Crypto Orders ─────────────────────────────────────────────────────────────
+
+  async getAdminCryptoOrders(status?: string) {
+    const where: Prisma.CryptoOrderWhereInput = status ? { status: status as CryptoOrderStatus } : {};
+    return prisma.cryptoOrder.findMany({
+      where,
+      include: { user: { select: { id: true, firstName: true, lastName: true, email: true } } },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async approveCryptoOrder(id: string, notes?: string) {
+    const order = await prisma.cryptoOrder.findUnique({ where: { id } });
+    if (!order) throw new AppError('Crypto order not found', 404, ErrorCodes.NOT_FOUND);
+    if (order.status !== CryptoOrderStatus.PENDING) throw new AppError('Order is not pending', 400, ErrorCodes.CONFLICT);
+
+    const updated = await prisma.cryptoOrder.update({
+      where: { id },
+      data: {
+        status: CryptoOrderStatus.COMPLETED,
+        processedAt: new Date(),
+        adminNotes: notes ?? null,
+      },
+    });
+
+    await prisma.notification.create({
+      data: {
+        userId: order.userId,
+        type: NotificationType.SYSTEM,
+        title: 'Crypto Order Approved',
+        body: `Your ${order.coin} purchase order (Ref: ${order.reference}) has been approved and is being processed. Estimated delivery: 1–2 business days.`,
+      },
+    });
+
+    return updated;
+  }
+
+  async rejectCryptoOrder(id: string, reason: string) {
+    const order = await prisma.cryptoOrder.findUnique({
+      where: { id },
+      include: { account: true },
+    });
+    if (!order) throw new AppError('Crypto order not found', 404, ErrorCodes.NOT_FOUND);
+    if (order.status !== CryptoOrderStatus.PENDING) throw new AppError('Order is not pending', 400, ErrorCodes.CONFLICT);
+
+    const refundAmount = order.amountGbp.plus(order.fee);
+
+    await prisma.$transaction(async (tx) => {
+      await tx.cryptoOrder.update({
+        where: { id },
+        data: { status: CryptoOrderStatus.REJECTED, processedAt: new Date(), adminNotes: reason },
+      });
+
+      await tx.account.update({
+        where: { id: order.accountId },
+        data: {
+          balance: { increment: refundAmount },
+          availableBalance: { increment: refundAmount },
+        },
+      });
+
+      await tx.transaction.create({
+        data: {
+          reference: generateTransactionReference(),
+          accountId: order.accountId,
+          type: TransactionType.CREDIT,
+          category: TransactionCategory.REFUND,
+          amount: refundAmount,
+          currency: order.account.currency,
+          balanceBefore: order.account.balance,
+          balanceAfter: order.account.balance.plus(refundAmount),
+          description: `Refund: rejected crypto order ${order.reference}`,
+          status: 'COMPLETED',
+          valueDate: new Date(),
+        },
+      });
+    });
+
+    await prisma.notification.create({
+      data: {
+        userId: order.userId,
+        type: NotificationType.SYSTEM,
+        title: 'Crypto Order Rejected',
+        body: `Your ${order.coin} purchase (Ref: ${order.reference}) could not be processed. Reason: ${reason}. Funds have been returned to your account.`,
+      },
+    });
+
+    return { id, status: CryptoOrderStatus.REJECTED, reason };
   }
 }
 

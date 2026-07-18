@@ -238,6 +238,7 @@ model User {
   insuranceQuotes  InsuranceQuote[]
   standingOrders   StandingOrder[]
   directDebits     DirectDebit[]
+  cryptoOrders     CryptoOrder[]
 
   @@index([email])
   @@index([status])
@@ -283,6 +284,7 @@ model Account {
   loans         Loan[]
   standingOrders StandingOrder[]
   directDebits   DirectDebit[]
+  cryptoOrders   CryptoOrder[]
 
   @@index([userId])
   @@index([accountNumber])
@@ -709,4 +711,38 @@ model DirectDebit {
   @@index([userId])
   @@index([status])
   @@index([nextCollectionDate])
+}
+
+enum CryptoOrderStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  COMPLETED
+}
+
+model CryptoOrder {
+  id            String            @id @default(uuid())
+  userId        String
+  accountId     String
+  coin          String
+  coinId        String
+  network       String
+  walletAddress String
+  amountGbp     Decimal           @db.Decimal(18, 4)
+  fee           Decimal           @db.Decimal(18, 4) @default(1.50)
+  priceGbp      Decimal           @db.Decimal(18, 4)
+  quantity      Decimal           @db.Decimal(18, 8)
+  status        CryptoOrderStatus @default(PENDING)
+  reference     String            @unique
+  adminNotes    String?
+  processedAt   DateTime?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  account Account @relation(fields: [accountId], references: [id])
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
 }

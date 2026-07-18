@@ -302,6 +302,32 @@ export class AdminController {
     } catch (err) { next(err); }
   }
 
+  // ── Crypto Orders ─────────────────────────────────────────────────────────────
+
+  async getAdminCryptoOrders(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = await adminService.getAdminCryptoOrders(req.query.status as string | undefined);
+      sendSuccess(res, data, 'Crypto orders retrieved');
+    } catch (err) { next(err); }
+  }
+
+  async approveCryptoOrder(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { notes } = req.body;
+      const data = await adminService.approveCryptoOrder(req.params.id as string, notes);
+      sendSuccess(res, data, 'Crypto order approved');
+    } catch (err) { next(err); }
+  }
+
+  async rejectCryptoOrder(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { reason } = req.body;
+      if (!reason) { res.status(400).json({ message: 'Reason is required' }); return; }
+      const data = await adminService.rejectCryptoOrder(req.params.id as string, reason);
+      sendSuccess(res, data, 'Crypto order rejected and refunded');
+    } catch (err) { next(err); }
+  }
+
   // ── Account management ────────────────────────────────────────────────────────
 
   async getUserAccounts(req: Request, res: Response, next: NextFunction) {
