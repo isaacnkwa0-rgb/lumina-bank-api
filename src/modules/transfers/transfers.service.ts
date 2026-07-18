@@ -15,6 +15,14 @@ const DAILY_LIMITS: Record<UserTier, number> = {
   PRIVATE: 100_000,
   BUSINESS: 100_000,
 };
+
+const DAILY_TX_COUNT_LIMITS: Record<UserTier, number> = {
+  STANDARD: 10,
+  PREMIUM: 30,
+  PRIVATE: 100,
+  BUSINESS: 100,
+};
+
 const ALERT_THRESHOLD = 1_000;
 
 export class TransfersService {
@@ -36,6 +44,8 @@ export class TransfersService {
     if (!toAccount) throw new AppError('Destination account not found', 404, ErrorCodes.ACCT_001);
     if (fromAccount.status === AccountStatus.FROZEN) throw new AppError('Source account is frozen', 400, ErrorCodes.ACCT_002);
     if (toAccount.status === AccountStatus.FROZEN) throw new AppError('Destination account is frozen', 400, ErrorCodes.ACCT_002);
+
+    await this.checkDailyTxCount(userId);
 
     const amount = new Decimal(data.amount);
     if (fromAccount.availableBalance.lessThan(amount)) {
@@ -208,6 +218,7 @@ export class TransfersService {
     if (!fromAccount) throw new AppError('Source account not found', 404, ErrorCodes.ACCT_001);
     if (fromAccount.status === AccountStatus.FROZEN) throw new AppError('Source account is frozen', 400, ErrorCodes.ACCT_002);
 
+    await this.checkDailyTxCount(userId);
     await this.checkDailyLimit(userId, data.amount);
 
     // Detect Lumina-to-Lumina
@@ -328,6 +339,7 @@ export class TransfersService {
     if (!fromAccount) throw new AppError('Source account not found', 404, ErrorCodes.ACCT_001);
     if (fromAccount.status === AccountStatus.FROZEN) throw new AppError('Source account is frozen', 400, ErrorCodes.ACCT_002);
 
+    await this.checkDailyTxCount(userId);
     await this.checkDailyLimit(userId, data.amount);
 
     const quote = await ratesService.getQuote(fromAccount.currency, data.toCurrency, data.amount);
@@ -503,6 +515,33 @@ export class TransfersService {
         `Daily transfer limit of £${limit.toLocaleString()} exceeded. You have £${(limit - spent).toFixed(2)} remaining today.`,
         400,
         ErrorCodes.TRNF_004
+      );
+    }
+  }
+
+  private async checkDailyTxCount(userId: string) {
+    const user = await prisma.user.findUnique({ where: { id: userId }, select: { tier: true } });
+    if (!user) throw new AppError('User not found', 404, ErrorCodes.NOT_FOUND);
+
+    const limit = DAILY_TX_COUNT_LIMITS[user.tier];
+    const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+    const accounts = await prisma.account.findMany({ where: { userId }, select: { id: true } });
+    const accountIds = accounts.map((a) => a.id);
+
+    const count = await prisma.transfer.count({
+      where: {
+        fromAccountId: { in: accountIds },
+        status: { notIn: [TransferStatus.CANCELLED, TransferStatus.FAILED] },
+        createdAt: { gte: since },
+      },
+    });
+
+    if (count >= limit) {
+      throw new AppError(
+        `Daily transaction limit of ${limit} reached. You can make more transfers tomorrow.`,
+        429,
+        ErrorCodes.TRNF_006
       );
     }
   }

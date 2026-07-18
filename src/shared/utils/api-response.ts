@@ -92,6 +92,7 @@ export const ErrorCodes = {
   TRNF_003: 'TRNF_003',
   TRNF_004: 'TRNF_004',
   TRNF_005: 'TRNF_005',
+  TRNF_006: 'TRNF_006',
   // KYC
   KYC_001: 'KYC_001',
   // Rates
