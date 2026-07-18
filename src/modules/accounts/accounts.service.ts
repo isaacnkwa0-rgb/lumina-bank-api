@@ -23,6 +23,16 @@ export class AccountsService {
     userId: string,
     data: { type: AccountType; currency?: string; interestRate?: number; maturityDate?: string }
   ) {
+    const existing = await prisma.account.findFirst({
+      where: { userId, type: data.type, status: { not: AccountStatus.CLOSED } },
+    });
+    if (existing)
+      throw new AppError(
+        `You already have an active ${data.type.toLowerCase().replace('_', ' ')} account`,
+        409,
+        ErrorCodes.ACCT_004
+      );
+
     const accountNumber = generateAccountNumber();
     const iban = generateIBAN(data.currency ?? 'USD');
 
