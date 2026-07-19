@@ -26,7 +26,7 @@ export class RatesService {
           })
         );
 
-      await Promise.all(upserts);
+      await prisma.$transaction(upserts);
       logger.info(`Refreshed ${upserts.length} exchange rates from live API`);
     } catch (err: unknown) {
       logger.error('Failed to refresh exchange rates', { err: (err as Error).message });
