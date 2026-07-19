@@ -91,12 +91,19 @@ export class AuthService {
 
     await this.sendEmailOtp(user.id, user.email, 'EMAIL_VERIFICATION');
 
+    const tokens = await this.issueTokens(user.id, user.email, user.role, user.tier, user.status);
+
     return {
-      id: user.id,
-      email: user.email,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      isEmailVerified: user.isEmailVerified,
+      ...tokens,
+      user: {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: user.role,
+        tier: user.tier,
+        isEmailVerified: user.isEmailVerified,
+      },
     };
   }
 
