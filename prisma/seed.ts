@@ -270,6 +270,13 @@ async function main() {
   }
   console.log(`✅ Created ${transactionData.length} transactions`);
 
+  // Sync current account balance to final runningBalance so it matches the last transaction's balanceAfter
+  await prisma.account.update({
+    where: { id: currentAcc.id },
+    data: { balance: runningBalance, availableBalance: runningBalance },
+  });
+  console.log(`✅ Synced current account balance to £${runningBalance.toFixed(2)}`);
+
   // ── Cards ─────────────────────────────────────────────────────────────────
   await prisma.card.create({
     data: {
