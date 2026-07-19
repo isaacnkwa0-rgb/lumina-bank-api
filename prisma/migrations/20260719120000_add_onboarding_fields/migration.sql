@@ -1,0 +1,17 @@
+-- Add onboarding fields to User table
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "onboardingStep" INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "termsAcceptedAt" TIMESTAMP(3);
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "marketingConsent" BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "electronicStatementsConsent" BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "dataProcessingConsent" BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "countryOfResidence" TEXT;
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "taxResidency" JSONB;
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "accountType" TEXT;
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "ssnEncrypted" TEXT;
+
+-- Add financial profile fields to Profile table
+ALTER TABLE "Profile" ADD COLUMN IF NOT EXISTS "employmentStatus" TEXT;
+ALTER TABLE "Profile" ADD COLUMN IF NOT EXISTS "industry" TEXT;
+ALTER TABLE "Profile" ADD COLUMN IF NOT EXISTS "sourceOfFunds" JSONB;
+ALTER TABLE "Profile" ADD COLUMN IF NOT EXISTS "annualIncomeRange" TEXT;
+ALTER TABLE "Profile" ADD COLUMN IF NOT EXISTS "expectedMonthlyVolume" TEXT;
