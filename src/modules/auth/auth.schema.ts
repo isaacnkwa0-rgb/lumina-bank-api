@@ -13,6 +13,10 @@ export const registerSchema = z.object({
   gender: z.enum(['MALE', 'FEMALE', 'OTHER']).optional(),
   dateOfBirth: z.string().date().optional(),
   nationality: z.string().length(2).toUpperCase().optional(),
+  countryOfResidence: z.string().optional(),
+  taxResidency: z.array(z.string()).optional(),
+  accountType: z.enum(['PERSONAL', 'STUDENT', 'JOINT', 'BUSINESS', 'PREMIUM']).optional(),
+  ssn: z.string().regex(/^\d{3}-\d{2}-\d{4}$/).optional(),
 });
 
 export const loginSchema = z.object({

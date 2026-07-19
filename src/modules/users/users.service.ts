@@ -55,9 +55,34 @@ export class UsersService {
       annualIncome?: number;
       preferredCurrency?: string;
       preferredLanguage?: Language;
+      onboardingStep?: number;
+      termsAcceptedAt?: string;
+      marketingConsent?: boolean;
+      electronicStatementsConsent?: boolean;
+      dataProcessingConsent?: boolean;
+      countryOfResidence?: string;
+      taxResidency?: string[];
+      accountType?: string;
+      employmentStatus?: string;
+      industry?: string;
+      sourceOfFunds?: string[];
+      annualIncomeRange?: string;
+      expectedMonthlyVolume?: string;
     }
   ) {
-    const { occupation, employer, annualIncome, preferredCurrency, preferredLanguage, ...userFields } = data;
+    const {
+      occupation,
+      employer,
+      annualIncome,
+      preferredCurrency,
+      preferredLanguage,
+      employmentStatus,
+      industry,
+      sourceOfFunds,
+      annualIncomeRange,
+      expectedMonthlyVolume,
+      ...userFields
+    } = data;
 
     const profileData: any = {};
     if (occupation !== undefined) profileData.occupation = occupation;
@@ -65,6 +90,11 @@ export class UsersService {
     if (annualIncome !== undefined) profileData.annualIncome = annualIncome;
     if (preferredCurrency !== undefined) profileData.preferredCurrency = preferredCurrency;
     if (preferredLanguage !== undefined) profileData.preferredLanguage = preferredLanguage;
+    if (employmentStatus !== undefined) profileData.employmentStatus = employmentStatus;
+    if (industry !== undefined) profileData.industry = industry;
+    if (sourceOfFunds !== undefined) profileData.sourceOfFunds = sourceOfFunds;
+    if (annualIncomeRange !== undefined) profileData.annualIncomeRange = annualIncomeRange;
+    if (expectedMonthlyVolume !== undefined) profileData.expectedMonthlyVolume = expectedMonthlyVolume;
 
     const [user] = await Promise.all([
       prisma.user.update({
@@ -72,6 +102,7 @@ export class UsersService {
         data: {
           ...userFields,
           dateOfBirth: userFields.dateOfBirth ? new Date(userFields.dateOfBirth) : undefined,
+          termsAcceptedAt: userFields.termsAcceptedAt ? new Date(userFields.termsAcceptedAt) : undefined,
         },
         select: { id: true, email: true, firstName: true, lastName: true, phone: true, updatedAt: true },
       }),

@@ -37,6 +37,22 @@ const updateProfileSchema = z.object({
   annualIncome: z.number().positive().optional(),
   preferredCurrency: z.string().length(3).toUpperCase().optional(),
   preferredLanguage: z.nativeEnum(Language).optional(),
+  // Onboarding & Consent
+  onboardingStep: z.number().int().min(0).max(12).optional(),
+  termsAcceptedAt: z.string().datetime().optional(),
+  marketingConsent: z.boolean().optional(),
+  electronicStatementsConsent: z.boolean().optional(),
+  dataProcessingConsent: z.boolean().optional(),
+  // Regulatory
+  countryOfResidence: z.string().optional(),
+  taxResidency: z.array(z.string()).optional(),
+  accountType: z.string().optional(),
+  // Financial profile
+  employmentStatus: z.enum(['EMPLOYED', 'SELF_EMPLOYED', 'STUDENT', 'RETIRED', 'UNEMPLOYED']).optional(),
+  industry: z.string().max(100).optional(),
+  sourceOfFunds: z.array(z.string()).optional(),
+  annualIncomeRange: z.string().optional(),
+  expectedMonthlyVolume: z.string().optional(),
 });
 
 router.get('/profile', usersController.getProfile);

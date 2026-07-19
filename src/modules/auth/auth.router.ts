@@ -1,9 +1,12 @@
-import { Router } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { authController } from './auth.controller';
+import { authService } from './auth.service';
 import { validate } from '../../middleware/validate.middleware';
 import { authenticate } from '../../middleware/auth.middleware';
 import { authLimiter } from '../../middleware/rate-limit.middleware';
+import { AppError } from '../../middleware/error.middleware';
+import { prisma } from '../../config/database';
 import {
   registerSchema,
   loginSchema,
@@ -36,5 +39,37 @@ router.post('/2fa/regenerate-recovery-codes', authenticate, authController.regen
 router.post('/change-password', authenticate, validate(z.object({ currentPassword: z.string().min(1), newPassword: z.string().min(8) })), authController.changePassword);
 router.post('/verify-password', authenticate, validate(z.object({ password: z.string().min(1) })), authController.verifyPassword);
 router.get('/me', authenticate, authController.me);
+
+router.post('/send-phone-otp', authenticate, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    await authService.sendPhoneOtp(req.user!.id);
+    res.json({ message: 'Verification code sent to your phone' });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/verify-phone-otp', authenticate, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { code } = req.body;
+    if (!code) throw new AppError('Code is required', 400, 'AUTH_PHONE_003');
+    await authService.verifyPhoneOtp(req.user!.id, code);
+    res.json({ message: 'Phone number verified successfully' });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/onboarding-status', authenticate, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.user!.id },
+      select: { onboardingStep: true, kycStatus: true, isEmailVerified: true, isPhoneVerified: true },
+    });
+    res.json({ data: user });
+  } catch (err) {
+    next(err);
+  }
+});
 
 export { router as authRouter };

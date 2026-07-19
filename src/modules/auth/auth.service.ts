@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import speakeasy from 'speakeasy';
 import QRCode from 'qrcode';
 import { randomBytes, createHash } from 'crypto';
+import * as crypto from 'crypto';
 import { prisma } from '../../config/database';
 import { env } from '../../config/env';
 import { logger } from '../../config/logger';
@@ -12,6 +13,14 @@ import { generateAccountNumber, generateSortCode, generateIBAN } from '../../sha
 import { hashToken, encrypt, decrypt } from '../../shared/utils/crypto';
 import { mailService } from '../../shared/services/mail.service';
 import { AccountType } from '@prisma/client';
+
+function encryptSsn(ssn: string): string {
+  const key = Buffer.from(process.env.SSN_ENCRYPTION_KEY || 'lumina_ssn_key_32_bytes_fallback!', 'utf8').slice(0, 32);
+  const iv = crypto.randomBytes(16);
+  const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
+  const encrypted = Buffer.concat([cipher.update(ssn, 'utf8'), cipher.final()]);
+  return iv.toString('hex') + ':' + encrypted.toString('hex');
+}
 
 const SALT_ROUNDS = 12;
 const MAX_LOGIN_ATTEMPTS = 5;
@@ -28,6 +37,10 @@ export class AuthService {
     gender?: string;
     dateOfBirth?: string;
     nationality?: string;
+    countryOfResidence?: string;
+    taxResidency?: string[];
+    accountType?: string;
+    ssn?: string;
   }) {
     const existing = await prisma.user.findUnique({ where: { email: data.email } });
     if (existing) {
@@ -47,6 +60,10 @@ export class AuthService {
           gender: data.gender,
           dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : undefined,
           nationality: data.nationality,
+          countryOfResidence: data.countryOfResidence,
+          taxResidency: data.taxResidency,
+          accountType: data.accountType,
+          ssnEncrypted: data.ssn ? encryptSsn(data.ssn) : undefined,
         },
       });
 
@@ -418,6 +435,38 @@ export class AuthService {
     const match = await bcrypt.compare(password, user.passwordHash);
     if (!match) throw new AppError('Incorrect password', 401, ErrorCodes.AUTH_001);
     return { verified: true };
+  }
+
+  async sendPhoneOtp(userId: string): Promise<void> {
+    const user = await prisma.user.findUnique({ where: { id: userId }, select: { phone: true } });
+    if (!user?.phone) throw new AppError('No phone number on file', 400, 'AUTH_PHONE_001');
+
+    const recent = await prisma.otpCode.findFirst({
+      where: { userId, type: 'PHONE_VERIFICATION', createdAt: { gte: new Date(Date.now() - 60000) } },
+    });
+    if (recent) throw new AppError('Please wait before requesting another code', 429, 'AUTH_PHONE_002');
+
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    await prisma.otpCode.deleteMany({ where: { userId, type: 'PHONE_VERIFICATION', usedAt: null } });
+    await prisma.otpCode.create({
+      data: { userId, code, type: 'PHONE_VERIFICATION', expiresAt: new Date(Date.now() + 10 * 60 * 1000) },
+    });
+
+    if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
+      const twilio = require('twilio')(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+      await twilio.messages.create({
+        body: `Your Lumina Bank verification code is: ${code}. Valid for 10 minutes.`,
+        from: process.env.TWILIO_FROM_NUMBER,
+        to: user.phone,
+      });
+    } else {
+      logger.info(`[DEMO] Phone OTP for ${user.phone}: ${code}`);
+    }
+  }
+
+  async verifyPhoneOtp(userId: string, code: string): Promise<void> {
+    await this.verifyOtp(userId, code, 'PHONE_VERIFICATION');
+    await prisma.user.update({ where: { id: userId }, data: { isPhoneVerified: true } });
   }
 
   private async verifyOtp(userId: string, code: string, type: string) {

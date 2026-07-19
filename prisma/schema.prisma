@@ -230,6 +230,19 @@ model User {
   createdAt           DateTime   @default(now())
   updatedAt           DateTime   @updatedAt
 
+  // Onboarding & Consent
+  onboardingStep              Int       @default(0)
+  termsAcceptedAt             DateTime?
+  marketingConsent            Boolean   @default(false)
+  electronicStatementsConsent Boolean   @default(false)
+  dataProcessingConsent       Boolean   @default(false)
+
+  // Regulatory
+  countryOfResidence          String?
+  taxResidency                Json?
+  accountType                 String?
+  ssnEncrypted                String?
+
   profile       Profile?
   accounts      Account[]
   cards         Card[]
@@ -259,6 +272,11 @@ model Profile {
   occupation              String?
   employer                String?
   annualIncome            Decimal? @db.Decimal(18, 4)
+  employmentStatus      String?
+  industry              String?
+  sourceOfFunds         Json?
+  annualIncomeRange     String?
+  expectedMonthlyVolume String?
   preferredCurrency       String   @default("USD")
   preferredLanguage       Language @default(EN)
   notificationPreferences Json     @default("{\"email\":true,\"sms\":true,\"push\":true,\"marketing\":false}")
