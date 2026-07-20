@@ -420,7 +420,11 @@ export class AuthService {
         ? mailService.sendPasswordResetOtp(email, code)
         : mailService.sendLoginOtp(email, code);
 
-    sendPromise.catch((err: Error) => logger.error('Failed to send OTP email', { email, type, err: err.message }));
+    sendPromise.catch((err: Error) => {
+      logger.error('Failed to send OTP email', { email, type, err: err.message });
+      // Fallback: log code so testing works even without email delivery
+      logger.warn(`[DEV FALLBACK] OTP code for ${email} (${type}): ${code}`);
+    });
     logger.info(`OTP sent for ${type}`, { email });
   }
 
