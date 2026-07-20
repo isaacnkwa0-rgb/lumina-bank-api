@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import multer from 'multer';
 import path from 'path';
+import fs from 'fs';
 import { Language } from '@prisma/client';
 import { usersController } from './users.controller';
 import { authenticate } from '../../middleware/auth.middleware';
@@ -10,8 +11,14 @@ import { z } from 'zod';
 const router = Router();
 router.use(authenticate);
 
+// Ensure upload directory exists
+const uploadDir = 'uploads/';
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
 const storage = multer.diskStorage({
-  destination: 'uploads/',
+  destination: uploadDir,
   filename: (_req, file, cb) => {
     const ext = path.extname(file.originalname);
     cb(null, `avatar-${Date.now()}${ext}`);
