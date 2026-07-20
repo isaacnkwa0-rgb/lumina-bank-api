@@ -5,7 +5,6 @@ import { KycStatus, NotificationType } from '@prisma/client';
 interface KycFiles {
   idFront?: Express.Multer.File[];
   idBack?: Express.Multer.File[];
-  selfie?: Express.Multer.File[];
 }
 
 export class KycService {
@@ -27,18 +26,14 @@ export class KycService {
   async submit(userId: string, files: KycFiles) {
     const idFront = files.idFront?.[0];
     const idBack = files.idBack?.[0];
-    const selfie1 = files.selfie?.[0];
-    const selfie2 = files.selfie?.[1];
 
-    if (!idFront || !idBack || !selfie1 || !selfie2) {
-      throw new AppError('All documents are required: idFront, idBack, and two selfie face snaps', 400);
+    if (!idFront || !idBack) {
+      throw new AppError('Both documents are required: idFront and idBack', 400);
     }
 
     const kycDocuments = {
       idFront: idFront.path || idFront.filename,
       idBack: idBack.path || idBack.filename,
-      selfie1: selfie1.path || selfie1.filename,
-      selfie2: selfie2.path || selfie2.filename,
     };
 
     const user = await prisma.user.update({

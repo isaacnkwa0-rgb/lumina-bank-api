@@ -19,7 +19,6 @@ export class KycController {
       const files = req.files as {
         idFront?: Express.Multer.File[];
         idBack?: Express.Multer.File[];
-        selfie?: Express.Multer.File[];
       };
       const data = await kycService.submit(userId, files);
       sendCreated(res, data, 'KYC documents submitted');
