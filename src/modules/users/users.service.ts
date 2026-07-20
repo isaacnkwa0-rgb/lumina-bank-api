@@ -21,7 +21,6 @@ export class UsersService {
         status: true,
         kycStatus: true,
         isEmailVerified: true,
-        isPhoneVerified: true,
         twoFactorEnabled: true,
         createdAt: true,
         profile: {
