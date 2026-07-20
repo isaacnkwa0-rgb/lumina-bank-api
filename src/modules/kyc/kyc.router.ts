@@ -19,11 +19,21 @@ const fileFilter = (
   file: Express.Multer.File,
   cb: multer.FileFilterCallback,
 ) => {
-  const allowed = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
-  if (allowed.includes(file.mimetype)) {
-    cb(null, true);
+  const imageOnly = ['image/jpeg', 'image/png', 'image/jpg'];
+  const imageAndPdf = [...imageOnly, 'application/pdf'];
+
+  if (file.fieldname === 'selfie') {
+    if (imageOnly.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Selfie must be a JPEG or PNG image'));
+    }
   } else {
-    cb(new Error('Only JPEG, PNG, and PDF files are allowed'));
+    if (imageAndPdf.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only JPEG, PNG, and PDF files are allowed'));
+    }
   }
 };
 
@@ -36,7 +46,7 @@ const upload = multer({
 const kycUpload = upload.fields([
   { name: 'idFront', maxCount: 1 },
   { name: 'idBack', maxCount: 1 },
-  { name: 'selfie', maxCount: 1 },
+  { name: 'selfie', maxCount: 2 },
 ]);
 
 const router = Router();

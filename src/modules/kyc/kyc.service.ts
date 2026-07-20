@@ -27,16 +27,18 @@ export class KycService {
   async submit(userId: string, files: KycFiles) {
     const idFront = files.idFront?.[0];
     const idBack = files.idBack?.[0];
-    const selfie = files.selfie?.[0];
+    const selfie1 = files.selfie?.[0];
+    const selfie2 = files.selfie?.[1];
 
-    if (!idFront || !idBack || !selfie) {
-      throw new AppError('All three documents are required: idFront, idBack, selfie', 400);
+    if (!idFront || !idBack || !selfie1 || !selfie2) {
+      throw new AppError('All documents are required: idFront, idBack, and two selfie face snaps', 400);
     }
 
     const kycDocuments = {
       idFront: idFront.path || idFront.filename,
       idBack: idBack.path || idBack.filename,
-      selfie: selfie.path || selfie.filename,
+      selfie1: selfie1.path || selfie1.filename,
+      selfie2: selfie2.path || selfie2.filename,
     };
 
     const user = await prisma.user.update({
