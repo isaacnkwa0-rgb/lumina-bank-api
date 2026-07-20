@@ -8,6 +8,7 @@ ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "countryOfResidence" TEXT;
 ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "taxResidency" JSONB;
 ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "accountType" TEXT;
 ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "ssnEncrypted" TEXT;
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "kycSubmittedAt" TIMESTAMP(3);
 
 -- Add financial profile fields to Profile table
 ALTER TABLE "Profile" ADD COLUMN IF NOT EXISTS "employmentStatus" TEXT;
