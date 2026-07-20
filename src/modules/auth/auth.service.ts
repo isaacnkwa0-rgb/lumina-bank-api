@@ -448,38 +448,6 @@ export class AuthService {
     return { verified: true };
   }
 
-  async sendPhoneOtp(userId: string): Promise<void> {
-    const user = await prisma.user.findUnique({ where: { id: userId }, select: { phone: true } });
-    if (!user?.phone) throw new AppError('No phone number on file', 400, 'AUTH_PHONE_001');
-
-    const recent = await prisma.otpCode.findFirst({
-      where: { userId, type: 'PHONE_VERIFICATION', createdAt: { gte: new Date(Date.now() - 60000) } },
-    });
-    if (recent) throw new AppError('Please wait before requesting another code', 429, 'AUTH_PHONE_002');
-
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
-    await prisma.otpCode.deleteMany({ where: { userId, type: 'PHONE_VERIFICATION', usedAt: null } });
-    await prisma.otpCode.create({
-      data: { userId, code, type: 'PHONE_VERIFICATION', expiresAt: new Date(Date.now() + 10 * 60 * 1000) },
-    });
-
-    if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
-      const twilio = require('twilio')(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
-      await twilio.messages.create({
-        body: `Your Lumina Bank verification code is: ${code}. Valid for 10 minutes.`,
-        from: process.env.TWILIO_FROM_NUMBER,
-        to: user.phone,
-      });
-    } else {
-      logger.info(`[DEMO] Phone OTP for ${user.phone}: ${code}`);
-    }
-  }
-
-  async verifyPhoneOtp(userId: string, code: string): Promise<void> {
-    await this.verifyOtp(userId, code, 'PHONE_VERIFICATION');
-    await prisma.user.update({ where: { id: userId }, data: { isPhoneVerified: true } });
-  }
-
   private async verifyOtp(userId: string, code: string, type: string) {
     const otp = await prisma.otpCode.findFirst({
       where: { userId, type, usedAt: null, expiresAt: { gt: new Date() } },
