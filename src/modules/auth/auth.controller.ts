@@ -158,6 +158,24 @@ export class AuthController {
     }
   }
 
+  async requestTransferOtp(req: Request, res: Response, next: NextFunction) {
+    try {
+      const result = await authService.requestTransferOtp(req.user!.id);
+      sendSuccess(res, result, 'Transfer authorisation code sent');
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async verifyTransferOtp(req: Request, res: Response, next: NextFunction) {
+    try {
+      const result = await authService.verifyTransferOtp(req.user!.id, req.body.code);
+      sendSuccess(res, result, 'Transfer authorised');
+    } catch (err) {
+      next(err);
+    }
+  }
+
   async me(req: Request, res: Response, next: NextFunction) {
     try {
       const user = await (await import('../../config/database')).prisma.user.findUnique({

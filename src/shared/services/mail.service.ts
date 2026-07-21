@@ -219,6 +219,15 @@ export const mailService = {
     await send({ to, subject: 'Reset your Lumina Bank password', html: layout('Password Reset', body) });
   },
 
+  async sendTransferOtp(to: string, code: string): Promise<void> {
+    const body = `
+      <p style="margin:0 0 8px;font-size:15px;color:#333">You're about to authorise a payment from your Lumina Bank account.</p>
+      <p style="margin:0 0 20px;font-size:13px;color:#666">Enter this code in the app to confirm. <strong>Never share this code with anyone</strong> — Lumina Bank will never ask for it.</p>
+      <span class="otp">${code}</span>
+      <p class="note">This code expires in <strong>10 minutes</strong>. If you did not request this, call us immediately on <strong>0800 123 4567</strong>.</p>`;
+    await send({ to, subject: `Your Lumina Bank payment authorisation code: ${code}`, html: layout('Payment Authorisation', body) });
+  },
+
   async sendLoginOtp(to: string, code: string): Promise<void> {
     const body = `
       <p>A sign-in was attempted on your Lumina Bank account. Enter this code to complete login.</p>

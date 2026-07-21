@@ -418,7 +418,9 @@ export class AuthService {
       ? mailService.sendVerificationOtp(email, code)
       : type === 'PASSWORD_RESET'
         ? mailService.sendPasswordResetOtp(email, code)
-        : mailService.sendLoginOtp(email, code);
+        : type === 'TRANSFER_AUTH'
+          ? mailService.sendTransferOtp(email, code)
+          : mailService.sendLoginOtp(email, code);
 
     sendPromise.catch((err: Error) => {
       logger.error('Failed to send OTP email', { email, type, err: err.message });
@@ -445,6 +447,19 @@ export class AuthService {
     if (!user) throw new AppError('User not found', 404, ErrorCodes.NOT_FOUND);
     const match = await bcrypt.compare(password, user.passwordHash);
     if (!match) throw new AppError('Incorrect password', 401, ErrorCodes.AUTH_001);
+    return { verified: true };
+  }
+
+  async requestTransferOtp(userId: string) {
+    const user = await prisma.user.findUnique({ where: { id: userId }, select: { email: true } });
+    if (!user) throw new AppError('User not found', 404, ErrorCodes.NOT_FOUND);
+    await this.sendEmailOtp(userId, user.email, 'TRANSFER_AUTH');
+    const masked = user.email.replace(/^(.)(.*)(@.*)$/, (_, a, b, c) => a + '*'.repeat(Math.max(b.length - 2, 2)) + b.slice(-2) + c);
+    return { sent: true, maskedEmail: masked };
+  }
+
+  async verifyTransferOtp(userId: string, code: string) {
+    await this.verifyOtp(userId, code, 'TRANSFER_AUTH');
     return { verified: true };
   }
 

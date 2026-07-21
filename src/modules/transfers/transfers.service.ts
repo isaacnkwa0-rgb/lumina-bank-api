@@ -259,7 +259,21 @@ export class TransfersService {
       include: { user: { select: { id: true, firstName: true, lastName: true } } },
     });
     if (luminaAccount) {
-      return this.luminaToLumina(fromAccount as any, luminaAccount as any, data.amount, data.description, userId);
+      const result = await this.luminaToLumina(fromAccount as any, luminaAccount as any, data.amount, data.description, userId);
+      if (data.saveBeneficiary) {
+        await prisma.beneficiary.create({
+          data: {
+            userId,
+            nickname: data.toAccountName,
+            accountName: data.toAccountName,
+            accountNumber: data.toAccountNumber,
+            bankName: 'Lumina Bank',
+            bankCode: 'LMN',
+            currency: fromAccount.currency,
+          },
+        }).catch(() => {});
+      }
+      return result;
     }
 
     const bank = getBankByCode(data.toBankCode);
