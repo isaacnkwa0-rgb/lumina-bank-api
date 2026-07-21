@@ -119,7 +119,7 @@ export class TransfersService {
 
   // Lumina-to-Lumina cross-user transfer (instant, no fee)
   private async luminaToLumina(
-    fromAccount: Account,
+    fromAccount: Account & { user: Pick<User, 'id' | 'firstName' | 'lastName'> },
     toAccount: Account & { user: Pick<User, 'id' | 'firstName' | 'lastName'> },
     amount: number,
     description: string,
@@ -174,7 +174,7 @@ export class TransfersService {
           balanceBefore: toBefore,
           balanceAfter: toAfter,
           description,
-          counterpartyName: 'Lumina Bank Transfer',
+          counterpartyName: `${fromAccount.user.firstName} ${fromAccount.user.lastName}`,
           counterpartyAccountNumber: fromAccount.accountNumber,
           status: 'COMPLETED',
           valueDate: new Date(),
@@ -214,7 +214,10 @@ export class TransfersService {
       saveBeneficiary?: boolean;
     }
   ) {
-    const fromAccount = await prisma.account.findFirst({ where: { id: data.fromAccountId, userId } });
+    const fromAccount = await prisma.account.findFirst({
+      where: { id: data.fromAccountId, userId },
+      include: { user: { select: { id: true, firstName: true, lastName: true } } },
+    });
     if (!fromAccount) throw new AppError('Source account not found', 404, ErrorCodes.ACCT_001);
     if (fromAccount.status === AccountStatus.FROZEN) throw new AppError('Source account is frozen', 400, ErrorCodes.ACCT_002);
 
@@ -227,7 +230,7 @@ export class TransfersService {
       include: { user: { select: { id: true, firstName: true, lastName: true } } },
     });
     if (luminaAccount) {
-      return this.luminaToLumina(fromAccount, luminaAccount as any, data.amount, data.description, userId);
+      return this.luminaToLumina(fromAccount as any, luminaAccount as any, data.amount, data.description, userId);
     }
 
     const bank = getBankByCode(data.toBankCode);
