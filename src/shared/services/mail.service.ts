@@ -120,6 +120,16 @@ export const mailService = {
     await send({ to, subject: 'Transfer confirmation — Lumina Bank', html: layout('Transfer Confirmation', body) });
   },
 
+  async sendMoneyReceived(to: string, opts: { amount: string; currency: string; sender: string; description: string }): Promise<void> {
+    const body = `
+      <p>You have received money in your Lumina Bank account.</p>
+      <p><strong>Amount:</strong> ${opts.currency} ${opts.amount}<br/>
+      <strong>From:</strong> ${opts.sender}<br/>
+      <strong>Description:</strong> ${opts.description}</p>
+      <p class="note">Log in to your Lumina Bank app to view your updated balance.</p>`;
+    await send({ to, subject: `You've received £${opts.amount} — Lumina Bank`, html: layout('Money Received', body) });
+  },
+
   async sendKycStatusUpdate(to: string, status: 'VERIFIED' | 'REJECTED', reason?: string): Promise<void> {
     const approved = status === 'VERIFIED';
     const body = approved

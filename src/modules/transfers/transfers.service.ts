@@ -198,7 +198,27 @@ export class TransfersService {
     });
 
     await this.notify(fromUserId, 'Transfer sent', `£${amount.toFixed(2)} sent to ${toAccount.user.firstName} ${toAccount.user.lastName}`);
-    await this.notify(toAccount.userId, 'Money received', `£${amount.toFixed(2)} received from Lumina Bank transfer — ${description}`);
+    await this.notify(toAccount.userId, 'Money received', `£${amount.toFixed(2)} received from ${fromAccount.user.firstName} ${fromAccount.user.lastName} — ${description}`);
+
+    // Email both parties
+    const [fromUser, toUser] = await Promise.all([
+      prisma.user.findUnique({ where: { id: fromUserId }, select: { email: true } }),
+      prisma.user.findUnique({ where: { id: toAccount.userId }, select: { email: true } }),
+    ]);
+    if (fromUser) {
+      mailService.sendTransferNotification(fromUser.email, {
+        amount: amount.toFixed(2), currency: fromAccount.currency,
+        recipient: `${toAccount.user.firstName} ${toAccount.user.lastName}`,
+        reference: transfer.fromTransactionId ?? transfer.id,
+      }).catch(() => {});
+    }
+    if (toUser) {
+      mailService.sendMoneyReceived(toUser.email, {
+        amount: amount.toFixed(2), currency: toAccount.currency,
+        sender: `${fromAccount.user.firstName} ${fromAccount.user.lastName}`,
+        description,
+      }).catch(() => {});
+    }
     return transfer;
   }
 
