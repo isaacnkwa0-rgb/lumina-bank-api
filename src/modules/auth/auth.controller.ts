@@ -158,6 +158,27 @@ export class AuthController {
     }
   }
 
+  async setTransferPin(req: Request, res: Response, next: NextFunction) {
+    try {
+      const result = await authService.setTransferPin(req.user!.id, req.body.pin, req.body.currentPin);
+      sendSuccess(res, result, 'Transfer PIN set successfully');
+    } catch (err) { next(err); }
+  }
+
+  async verifyTransferPin(req: Request, res: Response, next: NextFunction) {
+    try {
+      const result = await authService.verifyTransferPin(req.user!.id, req.body.pin);
+      sendSuccess(res, result, 'PIN verified');
+    } catch (err) { next(err); }
+  }
+
+  async getTransferPinStatus(req: Request, res: Response, next: NextFunction) {
+    try {
+      const result = await authService.getTransferPinStatus(req.user!.id);
+      sendSuccess(res, result);
+    } catch (err) { next(err); }
+  }
+
   async requestTransferOtp(req: Request, res: Response, next: NextFunction) {
     try {
       const result = await authService.requestTransferOtp(req.user!.id);

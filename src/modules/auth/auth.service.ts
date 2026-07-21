@@ -450,6 +450,36 @@ export class AuthService {
     return { verified: true };
   }
 
+  async setTransferPin(userId: string, pin: string, currentPin?: string) {
+    if (!/^\d{6}$/.test(pin)) throw new AppError('PIN must be exactly 6 digits', 400, ErrorCodes.VAL_001);
+    const user = await prisma.user.findUnique({ where: { id: userId }, select: { transferPinHash: true } });
+    if (!user) throw new AppError('User not found', 404, ErrorCodes.NOT_FOUND);
+    if (user.transferPinHash) {
+      if (!currentPin) throw new AppError('Current PIN is required to change your PIN', 400, ErrorCodes.VAL_001);
+      const match = await bcrypt.compare(currentPin, user.transferPinHash);
+      if (!match) throw new AppError('Current PIN is incorrect', 401, ErrorCodes.AUTH_001);
+    }
+    const hash = await bcrypt.hash(pin, SALT_ROUNDS);
+    await prisma.user.update({ where: { id: userId }, data: { transferPinHash: hash } });
+    return { set: true };
+  }
+
+  async verifyTransferPin(userId: string, pin: string) {
+    if (!/^\d{6}$/.test(pin)) throw new AppError('Invalid PIN format', 400, ErrorCodes.VAL_001);
+    const user = await prisma.user.findUnique({ where: { id: userId }, select: { transferPinHash: true } });
+    if (!user) throw new AppError('User not found', 404, ErrorCodes.NOT_FOUND);
+    if (!user.transferPinHash) throw new AppError('Transfer PIN not set up', 400, ErrorCodes.VAL_001);
+    const match = await bcrypt.compare(pin, user.transferPinHash);
+    if (!match) throw new AppError('Incorrect PIN', 401, ErrorCodes.AUTH_001);
+    return { verified: true };
+  }
+
+  async getTransferPinStatus(userId: string) {
+    const user = await prisma.user.findUnique({ where: { id: userId }, select: { transferPinHash: true } });
+    if (!user) throw new AppError('User not found', 404, ErrorCodes.NOT_FOUND);
+    return { hasPin: !!user.transferPinHash };
+  }
+
   async requestTransferOtp(userId: string) {
     const user = await prisma.user.findUnique({ where: { id: userId }, select: { email: true } });
     if (!user) throw new AppError('User not found', 404, ErrorCodes.NOT_FOUND);

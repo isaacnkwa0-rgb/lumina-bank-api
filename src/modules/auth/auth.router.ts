@@ -36,6 +36,9 @@ router.post('/2fa/verify', authLimiter, validate(twoFaVerifySchema), authControl
 router.post('/2fa/regenerate-recovery-codes', authenticate, authController.regenerateRecoveryCodes);
 router.post('/change-password', authenticate, validate(z.object({ currentPassword: z.string().min(1), newPassword: z.string().min(8) })), authController.changePassword);
 router.post('/verify-password', authenticate, validate(z.object({ password: z.string().min(1) })), authController.verifyPassword);
+router.post('/transfer-pin/setup', authenticate, validate(z.object({ pin: z.string().length(6).regex(/^\d+$/), currentPin: z.string().length(6).regex(/^\d+$/).optional() })), authController.setTransferPin);
+router.post('/transfer-pin/verify', authenticate, validate(z.object({ pin: z.string().length(6).regex(/^\d+$/) })), authController.verifyTransferPin);
+router.get('/transfer-pin/status', authenticate, authController.getTransferPinStatus);
 router.post('/transfer-otp', authenticate, authController.requestTransferOtp);
 router.post('/verify-transfer-otp', authenticate, validate(z.object({ code: z.string().length(6) })), authController.verifyTransferOtp);
 router.get('/me', authenticate, authController.me);

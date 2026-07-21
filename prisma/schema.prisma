@@ -224,6 +224,7 @@ model User {
   twoFactorEnabled    Boolean    @default(false)
   twoFactorSecret     String?
   twoFactorRecoveryCodes Json?
+  transferPinHash     String?
   status              UserStatus @default(ACTIVE)
   failedLoginAttempts Int        @default(0)
   lockedUntil         DateTime?
