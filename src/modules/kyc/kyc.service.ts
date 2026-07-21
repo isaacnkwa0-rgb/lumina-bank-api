@@ -41,7 +41,6 @@ export class KycService {
       data: {
         kycStatus: KycStatus.PENDING,
         kycDocuments,
-        kycSubmittedAt: new Date(),
       },
       select: { id: true, kycStatus: true },
     });

@@ -217,7 +217,6 @@ model User {
   address             Json?
   kycStatus           KycStatus  @default(PENDING)
   kycDocuments        Json?
-  kycSubmittedAt      DateTime?
   tier                UserTier   @default(STANDARD)
   role                Role       @default(USER)
   isEmailVerified     Boolean    @default(false)
