@@ -328,6 +328,16 @@ export class AdminController {
     } catch (err) { next(err); }
   }
 
+  // ── KYC management ───────────────────────────────────────────────────────────
+
+  async getKycSubmissions(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { status } = req.query;
+      const data = await adminService.getKycSubmissions(status as string | undefined);
+      sendSuccess(res, data, 'KYC submissions retrieved');
+    } catch (err) { next(err); }
+  }
+
   // ── Account management ────────────────────────────────────────────────────────
 
   async getUserAccounts(req: Request, res: Response, next: NextFunction) {

@@ -63,6 +63,9 @@ router.get('/crypto/orders', adminController.getAdminCryptoOrders.bind(adminCont
 router.patch('/crypto/orders/:id/approve', adminController.approveCryptoOrder.bind(adminController));
 router.patch('/crypto/orders/:id/reject', adminController.rejectCryptoOrder.bind(adminController));
 
+// KYC management
+router.get('/kyc', adminController.getKycSubmissions.bind(adminController));
+
 // Account management
 router.get('/users/:userId/accounts', adminController.getUserAccounts.bind(adminController));
 router.patch('/accounts/:accountId/freeze', adminController.freezeAccount.bind(adminController));

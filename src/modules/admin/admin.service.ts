@@ -641,6 +641,29 @@ export class AdminService {
     return { id, isEmailVerified: true };
   }
 
+  // ── KYC management ───────────────────────────────────────────────────────────
+
+  async getKycSubmissions(status?: string) {
+    const where: Prisma.UserWhereInput = status && ['PENDING', 'VERIFIED', 'REJECTED'].includes(status)
+      ? { kycStatus: status as KycStatus }
+      : {};
+    const users = await prisma.user.findMany({
+      where,
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+        phone: true,
+        kycStatus: true,
+        kycDocuments: true,
+        createdAt: true,
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+    return users.filter((u) => u.kycDocuments !== null);
+  }
+
   // ── Account management ────────────────────────────────────────────────────────
 
   async getUserAccounts(userId: string) {
