@@ -58,29 +58,146 @@ function layout(title: string, body: string): string {
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>${title}</title>
 <style>
-  body{margin:0;padding:0;background:#f4f4f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
-  .wrap{max-width:560px;margin:32px auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.08)}
-  .head{background:linear-gradient(135deg,#DB0011,#8B000A);padding:28px 32px;text-align:center}
-  .head h1{margin:0;color:#fff;font-size:20px;font-weight:700;letter-spacing:-0.3px}
-  .head p{margin:4px 0 0;color:rgba(255,255,255,.65);font-size:13px}
-  .body{padding:32px}
-  .body p{margin:0 0 16px;color:#444;font-size:15px;line-height:1.6}
+  body{margin:0;padding:0;background:#f2f2f2;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+  .wrap{max-width:580px;margin:24px auto;background:#fff;border-radius:4px;overflow:hidden;border:1px solid #ddd}
+  .head{background:#DB0011;padding:20px 32px;display:flex;align-items:center;gap:12px}
+  .head-logo{width:32px;height:32px;background:#fff;border-radius:4px;display:flex;align-items:center;justify-content:center}
+  .head h1{margin:0;color:#fff;font-size:18px;font-weight:700;letter-spacing:-0.2px}
+  .body{padding:28px 32px}
+  .body p{margin:0 0 14px;color:#333;font-size:15px;line-height:1.55}
   .otp{display:block;text-align:center;font-size:38px;font-weight:800;letter-spacing:12px;color:#DB0011;margin:24px 0;font-family:monospace}
-  .note{font-size:13px;color:#999;text-align:center}
-  .foot{background:#f9f9f9;border-top:1px solid #eee;padding:16px 32px;text-align:center;font-size:12px;color:#bbb}
+  .note{font-size:13px;color:#888;text-align:center}
+  .divider{border:none;border-top:1px solid #eee;margin:20px 0}
+  .foot{background:#f9f9f9;border-top:1px solid #e8e8e8;padding:20px 32px}
+  .foot p{margin:0 0 6px;font-size:11px;color:#999;line-height:1.5}
+  .foot .reg{font-size:10px;color:#bbb;margin-top:10px}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="head">
-    <h1>Lumina Bank</h1>
-    <p>Secure Banking</p>
+    <h1>&#9670; Lumina Bank</h1>
   </div>
   <div class="body">${body}</div>
-  <div class="foot">© ${new Date().getFullYear()} Lumina Bank · This email was sent because an action was taken on your account.</div>
+  <div class="foot">
+    <p>This is an automated notification. Please do not reply to this email.</p>
+    <p>For help, visit <strong>luminabank.co.uk/help</strong> or call <strong>0800 123 4567</strong> (free, 24/7).</p>
+    <p class="reg">Lumina Bank plc is authorised by the Prudential Regulation Authority and regulated by the Financial Conduct Authority and the Prudential Regulation Authority (FCA Register No. 123456). Registered in England &amp; Wales No. 12345678. Registered office: 1 Lumina Square, London, EC2V 8RF.</p>
+    <p class="reg">© ${new Date().getFullYear()} Lumina Bank plc. All rights reserved. FSCS protected up to £85,000.</p>
+  </div>
 </div>
 </body>
 </html>`;
+}
+
+// ── Transaction email layout (UK bank style) ───────────────────────────────────
+
+function txLayout(opts: {
+  title: string;
+  preheader: string;
+  amountLine: string;        // e.g. "+£20,000.00"
+  amountColor: string;       // e.g. "#1a7a3f" (credit green) or "#DB0011" (debit red)
+  directionLabel: string;    // e.g. "MONEY IN" / "MONEY OUT"
+  rows: { label: string; value: string; mono?: boolean }[];
+  balanceAfter?: string;
+  accountMasked?: string;
+  ctaLabel?: string;
+  ctaUrl?: string;
+  warningNote?: string;
+  recipientName?: string;
+}): string {
+  const rowsHtml = opts.rows.map(r => `
+    <tr>
+      <td style="padding:11px 0;border-bottom:1px solid #f0f0f0;color:#666;font-size:13px;width:42%">${r.label}</td>
+      <td style="padding:11px 0;border-bottom:1px solid #f0f0f0;color:#111;font-size:13px;font-weight:600;text-align:right${r.mono ? ';font-family:monospace;letter-spacing:0.5px' : ''}">${r.value}</td>
+    </tr>`).join('');
+
+  const ctaHtml = opts.ctaLabel && opts.ctaUrl ? `
+    <div style="text-align:center;margin:28px 0 8px">
+      <a href="${opts.ctaUrl}" style="background:#DB0011;color:#fff;text-decoration:none;padding:13px 32px;border-radius:4px;font-size:14px;font-weight:700;display:inline-block;letter-spacing:0.2px">${opts.ctaLabel}</a>
+    </div>` : '';
+
+  const balanceHtml = opts.balanceAfter ? `
+    <div style="background:#f8f8f8;border:1px solid #ebebeb;border-radius:4px;padding:14px 18px;margin:20px 0;display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:13px;color:#666">Available balance</span>
+      <span style="font-size:18px;font-weight:800;color:#111">${opts.balanceAfter}</span>
+    </div>` : '';
+
+  const warningHtml = opts.warningNote ? `
+    <div style="background:#fff8f0;border-left:3px solid #e67e00;padding:12px 16px;margin:20px 0;border-radius:2px">
+      <p style="margin:0;font-size:12.5px;color:#7a4500;line-height:1.5">${opts.warningNote}</p>
+    </div>` : '';
+
+  const greeting = opts.recipientName ? `<p style="margin:0 0 20px;font-size:15px;color:#333">Dear <strong>${opts.recipientName}</strong>,</p>` : '';
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>${opts.title}</title>
+</head>
+<body style="margin:0;padding:0;background:#f0f0f0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">
+<!-- preheader -->
+<div style="display:none;max-height:0;overflow:hidden;color:#f0f0f0;font-size:1px">${opts.preheader}&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;</div>
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f0f0f0;padding:20px 0">
+<tr><td align="center">
+<table width="580" cellpadding="0" cellspacing="0" style="max-width:580px;width:100%;background:#fff;border:1px solid #d8d8d8">
+
+  <!-- Header -->
+  <tr>
+    <td style="background:#DB0011;padding:18px 28px">
+      <span style="color:#fff;font-size:19px;font-weight:800;letter-spacing:-0.3px">&#9670; Lumina Bank</span>
+    </td>
+  </tr>
+
+  <!-- Amount hero -->
+  <tr>
+    <td style="background:#1a1a2e;padding:28px 28px 24px;text-align:center">
+      <div style="display:inline-block;background:rgba(255,255,255,0.06);border-radius:4px;padding:6px 14px;margin-bottom:10px">
+        <span style="font-size:11px;font-weight:700;letter-spacing:2px;color:rgba(255,255,255,0.5);text-transform:uppercase">${opts.directionLabel}</span>
+      </div>
+      <div style="font-size:42px;font-weight:800;color:${opts.amountColor};letter-spacing:-1px;line-height:1">${opts.amountLine}</div>
+    </td>
+  </tr>
+
+  <!-- Body -->
+  <tr>
+    <td style="padding:28px 28px 8px">
+      ${greeting}
+      <table width="100%" cellpadding="0" cellspacing="0">
+        ${rowsHtml}
+      </table>
+      ${balanceHtml}
+      ${ctaHtml}
+      ${warningHtml}
+    </td>
+  </tr>
+
+  <!-- Footer -->
+  <tr>
+    <td style="background:#f7f7f7;border-top:1px solid #e8e8e8;padding:20px 28px">
+      <p style="margin:0 0 5px;font-size:11.5px;color:#888;line-height:1.55">This is an automated notification sent to you because you have transaction alerts enabled. Do not reply to this email.</p>
+      <p style="margin:0 0 5px;font-size:11.5px;color:#888">Help: <strong>0800 123 4567</strong> · luminabank.co.uk/help</p>
+      <p style="margin:12px 0 0;font-size:10px;color:#bbb;line-height:1.55">Lumina Bank plc is authorised by the Prudential Regulation Authority and regulated by the Financial Conduct Authority and the Prudential Regulation Authority (FRN 123456). Registered in England &amp; Wales No. 12345678. Registered office: 1 Lumina Square, London EC2V 8RF. FSCS protected up to £85,000.</p>
+    </td>
+  </tr>
+
+</table>
+</td></tr>
+</table>
+</body>
+</html>`;
+}
+
+function formatUKDate(d = new Date()): string {
+  return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+function formatUKTime(d = new Date()): string {
+  return d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
+}
+function maskAccount(accountNumber: string): string {
+  return `****${accountNumber.slice(-4)}`;
 }
 
 // ── Public mail helpers ────────────────────────────────────────────────────────
@@ -110,24 +227,67 @@ export const mailService = {
     await send({ to, subject: 'Your Lumina Bank login code', html: layout('Sign-in Verification', body) });
   },
 
-  async sendTransferNotification(to: string, opts: { amount: string; currency: string; recipient: string; reference: string }): Promise<void> {
-    const body = `
-      <p>A transfer has been processed on your account.</p>
-      <p><strong>Amount:</strong> ${opts.currency} ${opts.amount}<br/>
-      <strong>To:</strong> ${opts.recipient}<br/>
-      <strong>Reference:</strong> ${opts.reference}</p>
-      <p class="note">If you did not authorise this transfer, please contact support immediately.</p>`;
-    await send({ to, subject: 'Transfer confirmation — Lumina Bank', html: layout('Transfer Confirmation', body) });
+  async sendTransferNotification(to: string, opts: {
+    amount: string; currency: string; recipient: string; reference: string;
+    recipientName?: string; accountNumber?: string; balanceAfter?: string; description?: string;
+  }): Promise<void> {
+    const now = new Date();
+    const symbol = opts.currency === 'GBP' ? '£' : opts.currency === 'EUR' ? '€' : opts.currency === 'USD' ? '$' : opts.currency + ' ';
+    const rows: { label: string; value: string; mono?: boolean }[] = [
+      { label: 'Amount', value: `${symbol}${opts.amount}` },
+      { label: 'Paid to', value: opts.recipient },
+      ...(opts.description ? [{ label: 'Payment reference', value: opts.description }] : []),
+      ...(opts.accountNumber ? [{ label: 'From account', value: maskAccount(opts.accountNumber) }] : []),
+      { label: 'Date', value: formatUKDate(now) },
+      { label: 'Time', value: `${formatUKTime(now)} GMT` },
+      { label: 'Transaction ID', value: opts.reference, mono: true },
+    ];
+    const html = txLayout({
+      title: 'Payment sent — Lumina Bank',
+      preheader: `You sent ${symbol}${opts.amount} to ${opts.recipient}`,
+      amountLine: `−${symbol}${opts.amount}`,
+      amountColor: '#DB0011',
+      directionLabel: 'MONEY OUT',
+      rows,
+      balanceAfter: opts.balanceAfter ? `${symbol}${opts.balanceAfter}` : undefined,
+      accountMasked: opts.accountNumber ? maskAccount(opts.accountNumber) : undefined,
+      recipientName: opts.recipientName,
+      ctaLabel: 'View transaction',
+      ctaUrl: 'https://lumina-bank-ui.vercel.app/transactions',
+      warningNote: 'Did not make this payment? Call us immediately on <strong>0800 123 4567</strong> (free, 24/7) and we will secure your account.',
+    });
+    await send({ to, subject: `Payment of ${symbol}${opts.amount} sent to ${opts.recipient} — Lumina Bank`, html });
   },
 
-  async sendMoneyReceived(to: string, opts: { amount: string; currency: string; sender: string; description: string }): Promise<void> {
-    const body = `
-      <p>You have received money in your Lumina Bank account.</p>
-      <p><strong>Amount:</strong> ${opts.currency} ${opts.amount}<br/>
-      <strong>From:</strong> ${opts.sender}<br/>
-      <strong>Description:</strong> ${opts.description}</p>
-      <p class="note">Log in to your Lumina Bank app to view your updated balance.</p>`;
-    await send({ to, subject: `You've received £${opts.amount} — Lumina Bank`, html: layout('Money Received', body) });
+  async sendMoneyReceived(to: string, opts: {
+    amount: string; currency: string; sender: string; description: string;
+    recipientName?: string; accountNumber?: string; balanceAfter?: string;
+  }): Promise<void> {
+    const now = new Date();
+    const symbol = opts.currency === 'GBP' ? '£' : opts.currency === 'EUR' ? '€' : opts.currency === 'USD' ? '$' : opts.currency + ' ';
+    const rows: { label: string; value: string; mono?: boolean }[] = [
+      { label: 'Amount', value: `${symbol}${opts.amount}` },
+      { label: 'Received from', value: opts.sender },
+      { label: 'Payment reference', value: opts.description },
+      ...(opts.accountNumber ? [{ label: 'Into account', value: maskAccount(opts.accountNumber) }] : []),
+      { label: 'Date', value: formatUKDate(now) },
+      { label: 'Time', value: `${formatUKTime(now)} GMT` },
+    ];
+    const html = txLayout({
+      title: 'Money received — Lumina Bank',
+      preheader: `${symbol}${opts.amount} from ${opts.sender} has arrived in your account`,
+      amountLine: `+${symbol}${opts.amount}`,
+      amountColor: '#1a9c52',
+      directionLabel: 'MONEY IN',
+      rows,
+      balanceAfter: opts.balanceAfter ? `${symbol}${opts.balanceAfter}` : undefined,
+      accountMasked: opts.accountNumber ? maskAccount(opts.accountNumber) : undefined,
+      recipientName: opts.recipientName,
+      ctaLabel: 'View account',
+      ctaUrl: 'https://lumina-bank-ui.vercel.app/dashboard',
+      warningNote: 'Not expecting this payment? You may need to return it. <a href="https://lumina-bank-ui.vercel.app/support" style="color:#7a4500">Contact us</a> for guidance.',
+    });
+    await send({ to, subject: `${symbol}${opts.amount} received from ${opts.sender} — Lumina Bank`, html });
   },
 
   async sendKycStatusUpdate(to: string, status: 'VERIFIED' | 'REJECTED', reason?: string): Promise<void> {

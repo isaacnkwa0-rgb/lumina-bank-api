@@ -207,16 +207,25 @@ export class TransfersService {
     ]);
     if (fromUser) {
       mailService.sendTransferNotification(fromUser.email, {
-        amount: amount.toFixed(2), currency: fromAccount.currency,
+        amount: amount.toFixed(2),
+        currency: fromAccount.currency,
         recipient: `${toAccount.user.firstName} ${toAccount.user.lastName}`,
         reference: transfer.fromTransactionId ?? transfer.id,
+        recipientName: `${fromAccount.user.firstName} ${fromAccount.user.lastName}`,
+        accountNumber: fromAccount.accountNumber,
+        balanceAfter: fromAccount.balance.minus(new Decimal(amount)).toFixed(2),
+        description,
       }).catch(() => {});
     }
     if (toUser) {
       mailService.sendMoneyReceived(toUser.email, {
-        amount: amount.toFixed(2), currency: toAccount.currency,
+        amount: amount.toFixed(2),
+        currency: toAccount.currency,
         sender: `${fromAccount.user.firstName} ${fromAccount.user.lastName}`,
         description,
+        recipientName: `${toAccount.user.firstName} ${toAccount.user.lastName}`,
+        accountNumber: toAccount.accountNumber,
+        balanceAfter: toAccount.balance.plus(new Decimal(amount)).toFixed(2),
       }).catch(() => {});
     }
     return transfer;
