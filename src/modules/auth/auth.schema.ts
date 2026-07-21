@@ -16,7 +16,7 @@ export const registerSchema = z.object({
   countryOfResidence: z.string().optional(),
   taxResidency: z.array(z.string()).optional(),
   accountType: z.enum(['PERSONAL', 'STUDENT', 'JOINT', 'BUSINESS', 'PREMIUM']).optional(),
-  ssn: z.string().regex(/^\d{3}-\d{3}-\d{3}$/).optional(),
+  ssn: z.string().regex(/^\d{3}-\d{2}-\d{4}$/).optional(),
 });
 
 export const loginSchema = z.object({
