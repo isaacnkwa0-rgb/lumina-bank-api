@@ -367,6 +367,39 @@ export class AdminController {
       sendSuccess(res, data, 'Account closed');
     } catch (err) { next(err); }
   }
+
+  async getSupportTickets(req: Request, res: Response, next: NextFunction) {
+    try {
+      const page = req.query.page ? parseInt(req.query.page as string, 10) : 1;
+      const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 20;
+      const status = req.query.status as string | undefined;
+      const search = req.query.search as string | undefined;
+      const data = await adminService.getSupportTickets({ page, limit, status, search });
+      sendSuccess(res, data, 'Support tickets retrieved');
+    } catch (err) { next(err); }
+  }
+
+  async getSupportTicket(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = await adminService.getSupportTicket(req.params.id);
+      sendSuccess(res, data, 'Support ticket retrieved');
+    } catch (err) { next(err); }
+  }
+
+  async replyToTicket(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { body } = req.body as { body: string };
+      const data = await adminService.replyToTicket(req.params.id, req.user!.id, body);
+      sendSuccess(res, data, 'Reply sent', 201);
+    } catch (err) { next(err); }
+  }
+
+  async resolveSupportTicket(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = await adminService.resolveSupportTicket(req.params.id);
+      sendSuccess(res, data, 'Ticket resolved');
+    } catch (err) { next(err); }
+  }
 }
 
 export default new AdminController();

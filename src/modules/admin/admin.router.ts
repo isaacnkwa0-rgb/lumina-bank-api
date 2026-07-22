@@ -72,4 +72,10 @@ router.patch('/accounts/:accountId/freeze', adminController.freezeAccount.bind(a
 router.patch('/accounts/:accountId/unfreeze', adminController.unfreezeAccount.bind(adminController));
 router.patch('/accounts/:accountId/close', adminController.closeAccount.bind(adminController));
 
+// Support tickets
+router.get('/support/tickets', adminController.getSupportTickets.bind(adminController));
+router.get('/support/tickets/:id', adminController.getSupportTicket.bind(adminController));
+router.post('/support/tickets/:id/reply', adminController.replyToTicket.bind(adminController));
+router.patch('/support/tickets/:id/resolve', adminController.resolveSupportTicket.bind(adminController));
+
 export default router;

@@ -797,6 +797,117 @@ export class AdminService {
 
     return { id, status: CryptoOrderStatus.REJECTED, reason };
   }
+
+  async getSupportTickets(filters: { page?: number; limit?: number; status?: string; search?: string }) {
+    const { page = 1, limit = 20, status, search } = filters;
+    const { skip, take } = getPagination({ page, limit });
+
+    const where: Prisma.SupportTicketWhereInput = {
+      ...(status ? { status: status as import('@prisma/client').SupportTicketStatus } : {}),
+      ...(search
+        ? {
+            OR: [
+              { subject: { contains: search, mode: 'insensitive' } },
+              { user: { firstName: { contains: search, mode: 'insensitive' } } },
+              { user: { lastName: { contains: search, mode: 'insensitive' } } },
+              { user: { email: { contains: search, mode: 'insensitive' } } },
+            ],
+          }
+        : {}),
+    };
+
+    const [tickets, total] = await Promise.all([
+      prisma.supportTicket.findMany({
+        where,
+        skip,
+        take,
+        orderBy: { updatedAt: 'desc' },
+        include: {
+          user: { select: { id: true, firstName: true, lastName: true, email: true } },
+          messages: { orderBy: { createdAt: 'desc' }, take: 1 },
+          _count: { select: { messages: true } },
+        },
+      }),
+      prisma.supportTicket.count({ where }),
+    ]);
+
+    return { tickets, ...buildPaginationMeta({ total, page, limit }) };
+  }
+
+  async getSupportTicket(id: string) {
+    const ticket = await prisma.supportTicket.findUnique({
+      where: { id },
+      include: {
+        user: { select: { id: true, firstName: true, lastName: true, email: true } },
+        messages: { orderBy: { createdAt: 'asc' } },
+      },
+    });
+    if (!ticket) throw new AppError('Ticket not found', 404, ErrorCodes.NOT_FOUND);
+    return ticket;
+  }
+
+  async replyToTicket(ticketId: string, agentId: string, body: string) {
+    const ticket = await prisma.supportTicket.findUnique({
+      where: { id: ticketId },
+      include: { user: { select: { email: true, firstName: true } } },
+    });
+    if (!ticket) throw new AppError('Ticket not found', 404, ErrorCodes.NOT_FOUND);
+
+    const { SenderRole, SupportTicketStatus, NotificationType } = await import('@prisma/client');
+
+    const [message] = await Promise.all([
+      prisma.supportMessage.create({
+        data: { ticketId, senderId: agentId, senderRole: SenderRole.AGENT, body },
+      }),
+      prisma.supportTicket.update({
+        where: { id: ticketId },
+        data: { status: SupportTicketStatus.IN_PROGRESS, updatedAt: new Date() },
+      }),
+      prisma.notification.create({
+        data: {
+          userId: ticket.userId,
+          type: NotificationType.SYSTEM,
+          title: 'Support reply received',
+          body: `Your ticket "${ticket.subject}" has a new reply from our team.`,
+        },
+      }),
+    ]);
+
+    mailService.sendSupportReply(ticket.user.email, {
+      firstName: ticket.user.firstName,
+      subject: ticket.subject,
+      replyBody: body,
+    }).catch(() => {});
+
+    return message;
+  }
+
+  async resolveSupportTicket(id: string) {
+    const ticket = await prisma.supportTicket.findUnique({
+      where: { id },
+      include: { user: { select: { email: true, firstName: true } } },
+    });
+    if (!ticket) throw new AppError('Ticket not found', 404, ErrorCodes.NOT_FOUND);
+
+    const { SupportTicketStatus, NotificationType } = await import('@prisma/client');
+
+    const [updated] = await Promise.all([
+      prisma.supportTicket.update({
+        where: { id },
+        data: { status: SupportTicketStatus.RESOLVED, resolvedAt: new Date() },
+      }),
+      prisma.notification.create({
+        data: {
+          userId: ticket.userId,
+          type: NotificationType.SYSTEM,
+          title: 'Ticket resolved',
+          body: `Your support ticket "${ticket.subject}" has been marked as resolved.`,
+        },
+      }),
+    ]);
+
+    return updated;
+  }
 }
 
 export const adminService = new AdminService();

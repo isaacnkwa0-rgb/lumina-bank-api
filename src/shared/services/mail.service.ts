@@ -452,4 +452,21 @@ export const mailService = {
       html: layout(`Crypto Order ${approved ? 'Approved' : 'Rejected'}`, body),
     });
   },
+
+  async sendSupportReply(to: string, opts: { firstName: string; subject: string; replyBody: string }): Promise<void> {
+    const { firstName, subject, replyBody } = opts;
+    const body = `
+      <p>Hi ${firstName},</p>
+      <p>Our support team has replied to your ticket: <strong>${subject}</strong></p>
+      <div style="background:#F8F8F8;border-left:4px solid #DB0011;padding:14px 18px;margin:20px 0;border-radius:4px;">
+        <p style="margin:0;color:#333;line-height:1.6;">${replyBody.replace(/\n/g, '<br/>')}</p>
+      </div>
+      <p>Log in to your account to continue the conversation or mark the ticket as resolved.</p>
+      <p class="note">If you did not raise this ticket, please contact us immediately at <a href="mailto:support@luminabank.online">support@luminabank.online</a>.</p>`;
+    await send({
+      to,
+      subject: `Support reply: ${subject} | Lumina Bank`,
+      html: layout('Support Team Reply', body),
+    });
+  },
 };

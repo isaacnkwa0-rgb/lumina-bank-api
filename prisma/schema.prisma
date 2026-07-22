@@ -181,6 +181,18 @@ enum DisputeStatus {
   REJECTED
 }
 
+enum SupportTicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum SenderRole {
+  CUSTOMER
+  AGENT
+}
+
 enum InsuranceType {
   LIFE
   HOME
@@ -257,6 +269,7 @@ model User {
   auditLogs     AuditLog[]
   otpCodes      OtpCode[]
   disputes         Dispute[]
+  supportTickets   SupportTicket[]
   insuranceQuotes  InsuranceQuote[]
   standingOrders   StandingOrder[]
   directDebits     DirectDebit[]
@@ -651,6 +664,38 @@ model Dispute {
 
   @@index([userId])
   @@index([status])
+  @@index([createdAt])
+}
+
+model SupportTicket {
+  id         String              @id @default(uuid())
+  userId     String
+  subject    String
+  status     SupportTicketStatus @default(OPEN)
+  createdAt  DateTime            @default(now())
+  updatedAt  DateTime            @updatedAt
+  resolvedAt DateTime?
+
+  user     User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages SupportMessage[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model SupportMessage {
+  id         String     @id @default(uuid())
+  ticketId   String
+  senderId   String
+  senderRole SenderRole
+  body       String
+  isRead     Boolean    @default(false)
+  createdAt  DateTime   @default(now())
+
+  ticket SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId])
   @@index([createdAt])
 }
 
