@@ -24,7 +24,7 @@ export class SupportController {
 
   async getTicket(req: Request, res: Response, next: NextFunction) {
     try {
-      const ticket = await supportService.getTicket(req.params.id, req.user!.id);
+      const ticket = await supportService.getTicket(req.params.id as string, req.user!.id);
       sendSuccess(res, ticket, 'Ticket retrieved');
     } catch (err) {
       next(err);
@@ -34,7 +34,7 @@ export class SupportController {
   async postMessage(req: Request, res: Response, next: NextFunction) {
     try {
       const { body } = req.body as { body: string };
-      const message = await supportService.postMessage(req.params.id, req.user!.id, body);
+      const message = await supportService.postMessage(req.params.id as string, req.user!.id, body);
       sendSuccess(res, message, 'Message sent', 201);
     } catch (err) {
       next(err);
@@ -43,7 +43,7 @@ export class SupportController {
 
   async closeTicket(req: Request, res: Response, next: NextFunction) {
     try {
-      const ticket = await supportService.closeTicket(req.params.id, req.user!.id);
+      const ticket = await supportService.closeTicket(req.params.id as string, req.user!.id);
       sendSuccess(res, ticket, 'Ticket closed');
     } catch (err) {
       next(err);

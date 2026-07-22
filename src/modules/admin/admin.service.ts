@@ -831,7 +831,7 @@ export class AdminService {
       prisma.supportTicket.count({ where }),
     ]);
 
-    return { tickets, ...buildPaginationMeta({ total, page, limit }) };
+    return { tickets, ...buildPaginationMeta(total, page, limit) };
   }
 
   async getSupportTicket(id: string) {

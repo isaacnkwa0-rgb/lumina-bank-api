@@ -381,7 +381,7 @@ export class AdminController {
 
   async getSupportTicket(req: Request, res: Response, next: NextFunction) {
     try {
-      const data = await adminService.getSupportTicket(req.params.id);
+      const data = await adminService.getSupportTicket(req.params.id as string);
       sendSuccess(res, data, 'Support ticket retrieved');
     } catch (err) { next(err); }
   }
@@ -389,14 +389,14 @@ export class AdminController {
   async replyToTicket(req: Request, res: Response, next: NextFunction) {
     try {
       const { body } = req.body as { body: string };
-      const data = await adminService.replyToTicket(req.params.id, req.user!.id, body);
+      const data = await adminService.replyToTicket(req.params.id as string, req.user!.id, body);
       sendSuccess(res, data, 'Reply sent', 201);
     } catch (err) { next(err); }
   }
 
   async resolveSupportTicket(req: Request, res: Response, next: NextFunction) {
     try {
-      const data = await adminService.resolveSupportTicket(req.params.id);
+      const data = await adminService.resolveSupportTicket(req.params.id as string);
       sendSuccess(res, data, 'Ticket resolved');
     } catch (err) { next(err); }
   }
