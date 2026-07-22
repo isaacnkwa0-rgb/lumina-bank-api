@@ -81,7 +81,7 @@ function layout(title: string, body: string): string {
   <div class="body">${body}</div>
   <div class="foot">
     <p>This is an automated notification. Please do not reply to this email.</p>
-    <p>For help, visit <strong>luminabank.co.uk/help</strong> or call <strong>0800 123 4567</strong> (free, 24/7).</p>
+    <p>For help, visit <strong>luminabank.online/help</strong> or call <strong>0800 123 4567</strong> (free, 24/7).</p>
     <p class="reg">Lumina Bank plc is authorised by the Prudential Regulation Authority and regulated by the Financial Conduct Authority and the Prudential Regulation Authority (FCA Register No. 123456). Registered in England &amp; Wales No. 12345678. Registered office: 1 Lumina Square, London, EC2V 8RF.</p>
     <p class="reg">© ${new Date().getFullYear()} Lumina Bank plc. All rights reserved. FSCS protected up to £85,000.</p>
   </div>
@@ -153,7 +153,7 @@ function txLayout(opts: {
 
   <!-- Amount hero -->
   <tr>
-    <td style="background:#1a1a2e;padding:28px 28px 24px;text-align:center">
+    <td style="background:#8B000A;padding:28px 28px 24px;text-align:center">
       <div style="display:inline-block;background:rgba(255,255,255,0.06);border-radius:4px;padding:6px 14px;margin-bottom:10px">
         <span style="font-size:11px;font-weight:700;letter-spacing:2px;color:rgba(255,255,255,0.5);text-transform:uppercase">${opts.directionLabel}</span>
       </div>
@@ -178,7 +178,7 @@ function txLayout(opts: {
   <tr>
     <td style="background:#f7f7f7;border-top:1px solid #e8e8e8;padding:20px 28px">
       <p style="margin:0 0 5px;font-size:11.5px;color:#888;line-height:1.55">This is an automated notification sent to you because you have transaction alerts enabled. Do not reply to this email.</p>
-      <p style="margin:0 0 5px;font-size:11.5px;color:#888">Help: <strong>0800 123 4567</strong> · luminabank.co.uk/help</p>
+      <p style="margin:0 0 5px;font-size:11.5px;color:#888">Help: <strong>0800 123 4567</strong> · luminabank.online/help</p>
       <p style="margin:12px 0 0;font-size:10px;color:#bbb;line-height:1.55">Lumina Bank plc is authorised by the Prudential Regulation Authority and regulated by the Financial Conduct Authority and the Prudential Regulation Authority (FRN 123456). Registered in England &amp; Wales No. 12345678. Registered office: 1 Lumina Square, London EC2V 8RF. FSCS protected up to £85,000.</p>
     </td>
   </tr>
@@ -222,7 +222,7 @@ export const mailService = {
   async sendTransferOtp(to: string, code: string): Promise<void> {
     const body = `
       <p style="margin:0 0 8px;font-size:15px;color:#333">You're about to authorise a payment from your Lumina Bank account.</p>
-      <p style="margin:0 0 20px;font-size:13px;color:#666">Enter this code in the app to confirm. <strong>Never share this code with anyone</strong> — Lumina Bank will never ask for it.</p>
+      <p style="margin:0 0 20px;font-size:13px;color:#666">Enter this code in the app to confirm. <strong>Never share this code with anyone.</strong> Lumina Bank staff will never ask for it.</p>
       <span class="otp">${code}</span>
       <p class="note">This code expires in <strong>10 minutes</strong>. If you did not request this, call us immediately on <strong>0800 123 4567</strong>.</p>`;
     await send({ to, subject: `Your Lumina Bank payment authorisation code: ${code}`, html: layout('Payment Authorisation', body) });
@@ -252,7 +252,7 @@ export const mailService = {
       { label: 'Transaction ID', value: opts.reference, mono: true },
     ];
     const html = txLayout({
-      title: 'Payment sent — Lumina Bank',
+      title: 'Payment sent | Lumina Bank',
       preheader: `You sent ${symbol}${opts.amount} to ${opts.recipient}`,
       amountLine: `−${symbol}${opts.amount}`,
       amountColor: '#DB0011',
@@ -262,10 +262,10 @@ export const mailService = {
       accountMasked: opts.accountNumber ? maskAccount(opts.accountNumber) : undefined,
       recipientName: opts.recipientName,
       ctaLabel: 'View transaction',
-      ctaUrl: 'https://lumina-bank-ui.vercel.app/transactions',
+      ctaUrl: 'https://luminabank.online/transactions',
       warningNote: 'Did not make this payment? Call us immediately on <strong>0800 123 4567</strong> (free, 24/7) and we will secure your account.',
     });
-    await send({ to, subject: `Payment of ${symbol}${opts.amount} sent to ${opts.recipient} — Lumina Bank`, html });
+    await send({ to, subject: `Payment of ${symbol}${opts.amount} sent to ${opts.recipient} | Lumina Bank`, html });
   },
 
   async sendMoneyReceived(to: string, opts: {
@@ -283,7 +283,7 @@ export const mailService = {
       { label: 'Time', value: `${formatUKTime(now)} GMT` },
     ];
     const html = txLayout({
-      title: 'Money received — Lumina Bank',
+      title: 'Money received | Lumina Bank',
       preheader: `${symbol}${opts.amount} from ${opts.sender} has arrived in your account`,
       amountLine: `+${symbol}${opts.amount}`,
       amountColor: '#1a9c52',
@@ -293,10 +293,10 @@ export const mailService = {
       accountMasked: opts.accountNumber ? maskAccount(opts.accountNumber) : undefined,
       recipientName: opts.recipientName,
       ctaLabel: 'View account',
-      ctaUrl: 'https://lumina-bank-ui.vercel.app/dashboard',
-      warningNote: 'Not expecting this payment? You may need to return it. <a href="https://lumina-bank-ui.vercel.app/support" style="color:#7a4500">Contact us</a> for guidance.',
+      ctaUrl: 'https://luminabank.online/dashboard',
+      warningNote: 'Not expecting this payment? You may need to return it. <a href="https://luminabank.online/support" style="color:#7a4500">Contact us</a> for guidance.',
     });
-    await send({ to, subject: `${symbol}${opts.amount} received from ${opts.sender} — Lumina Bank`, html });
+    await send({ to, subject: `${symbol}${opts.amount} received from ${opts.sender} | Lumina Bank`, html });
   },
 
   async sendKycStatusUpdate(to: string, status: 'VERIFIED' | 'REJECTED', reason?: string): Promise<void> {
@@ -304,7 +304,7 @@ export const mailService = {
     const body = approved
       ? `<p>Great news! Your identity verification has been <strong>approved</strong>. Your account is now fully verified.</p>`
       : `<p>Unfortunately your identity verification was <strong>not approved</strong>.</p>${reason ? `<p><strong>Reason:</strong> ${reason}</p>` : ''}<p>Please log in and resubmit your documents.</p>`;
-    await send({ to, subject: `KYC ${approved ? 'Approved' : 'Rejected'} — Lumina Bank`, html: layout('Identity Verification Update', body) });
+    await send({ to, subject: `KYC ${approved ? 'Approved' : 'Rejected'} | Lumina Bank`, html: layout('Identity Verification Update', body) });
   },
 
   async sendAccountLockout(to: string, lockDurationMinutes: number): Promise<void> {
@@ -313,7 +313,7 @@ export const mailService = {
       <p>Your account will unlock automatically in <strong>${lockDurationMinutes} minutes</strong>.</p>
       <p>If this wasn't you, your password may be compromised. Once your account unlocks, please <strong>change your password immediately</strong>.</p>
       <p class="note">If you need urgent assistance, contact our support team.</p>`;
-    await send({ to, subject: 'Security alert: account temporarily locked — Lumina Bank', html: layout('Account Locked', body) });
+    await send({ to, subject: 'Security alert: account temporarily locked | Lumina Bank', html: layout('Account Locked', body) });
   },
 
   async sendPasswordChanged(to: string): Promise<void> {
@@ -322,7 +322,7 @@ export const mailService = {
       <p>If you made this change, no action is needed.</p>
       <p><strong>If you did not request this change</strong>, your account may be compromised. Please contact our support team immediately and we will secure your account.</p>
       <p class="note">For your security, all active sessions have been signed out.</p>`;
-    await send({ to, subject: 'Your password has been changed — Lumina Bank', html: layout('Password Changed', body) });
+    await send({ to, subject: 'Your password has been changed | Lumina Bank', html: layout('Password Changed', body) });
   },
 
   async sendLoanDecision(to: string, opts: { approved: boolean; loanType: string; amount?: number; reason?: string }): Promise<void> {
@@ -337,7 +337,7 @@ export const mailService = {
          <p>You are welcome to reapply in the future or contact our support team to discuss your options.</p>`;
     await send({
       to,
-      subject: `Loan application ${approved ? 'approved' : 'update'} — Lumina Bank`,
+      subject: `Loan application ${approved ? 'approved' : 'update'} | Lumina Bank`,
       html: layout(`Loan Application ${approved ? 'Approved' : 'Update'}`, body),
     });
   },
@@ -347,14 +347,14 @@ export const mailService = {
       <p>Your Lumina Bank account has been <strong>temporarily suspended</strong>.</p>
       <p>During this period you will not be able to log in or access your funds.</p>
       <p>Please contact our support team for more information or to appeal this decision.</p>`;
-    await send({ to, subject: 'Your account has been suspended — Lumina Bank', html: layout('Account Suspended', body) });
+    await send({ to, subject: 'Your account has been suspended | Lumina Bank', html: layout('Account Suspended', body) });
   },
 
   async sendAccountReactivated(to: string): Promise<void> {
     const body = `
       <p>Your Lumina Bank account has been <strong>reactivated</strong> and you can now log in as normal.</p>
       <p>If you have any questions, please don't hesitate to contact our support team.</p>`;
-    await send({ to, subject: 'Your account has been reactivated — Lumina Bank', html: layout('Account Reactivated', body) });
+    await send({ to, subject: 'Your account has been reactivated | Lumina Bank', html: layout('Account Reactivated', body) });
   },
 
   async sendTransferRejected(to: string, opts: { amount: string; currency: string; reason?: string }): Promise<void> {
@@ -364,7 +364,7 @@ export const mailService = {
       ${reason ? `<p><strong>Reason:</strong> ${reason}</p>` : ''}
       <p>The full amount has been <strong>refunded to your account</strong> and is available immediately.</p>
       <p class="note">If you believe this was in error, please contact support.</p>`;
-    await send({ to, subject: 'Transfer rejected — Lumina Bank', html: layout('Transfer Rejected', body) });
+    await send({ to, subject: 'Transfer rejected | Lumina Bank', html: layout('Transfer Rejected', body) });
   },
 
   async sendDisputeOutcome(to: string, opts: { resolved: boolean; subject: string; resolution: string }): Promise<void> {
@@ -378,7 +378,7 @@ export const mailService = {
          <p class="note">If you believe this is incorrect, please contact support to discuss further options.</p>`;
     await send({
       to,
-      subject: `Dispute ${resolved ? 'resolved' : 'update'} — Lumina Bank`,
+      subject: `Dispute ${resolved ? 'resolved' : 'update'} | Lumina Bank`,
       html: layout(`Dispute ${resolved ? 'Resolved' : 'Update'}`, body),
     });
   },
@@ -395,7 +395,7 @@ export const mailService = {
          <p>Please contact our insurance team to discuss your options.</p>`;
     await send({
       to,
-      subject: `Insurance quote ${accepted ? 'accepted' : 'update'} — Lumina Bank`,
+      subject: `Insurance quote ${accepted ? 'accepted' : 'update'} | Lumina Bank`,
       html: layout(`Insurance Quote ${accepted ? 'Accepted' : 'Update'}`, body),
     });
   },
@@ -410,7 +410,7 @@ export const mailService = {
          <p class="note">If you did not make this change, your account may be compromised — contact support immediately.</p>`;
     await send({
       to,
-      subject: `Two-factor authentication ${enabled ? 'enabled' : 'disabled'} — Lumina Bank`,
+      subject: `Two-factor authentication ${enabled ? 'enabled' : 'disabled'} | Lumina Bank`,
       html: layout(`2FA ${enabled ? 'Enabled' : 'Disabled'}`, body),
     });
   },
@@ -420,7 +420,7 @@ export const mailService = {
       <p>Your Lumina Bank card ending in <strong>${last4}</strong> has been <strong>blocked</strong> by our team.</p>
       <p>The card cannot be used for any transactions until it is unblocked.</p>
       <p class="note">If this was unexpected, please contact support immediately.</p>`;
-    await send({ to, subject: `Card ending ${last4} blocked — Lumina Bank`, html: layout('Card Blocked', body) });
+    await send({ to, subject: `Card ending ${last4} blocked | Lumina Bank`, html: layout('Card Blocked', body) });
   },
 
   async sendSecurityAlert(to: string, opts: { event: string; detail?: string }): Promise<void> {
@@ -429,7 +429,7 @@ export const mailService = {
       ${opts.detail ? `<p>${opts.detail}</p>` : ''}
       <p>All active sessions have been signed out as a precaution.</p>
       <p class="note">If this was you, simply log back in. If you did not take this action, please <strong>change your password immediately</strong> and contact support.</p>`;
-    await send({ to, subject: `Security alert — Lumina Bank`, html: layout('Security Alert', body) });
+    await send({ to, subject: `Security alert | Lumina Bank`, html: layout('Security Alert', body) });
   },
 
   async sendCryptoOrderDecision(to: string, opts: { approved: boolean; coin: string; amountGbp: number; reference: string; reason?: string }): Promise<void> {
@@ -448,7 +448,7 @@ export const mailService = {
          <p>The full amount including the processing fee has been <strong>refunded to your account</strong>.</p>`;
     await send({
       to,
-      subject: `Crypto order ${approved ? 'approved' : 'rejected'} — Lumina Bank`,
+      subject: `Crypto order ${approved ? 'approved' : 'rejected'} | Lumina Bank`,
       html: layout(`Crypto Order ${approved ? 'Approved' : 'Rejected'}`, body),
     });
   },
