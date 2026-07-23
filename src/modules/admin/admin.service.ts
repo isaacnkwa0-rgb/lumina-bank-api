@@ -908,6 +908,50 @@ export class AdminService {
 
     return updated;
   }
+
+  async fundAccount(userId: string, accountId: string, amount: number, description?: string) {
+    if (amount <= 0) throw new AppError('Amount must be positive', 400, ErrorCodes.VAL_001);
+
+    const account = await prisma.account.findFirst({ where: { id: accountId, userId } });
+    if (!account) throw new AppError('Account not found', 404, ErrorCodes.NOT_FOUND);
+    if (account.status === 'CLOSED') throw new AppError('Cannot fund a closed account', 400, ErrorCodes.CONFLICT);
+
+    const reference = generateTransactionReference();
+    const balanceBefore = account.balance.toNumber();
+    const balanceAfter = balanceBefore + amount;
+    const desc = description?.trim() || 'Admin credit';
+
+    await prisma.$transaction([
+      prisma.account.update({
+        where: { id: accountId },
+        data: { balance: { increment: amount }, availableBalance: { increment: amount } },
+      }),
+      prisma.transaction.create({
+        data: {
+          accountId,
+          type: TransactionType.CREDIT,
+          category: TransactionCategory.DEPOSIT,
+          amount,
+          currency: account.currency,
+          balanceBefore,
+          balanceAfter,
+          description: desc,
+          reference,
+          status: 'COMPLETED',
+        },
+      }),
+      prisma.notification.create({
+        data: {
+          userId,
+          type: NotificationType.TRANSACTION,
+          title: 'Account credited',
+          body: `${account.currency} ${amount.toLocaleString()} has been credited to your account ending ${account.accountNumber.slice(-4)}.`,
+        },
+      }),
+    ]);
+
+    return prisma.account.findUnique({ where: { id: accountId } });
+  }
 }
 
 export const adminService = new AdminService();

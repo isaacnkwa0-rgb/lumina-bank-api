@@ -71,6 +71,7 @@ router.get('/users/:userId/accounts', adminController.getUserAccounts.bind(admin
 router.patch('/accounts/:accountId/freeze', adminController.freezeAccount.bind(adminController));
 router.patch('/accounts/:accountId/unfreeze', adminController.unfreezeAccount.bind(adminController));
 router.patch('/accounts/:accountId/close', adminController.closeAccount.bind(adminController));
+router.post('/users/:userId/accounts/:accountId/fund', adminController.fundAccount.bind(adminController));
 
 // Support tickets
 router.get('/support/tickets', adminController.getSupportTickets.bind(adminController));

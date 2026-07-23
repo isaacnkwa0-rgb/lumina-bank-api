@@ -400,6 +400,15 @@ export class AdminController {
       sendSuccess(res, data, 'Ticket resolved');
     } catch (err) { next(err); }
   }
+
+  async fundAccount(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { userId, accountId } = req.params as { userId: string; accountId: string };
+      const { amount, description } = req.body as { amount: number; description?: string };
+      const data = await adminService.fundAccount(userId, accountId, Number(amount), description);
+      sendSuccess(res, data, 'Account funded successfully');
+    } catch (err) { next(err); }
+  }
 }
 
 export default new AdminController();
