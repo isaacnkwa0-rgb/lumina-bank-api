@@ -2,6 +2,7 @@ import { prisma } from '../../config/database';
 import { AppError } from '../../middleware/error.middleware';
 import { ErrorCodes } from '../../shared/utils/api-response';
 import { DirectDebitStatus, StandingOrderFreq } from '@prisma/client';
+import { mailService } from '../../shared/services/mail.service';
 
 function nextDate(from: Date, freq: StandingOrderFreq): Date {
   const d = new Date(from);
@@ -94,7 +95,7 @@ export class DirectDebitsService {
     const now = new Date();
     const due = await prisma.directDebit.findMany({
       where: { status: DirectDebitStatus.ACTIVE, nextCollectionDate: { lte: now } },
-      include: { account: true },
+      include: { account: { include: { user: { select: { id: true, email: true } } } } },
     });
 
     const results = [];
@@ -149,6 +150,22 @@ export class DirectDebitsService {
           },
         }),
       ]);
+      const balanceAfter = Number(dd.account.balance) - Number(dd.amount);
+      await prisma.notification.create({
+        data: {
+          userId: dd.account.user.id,
+          type: 'TRANSFER' as any,
+          title: 'Direct Debit Collected',
+          body: `${dd.currency} ${Number(dd.amount).toFixed(2)} collected by ${dd.originatorName}`,
+        },
+      });
+      mailService.sendDirectDebitCollected(dd.account.user.email, {
+        amount: Number(dd.amount).toFixed(2),
+        currency: dd.currency,
+        originatorName: dd.originatorName,
+        balanceAfter: balanceAfter.toFixed(2),
+      }).catch(() => {});
+
       results.push({ id: dd.id, status: 'collected' });
     }
     return results;

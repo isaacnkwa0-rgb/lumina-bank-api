@@ -3,6 +3,7 @@ import { AppError } from '../../middleware/error.middleware';
 import { ErrorCodes } from '../../shared/utils/api-response';
 import { StandingOrderFreq, StandingOrderStatus, TransactionType, TransactionCategory, TransactionStatus } from '@prisma/client';
 import { generateTransactionReference } from '../../shared/utils/transaction-ref';
+import { mailService } from '../../shared/services/mail.service';
 
 function nextDate(from: Date, freq: StandingOrderFreq): Date {
   const d = new Date(from);
@@ -91,7 +92,7 @@ export class StandingOrdersService {
         nextExecutionDate: { lte: now },
         OR: [{ endDate: null }, { endDate: { gt: now } }],
       },
-      include: { fromAccount: true },
+      include: { fromAccount: { include: { user: { select: { email: true } } } } },
     });
 
     const results: { id: string; success: boolean; error?: string }[] = [];
@@ -149,6 +150,14 @@ export class StandingOrdersService {
             },
           }),
         ]);
+
+        mailService.sendStandingOrderExecuted(order.fromAccount.user.email, {
+          amount: amount.toFixed(2),
+          currency: account.currency,
+          recipientName: order.toAccountName,
+          description: order.description,
+          balanceAfter: (balanceBefore - amount).toFixed(2),
+        }).catch(() => {});
 
         results.push({ id: order.id, success: true });
       } catch (err: any) {

@@ -534,6 +534,72 @@ export const mailService = {
     await send({ to, subject: 'Your account has been unfrozen | Lumina Bank', html: layout('Account Unfrozen', body) });
   },
 
+  async sendTransferApproved(to: string, opts: { amount: string; currency: string }): Promise<void> {
+    const { amount, currency } = opts;
+    const body = `
+      <p>Your transfer of <strong>${currency} ${amount}</strong> has been <strong>approved</strong> and successfully processed by our team.</p>
+      <p>The funds are on their way to the recipient.</p>
+      <p class="note">If you have any questions about this transfer, please contact our support team.</p>`;
+    await send({ to, subject: `Transfer approved: ${currency} ${amount} | Lumina Bank`, html: layout('Transfer Approved', body) });
+  },
+
+  async sendStandingOrderExecuted(to: string, opts: { amount: string; currency: string; recipientName: string; description: string; balanceAfter: string }): Promise<void> {
+    const { amount, currency, recipientName, description, balanceAfter } = opts;
+    const body = `
+      <p>Your standing order has been executed successfully.</p>
+      <div style="background:#F8F8F8;border:1px solid #E8E8E8;border-radius:4px;padding:14px 18px;margin:20px 0;">
+        <p style="margin:0 0 8px;font-size:11px;color:#AAAAAA;text-transform:uppercase;letter-spacing:1px">Payment details</p>
+        <p style="margin:0 0 4px;font-size:15px;font-weight:700;color:#333;">${currency} ${amount}</p>
+        <p style="margin:0;font-size:13px;color:#767676;">To: ${recipientName}</p>
+        ${description ? `<p style="margin:4px 0 0;font-size:13px;color:#767676;">${description}</p>` : ''}
+        <p style="margin:8px 0 0;font-size:12px;color:#AAAAAA;">Balance after: ${currency} ${balanceAfter}</p>
+      </div>
+      <p class="note">Standing orders run automatically. You can manage them in the Standing Orders section of the app.</p>`;
+    await send({ to, subject: `Standing order executed: ${currency} ${amount} to ${recipientName} | Lumina Bank`, html: layout('Standing Order Executed', body) });
+  },
+
+  async sendDirectDebitCollected(to: string, opts: { amount: string; currency: string; originatorName: string; balanceAfter: string }): Promise<void> {
+    const { amount, currency, originatorName, balanceAfter } = opts;
+    const body = `
+      <p>A direct debit has been collected from your account.</p>
+      <div style="background:#F8F8F8;border:1px solid #E8E8E8;border-radius:4px;padding:14px 18px;margin:20px 0;">
+        <p style="margin:0 0 8px;font-size:11px;color:#AAAAAA;text-transform:uppercase;letter-spacing:1px">Collection details</p>
+        <p style="margin:0 0 4px;font-size:15px;font-weight:700;color:#333;">${currency} ${amount}</p>
+        <p style="margin:0;font-size:13px;color:#767676;">Collected by: ${originatorName}</p>
+        <p style="margin:8px 0 0;font-size:12px;color:#AAAAAA;">Balance after: ${currency} ${balanceAfter}</p>
+      </div>
+      <p class="note">If you did not authorise this direct debit or believe this is an error, raise a dispute in the app immediately.</p>`;
+    await send({ to, subject: `Direct debit collected: ${currency} ${amount} by ${originatorName} | Lumina Bank`, html: layout('Direct Debit Collected', body) });
+  },
+
+  async sendNewSupportTicketAlert(to: string, opts: { ticketId: string; subject: string; customerName: string; customerEmail: string; firstMessage: string }): Promise<void> {
+    const { ticketId, subject, customerName, customerEmail, firstMessage } = opts;
+    const body = `
+      <p>A new support ticket has been opened and requires attention.</p>
+      <div style="background:#F8F8F8;border-left:4px solid #DB0011;padding:14px 18px;margin:20px 0;border-radius:4px;">
+        <p style="margin:0 0 4px;font-size:11px;color:#AAAAAA;text-transform:uppercase;letter-spacing:1px">Ticket #${ticketId.slice(0, 8).toUpperCase()}</p>
+        <p style="margin:0 0 4px;font-size:15px;font-weight:700;color:#333;">${subject}</p>
+        <p style="margin:0 0 4px;font-size:13px;color:#767676;">From: ${customerName} (${customerEmail})</p>
+        <hr style="border:none;border-top:1px solid #E8E8E8;margin:12px 0;" />
+        <p style="margin:0;font-size:13px;color:#333;line-height:1.6;">${firstMessage.replace(/\n/g, '<br/>')}</p>
+      </div>
+      <p>Log in to the admin panel to respond.</p>`;
+    await send({ to, subject: `New support ticket: "${subject}" from ${customerName} | Lumina Bank`, html: layout('New Support Ticket', body) });
+  },
+
+  async sendCustomerRepliedAlert(to: string, opts: { ticketId: string; subject: string; customerName: string; messageBody: string }): Promise<void> {
+    const { ticketId, subject, customerName, messageBody } = opts;
+    const body = `
+      <p><strong>${customerName}</strong> has replied to their support ticket.</p>
+      <div style="background:#F8F8F8;border-left:4px solid #DB0011;padding:14px 18px;margin:20px 0;border-radius:4px;">
+        <p style="margin:0 0 4px;font-size:11px;color:#AAAAAA;text-transform:uppercase;letter-spacing:1px">Ticket #${ticketId.slice(0, 8).toUpperCase()} — ${subject}</p>
+        <hr style="border:none;border-top:1px solid #E8E8E8;margin:12px 0;" />
+        <p style="margin:0;font-size:13px;color:#333;line-height:1.6;">${messageBody.replace(/\n/g, '<br/>')}</p>
+      </div>
+      <p>Log in to the admin panel to continue the conversation.</p>`;
+    await send({ to, subject: `Customer replied: "${subject}" | Lumina Bank`, html: layout('Customer Replied', body) });
+  },
+
   async sendTicketClosed(to: string, opts: { firstName: string; subject: string }): Promise<void> {
     const { firstName, subject } = opts;
     const body = `

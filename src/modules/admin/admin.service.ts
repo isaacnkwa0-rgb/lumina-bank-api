@@ -197,7 +197,7 @@ export class AdminService {
   async approveTransfer(id: string) {
     const transfer = await prisma.transfer.findUnique({
       where: { id },
-      include: { fromAccount: { include: { user: { select: { id: true } } } } },
+      include: { fromAccount: { include: { user: { select: { id: true, email: true } } } } },
     });
     if (!transfer) throw new AppError('Transfer not found', 404, ErrorCodes.NOT_FOUND);
     if (transfer.status !== TransferStatus.PENDING) throw new AppError('Transfer is not pending', 400, ErrorCodes.CONFLICT);
@@ -219,6 +219,11 @@ export class AdminService {
         body: `Your transfer of £${amount} has been processed and sent successfully.`,
       },
     });
+
+    mailService.sendTransferApproved(transfer.fromAccount.user.email, {
+      amount,
+      currency: transfer.currency,
+    }).catch(() => {});
 
     return prisma.transfer.findUnique({ where: { id } });
   }
