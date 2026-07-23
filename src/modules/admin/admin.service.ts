@@ -678,13 +678,13 @@ export class AdminService {
   async freezeAccount(accountId: string) {
     const account = await prisma.account.findUnique({ where: { id: accountId } });
     if (!account) throw new AppError('Account not found', 404, ErrorCodes.NOT_FOUND);
-    return prisma.account.update({ where: { id: accountId }, data: { status: 'FROZEN', isFrozen: true } });
+    return prisma.account.update({ where: { id: accountId }, data: { status: 'FROZEN' } });
   }
 
   async unfreezeAccount(accountId: string) {
     const account = await prisma.account.findUnique({ where: { id: accountId } });
     if (!account) throw new AppError('Account not found', 404, ErrorCodes.NOT_FOUND);
-    return prisma.account.update({ where: { id: accountId }, data: { status: 'ACTIVE', isFrozen: false } });
+    return prisma.account.update({ where: { id: accountId }, data: { status: 'ACTIVE' } });
   }
 
   async closeAccount(accountId: string) {
