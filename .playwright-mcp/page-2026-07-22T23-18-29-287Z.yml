@@ -1,0 +1,36 @@
+- generic [active] [ref=f58e1]:
+  - generic [ref=f58e2]:
+    - banner [ref=f58e4]:
+      - link "Lumina Bank" [ref=f58e5] [cursor=pointer]:
+        - /url: /
+      - combobox "Select language" [ref=f58e11] [cursor=pointer]:
+        - option "🇬🇧 EN" [selected]
+        - option "🇪🇸 ES"
+        - option "🇫🇷 FR"
+        - option "🇵🇹 PT"
+        - option "🇩🇪 DE"
+    - main [ref=f58e12]:
+      - generic [ref=f58e14]:
+        - generic [ref=f58e15]:
+          - heading "Log on to Online Banking" [level=1] [ref=f58e16]
+          - paragraph [ref=f58e17]: Enter your email and password to access your account.
+        - generic [ref=f58e18]:
+          - generic [ref=f58e19]:
+            - generic [ref=f58e20]: Email address
+            - textbox "Email address" [ref=f58e21]:
+              - /placeholder: e.g. demo@lumina.bank
+              - text: isaacnkwa0@gmail.com
+          - generic [ref=f58e22]:
+            - generic [ref=f58e23]: Password
+            - textbox "Password" [ref=f58e24]: Lumina@2026!
+          - button "Log on" [ref=f58e26]
+          - generic [ref=f58e27]:
+            - link "Forgotten your details?" [ref=f58e28] [cursor=pointer]:
+              - /url: /forgot-password
+            - generic [ref=f58e29]:
+              - text: New to Lumina Bank?
+              - link "Register" [ref=f58e30] [cursor=pointer]:
+                - /url: /register
+        - paragraph [ref=f58e32]: "Security notice: Lumina Bank will never ask for your full password. Always ensure you are on the correct website before logging on."
+    - contentinfo [ref=f58e33]: © 2026 Lumina Bank. All rights reserved. Authorised by the FCA.
+  - alert [ref=f58e34]

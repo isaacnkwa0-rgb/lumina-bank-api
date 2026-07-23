@@ -1,0 +1,104 @@
+- generic [ref=f20e1]:
+  - complementary [ref=f20e2]:
+    - link [ref=f20e3] [cursor=pointer]:
+      - /url: /dashboard
+      - generic [ref=f20e7]:
+        - paragraph [ref=f20e8]: Lumina Bank
+        - paragraph [ref=f20e9]: Secure Banking
+    - generic [ref=f20e15]:
+      - paragraph [ref=f20e16]: Alex Morgan
+      - paragraph [ref=f20e17]: demo@lumina.bank
+    - navigation [ref=f20e18]:
+      - generic [ref=f20e19]:
+        - paragraph [ref=f20e20]: Overview
+        - link "Home" [ref=f20e21] [cursor=pointer]:
+          - /url: /dashboard
+        - link "Accounts" [ref=f20e26] [cursor=pointer]:
+          - /url: /accounts
+        - link "Transactions" [ref=f20e30] [cursor=pointer]:
+          - /url: /transactions
+        - link "Notifications" [ref=f20e35] [cursor=pointer]:
+          - /url: /notifications
+      - generic [ref=f20e40]:
+        - paragraph [ref=f20e41]: Move Money
+        - link "Transfer" [ref=f20e42] [cursor=pointer]:
+          - /url: /transfer
+        - link "Standing Orders" [ref=f20e47] [cursor=pointer]:
+          - /url: /standing-orders
+        - link "Direct Debits" [ref=f20e54] [cursor=pointer]:
+          - /url: /direct-debits
+        - link "Saved Payees" [ref=f20e58] [cursor=pointer]:
+          - /url: /beneficiaries
+      - generic [ref=f20e63]:
+        - paragraph [ref=f20e64]: Cards & Credit
+        - link "Cards" [ref=f20e65] [cursor=pointer]:
+          - /url: /cards
+        - link "Loans" [ref=f20e69] [cursor=pointer]:
+          - /url: /loans
+        - link "Mortgage" [ref=f20e73] [cursor=pointer]:
+          - /url: /mortgage
+      - generic [ref=f20e78]:
+        - paragraph [ref=f20e79]: Grow
+        - link "Investments" [ref=f20e80] [cursor=pointer]:
+          - /url: /investments
+        - link "Savings Goals" [ref=f20e85] [cursor=pointer]:
+          - /url: /goals
+        - link "Crypto" [ref=f20e91] [cursor=pointer]:
+          - /url: /crypto
+        - link "Insurance" [ref=f20e95] [cursor=pointer]:
+          - /url: /insurance
+      - generic [ref=f20e100]:
+        - paragraph [ref=f20e101]: Tools
+        - link "Analytics" [ref=f20e102] [cursor=pointer]:
+          - /url: /analytics
+        - link "Exchange Rates" [ref=f20e105] [cursor=pointer]:
+          - /url: /rates
+      - generic [ref=f20e110]:
+        - paragraph [ref=f20e111]: Support
+        - link "My Disputes" [ref=f20e112] [cursor=pointer]:
+          - /url: /disputes
+    - generic [ref=f20e116]:
+      - combobox "Select language" [ref=f20e119] [cursor=pointer]:
+        - option "🇬🇧 EN" [selected]
+        - option "🇪🇸 ES"
+        - option "🇫🇷 FR"
+        - option "🇵🇹 PT"
+        - option "🇩🇪 DE"
+      - link "Profile & Settings" [ref=f20e120] [cursor=pointer]:
+        - /url: /profile
+      - button "Log off" [ref=f20e124]
+  - main [ref=f20e129]:
+    - generic [ref=f20e130]:
+      - generic [ref=f20e131]:
+        - button [ref=f20e132]
+        - generic [ref=f20e140]:
+          - heading "Transfer PIN" [level=1] [ref=f20e141]
+          - paragraph [ref=f20e142]: 6-digit payment security PIN
+      - generic [ref=f20e201]:
+        - generic [ref=f20e202]:
+          - paragraph [ref=f20e203]: Enter your new PIN
+          - paragraph [ref=f20e204]: Choose a 6-digit PIN you'll remember
+        - paragraph [ref=f20e206]:
+          - strong [ref=f20e207]: "Tips:"
+          - text: Avoid obvious sequences like 123456 or your date of birth. Don't share your PIN with anyone — Lumina Bank staff will never ask for it.
+        - generic [ref=f20e208]:
+          - generic [ref=f20e209]:
+            - textbox [ref=f20e211]: "6"
+            - textbox [active] [ref=f20e214]
+            - textbox [ref=f20e217]
+            - textbox [ref=f20e220]
+            - textbox [ref=f20e223]
+            - textbox [ref=f20e226]
+          - generic [ref=f20e228]:
+            - button "1" [ref=f20e229]
+            - button "2" [ref=f20e230]
+            - button "3" [ref=f20e231]
+            - button "4" [ref=f20e232]
+            - button "5" [ref=f20e233]
+            - button "6" [ref=f20e234]
+            - button "7" [ref=f20e235]
+            - button "8" [ref=f20e236]
+            - button "9" [ref=f20e237]
+            - button "0" [ref=f20e238]
+            - button "⌫" [ref=f20e239]
+  - alert [ref=f20e147]

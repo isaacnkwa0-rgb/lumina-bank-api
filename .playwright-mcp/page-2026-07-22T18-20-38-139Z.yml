@@ -1,0 +1,27 @@
+- generic [active] [ref=f51e1]:
+  - generic [ref=f51e2]:
+    - banner [ref=f51e4]:
+      - link "Lumina Bank" [ref=f51e5] [cursor=pointer]:
+        - /url: /
+      - combobox "Select language" [ref=f51e11] [cursor=pointer]:
+        - option "🇬🇧 EN" [selected]
+        - option "🇪🇸 ES"
+        - option "🇫🇷 FR"
+        - option "🇵🇹 PT"
+        - option "🇩🇪 DE"
+    - main [ref=f51e12]:
+      - region [ref=f51e601]:
+        - generic [ref=f51e602]:
+          - heading "Welcome to Lumina Bank, Isaac!" [level=2] [ref=f51e607]
+          - paragraph [ref=f51e608]: Your account has been created.
+        - generic [ref=f51e609]:
+          - paragraph [ref=f51e610]: Account Status
+          - generic [ref=f51e611]: Account Created
+          - generic [ref=f51e616]: Email Verified
+          - generic [ref=f51e621]: Documents Submitted
+          - generic [ref=f51e630]:
+            - text: Identity Review Pending
+            - paragraph [ref=f51e631]: Usually a few minutes · Up to 24 hours
+        - button "Go to Dashboard" [ref=f51e632]
+    - contentinfo [ref=f51e114]: © 2026 Lumina Bank. All rights reserved. Authorised by the FCA.
+  - alert [ref=f51e115]

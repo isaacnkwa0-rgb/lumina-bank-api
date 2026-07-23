@@ -409,6 +409,27 @@ export class AdminController {
       sendSuccess(res, data, 'Account funded successfully');
     } catch (err) { next(err); }
   }
+
+  async getAgents(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = await adminService.getAgents();
+      sendSuccess(res, data, 'Agents retrieved');
+    } catch (err) { next(err); }
+  }
+
+  async createAgent(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = await adminService.createAgent(req.body);
+      sendSuccess(res, data, 'Agent created', 201);
+    } catch (err) { next(err); }
+  }
+
+  async deleteAgent(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = await adminService.deleteAgent(req.params.id as string);
+      sendSuccess(res, data, 'Agent deleted');
+    } catch (err) { next(err); }
+  }
 }
 
 export default new AdminController();

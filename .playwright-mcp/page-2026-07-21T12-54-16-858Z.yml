@@ -1,0 +1,45 @@
+- generic [active] [ref=f1e1]:
+  - generic [ref=f1e2]:
+    - banner [ref=f1e4]:
+      - link "Lumina Bank" [ref=f1e5] [cursor=pointer]:
+        - /url: /
+      - combobox "Select language" [ref=f1e11] [cursor=pointer]:
+        - option "🇬🇧 EN" [selected]
+        - option "🇪🇸 ES"
+        - option "🇫🇷 FR"
+        - option "🇵🇹 PT"
+        - option "🇩🇪 DE"
+    - main [ref=f1e12]:
+      - generic [ref=f1e14]:
+        - generic [ref=f1e130]:
+          - generic [ref=f1e131]: Welcome
+          - generic [ref=f1e137]: Eligibility
+          - generic [ref=f1e143]: Personal
+          - generic [ref=f1e149]: Contact
+          - generic [ref=f1e155]: Email
+          - generic [ref=f1e161]: Address
+          - generic [ref=f1e166]: Finances
+          - generic [ref=f1e172]:
+            - generic [ref=f1e173]: "8"
+            - generic [ref=f1e175]: Identity
+          - generic [ref=f1e177]:
+            - generic [ref=f1e178]: "9"
+            - generic [ref=f1e180]: Review
+          - generic [ref=f1e182]:
+            - generic [ref=f1e183]: "10"
+            - generic [ref=f1e185]: Consent
+          - generic [ref=f1e187]:
+            - generic [ref=f1e188]: "11"
+            - generic [ref=f1e190]: Complete
+        - region [ref=f1e379]:
+          - generic [ref=f1e356]:
+            - heading "Documents Submitted Securely" [level=2] [ref=f1e384]
+            - paragraph [ref=f1e385]: Your identity is being verified.
+            - generic [ref=f1e386]:
+              - generic [ref=f1e387]: Under Review
+              - paragraph [ref=f1e392]: "Estimated review: 5–10 minutes · Up to 24 hours if manual review is needed"
+          - button "Continue to Review" [ref=f1e393]
+        - paragraph [ref=f1e219]: 256-bit TLS encryption · FCA regulated · FSCS protected up to £85,000
+    - contentinfo [ref=f1e114]: © 2026 Lumina Bank. All rights reserved. Authorised by the FCA.
+  - button "Open Next.js Dev Tools" [ref=f1e120] [cursor=pointer]
+  - alert [ref=f1e128]

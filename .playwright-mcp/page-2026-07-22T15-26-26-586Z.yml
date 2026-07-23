@@ -1,0 +1,46 @@
+- generic [active] [ref=f39e1]:
+  - link "Skip to content":
+    - /url: "#geist-skip-nav"
+  - generic [ref=f39e3]:
+    - banner [ref=f39e4]:
+      - link "Vercel logo":
+        - /url: /home
+        - button "Vercel Logo":
+          - img "Vercel Logo"
+      - navigation [ref=f39e5]:
+        - navigation [ref=f39e6]:
+          - link [ref=f39e7] [cursor=pointer]:
+            - /url: /signup?next=%2Fsso-api%3Furl%3Dhttps%253A%252F%252Flumina-bank-o19xiqb84-isaacnkwa0-rgbs-projects.vercel.app%252Flogin%26nonce%3Db5da8b7f36230c0b2df0acdd33ec267ff38c3339bcce96ef7b108798c320f281
+            - paragraph [ref=f39e9]: Sign Up
+    - main [ref=f39e10]:
+      - generic [ref=f39e12]:
+        - heading "Log in to Vercel" [level=1] [ref=f39e15]
+        - generic [ref=f39e16]:
+          - generic [ref=f39e17]:
+            - textbox "Email Address" [ref=f39e19]
+            - button "Continue with Email" [ref=f39e20] [cursor=pointer]
+          - generic [ref=f39e23]:
+            - button "Continue with Google" [ref=f39e24] [cursor=pointer]:
+              - generic [ref=f39e29]:
+                - generic [ref=f39e30]: Continue with
+                - text: Google
+            - button "Continue with GitHub" [ref=f39e31] [cursor=pointer]:
+              - generic [ref=f39e35]:
+                - generic [ref=f39e36]: Continue with
+                - text: GitHub
+            - button "Continue with Apple" [ref=f39e37] [cursor=pointer]:
+              - generic [ref=f39e41]:
+                - generic [ref=f39e42]: Continue with
+                - text: Apple
+            - button "Continue with SAML SSO" [ref=f39e44] [cursor=pointer]
+            - button "Continue with Passkey" [ref=f39e49] [cursor=pointer]
+            - button "Show other options" [ref=f39e54] [cursor=pointer]
+        - paragraph [ref=f39e57]:
+          - text: Don't have an account?
+          - link "Sign Up" [ref=f39e58] [cursor=pointer]:
+            - /url: /signup?next=%2Fsso-api%3Furl%3Dhttps%253A%252F%252Flumina-bank-o19xiqb84-isaacnkwa0-rgbs-projects.vercel.app%252Flogin%26nonce%3Db5da8b7f36230c0b2df0acdd33ec267ff38c3339bcce96ef7b108798c320f281
+      - generic [ref=f39e61]:
+        - link "Terms" [ref=f39e62] [cursor=pointer]:
+          - /url: /legal/terms
+        - link "Privacy Policy" [ref=f39e63] [cursor=pointer]:
+          - /url: /legal/privacy-policy

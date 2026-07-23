@@ -1,0 +1,32 @@
+- generic [active] [ref=f3e1]:
+  - button "Open Next.js Dev Tools" [ref=f3e39] [cursor=pointer]
+  - alert [ref=f3e43]
+  - generic [ref=f3e44]:
+    - banner [ref=f3e45]:
+      - link "Back to app" [ref=f3e46] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f3e52]: Admin Console
+      - generic [ref=f3e53]: Internal
+      - button "Log off" [ref=f3e54]
+    - main [ref=f3e59]:
+      - generic [ref=f3e60]:
+        - generic [ref=f3e62]:
+          - heading "Admin Console" [level=1] [ref=f3e66]
+          - generic [ref=f3e67]: Internal
+        - generic [ref=f3e68]:
+          - button "Transfers" [ref=f3e69]
+          - button "Loans" [ref=f3e74]
+          - button "Mortgages" [ref=f3e78]
+          - button "Disputes" [ref=f3e83]
+          - button "Insurance" [ref=f3e87]
+          - button "Crypto" [ref=f3e91]
+          - button "Cards" [ref=f3e95]
+          - button "Transactions" [ref=f3e99]
+          - button "Rates" [ref=f3e104]
+          - button "Investments" [ref=f3e109]
+          - button "Goals" [ref=f3e114]
+          - button "Users" [ref=f3e120]
+          - button "Audit Log" [ref=f3e127]
+        - generic [ref=f3e134]:
+          - button "Pending" [ref=f3e135]
+          - button "All" [ref=f3e136]

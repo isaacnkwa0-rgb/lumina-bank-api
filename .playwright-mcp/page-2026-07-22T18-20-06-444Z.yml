@@ -1,0 +1,58 @@
+- generic [active] [ref=f51e1]:
+  - generic [ref=f51e2]:
+    - banner [ref=f51e4]:
+      - link "Lumina Bank" [ref=f51e5] [cursor=pointer]:
+        - /url: /
+      - combobox "Select language" [ref=f51e11] [cursor=pointer]:
+        - option "🇬🇧 EN" [selected]
+        - option "🇪🇸 ES"
+        - option "🇫🇷 FR"
+        - option "🇵🇹 PT"
+        - option "🇩🇪 DE"
+    - main [ref=f51e12]:
+      - generic [ref=f51e14]:
+        - generic [ref=f51e16]:
+          - generic [ref=f51e17]: Welcome
+          - generic [ref=f51e22]: Eligibility
+          - generic [ref=f51e27]: Personal
+          - generic [ref=f51e32]: Contact
+          - generic [ref=f51e37]: Email
+          - generic [ref=f51e42]: Address
+          - generic [ref=f51e47]: Finances
+          - generic [ref=f51e52]: Identity
+          - generic [ref=f51e57]: Review
+          - generic [ref=f51e63]:
+            - generic [ref=f51e64]: "10"
+            - generic [ref=f51e66]: Consent
+          - generic [ref=f51e68]:
+            - generic [ref=f51e69]: "11"
+            - generic [ref=f51e71]: Complete
+        - region [ref=f51e575]:
+          - generic [ref=f51e576]:
+            - heading "Legal Consent" [level=2] [ref=f51e577]
+            - paragraph [ref=f51e578]: Please read and agree to the following
+          - generic [ref=f51e579]:
+            - paragraph [ref=f51e580]: Required
+            - generic [ref=f51e581] [cursor=pointer]:
+              - checkbox "I have read and agree to the Terms & Conditions and Privacy Policy" [ref=f51e582]
+              - generic [ref=f51e583]: I have read and agree to the Terms & Conditions and Privacy Policy
+            - generic [ref=f51e584] [cursor=pointer]:
+              - checkbox "I confirm the information I've provided is accurate and complete" [ref=f51e585]
+              - generic [ref=f51e586]: I confirm the information I've provided is accurate and complete
+          - generic [ref=f51e587]:
+            - paragraph [ref=f51e588]: Optional
+            - generic [ref=f51e589] [cursor=pointer]:
+              - checkbox "I agree to receive marketing communications by email and SMS" [ref=f51e590]
+              - generic [ref=f51e591]: I agree to receive marketing communications by email and SMS
+            - generic [ref=f51e592] [cursor=pointer]:
+              - checkbox "I consent to electronic statements instead of paper statements" [ref=f51e593]
+              - generic [ref=f51e594]: I consent to electronic statements instead of paper statements
+            - generic [ref=f51e595] [cursor=pointer]:
+              - checkbox "I consent to Lumina processing my data for personalised product recommendations" [ref=f51e596]
+              - generic [ref=f51e597]: I consent to Lumina processing my data for personalised product recommendations
+          - generic [ref=f51e598]:
+            - button "Back" [ref=f51e599]
+            - button "Continue" [ref=f51e600]
+        - paragraph [ref=f51e110]: 256-bit TLS encryption · FCA regulated · FSCS protected up to £85,000
+    - contentinfo [ref=f51e114]: © 2026 Lumina Bank. All rights reserved. Authorised by the FCA.
+  - alert [ref=f51e115]

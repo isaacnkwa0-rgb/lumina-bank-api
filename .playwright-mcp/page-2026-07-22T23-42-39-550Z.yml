@@ -1,0 +1,36 @@
+- generic [ref=f66e1]:
+  - alert [ref=f66e34]
+  - generic [ref=f66e43]:
+    - banner [ref=f66e44]:
+      - link "Back to app" [ref=f66e45] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f66e51]: Admin Console
+      - generic [ref=f66e52]: Internal
+      - button "Log off" [ref=f66e53]
+    - main [ref=f66e58]:
+      - generic [ref=f66e59]:
+        - generic [ref=f66e61]:
+          - heading "Admin Console" [level=1] [ref=f66e65]
+          - generic [ref=f66e66]: Internal
+        - generic [ref=f66e67]:
+          - button "Transfers" [ref=f66e68]
+          - button "Loans" [ref=f66e73]
+          - button "Mortgages" [ref=f66e77]
+          - button "Disputes" [ref=f66e82]
+          - button "Support" [active] [ref=f66e86]
+          - button "Insurance" [ref=f66e90]
+          - button "Crypto" [ref=f66e94]
+          - button "Cards" [ref=f66e98]
+          - button "Transactions" [ref=f66e102]
+          - button "Rates" [ref=f66e107]
+          - button "Investments" [ref=f66e112]
+          - button "Goals" [ref=f66e117]
+          - button "Users" [ref=f66e123]
+          - button "KYC Review" [ref=f66e130]
+          - button "Audit Log" [ref=f66e135]
+        - generic [ref=f66e150]:
+          - generic [ref=f66e151]:
+            - button "Open" [ref=f66e152]
+            - button "In Progress" [ref=f66e153]
+            - button "All" [ref=f66e154]
+          - paragraph [ref=f66e158]: No support tickets

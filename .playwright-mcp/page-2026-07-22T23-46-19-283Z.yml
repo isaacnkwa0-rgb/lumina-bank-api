@@ -1,0 +1,116 @@
+- generic [ref=f67e1]:
+  - alert [ref=f67e34]
+  - complementary [ref=f67e35]:
+    - link [ref=f67e36] [cursor=pointer]:
+      - /url: /dashboard
+      - generic [ref=f67e40]:
+        - paragraph [ref=f67e41]: Lumina Bank
+        - paragraph [ref=f67e42]: Secure Banking
+    - generic [ref=f67e48]:
+      - paragraph [ref=f67e49]: Isaac Nkwa
+      - paragraph [ref=f67e50]: isaacnkwa0@gmail.com
+    - navigation [ref=f67e51]:
+      - generic [ref=f67e52]:
+        - paragraph [ref=f67e53]: Overview
+        - link "Home" [ref=f67e54] [cursor=pointer]:
+          - /url: /dashboard
+        - link "Accounts" [ref=f67e61] [cursor=pointer]:
+          - /url: /accounts
+        - link "Transactions" [ref=f67e65] [cursor=pointer]:
+          - /url: /transactions
+        - link "Notifications" [ref=f67e70] [cursor=pointer]:
+          - /url: /notifications
+      - generic [ref=f67e75]:
+        - paragraph [ref=f67e76]: Move Money
+        - link "Transfer" [ref=f67e77] [cursor=pointer]:
+          - /url: /transfer
+        - link "Standing Orders" [ref=f67e82] [cursor=pointer]:
+          - /url: /standing-orders
+        - link "Direct Debits" [ref=f67e89] [cursor=pointer]:
+          - /url: /direct-debits
+        - link "Saved Payees" [ref=f67e93] [cursor=pointer]:
+          - /url: /beneficiaries
+      - generic [ref=f67e98]:
+        - paragraph [ref=f67e99]: Cards & Credit
+        - link "Cards" [ref=f67e100] [cursor=pointer]:
+          - /url: /cards
+        - link "Loans" [ref=f67e104] [cursor=pointer]:
+          - /url: /loans
+        - link "Mortgage" [ref=f67e108] [cursor=pointer]:
+          - /url: /mortgage
+      - generic [ref=f67e113]:
+        - paragraph [ref=f67e114]: Grow
+        - link "Investments" [ref=f67e115] [cursor=pointer]:
+          - /url: /investments
+        - link "Savings Goals" [ref=f67e120] [cursor=pointer]:
+          - /url: /goals
+        - link "Crypto" [ref=f67e126] [cursor=pointer]:
+          - /url: /crypto
+        - link "Insurance" [ref=f67e130] [cursor=pointer]:
+          - /url: /insurance
+      - generic [ref=f67e135]:
+        - paragraph [ref=f67e136]: Tools
+        - link "Analytics" [ref=f67e137] [cursor=pointer]:
+          - /url: /analytics
+        - link "Exchange Rates" [ref=f67e140] [cursor=pointer]:
+          - /url: /rates
+      - generic [ref=f67e145]:
+        - paragraph [ref=f67e146]: Support
+        - link "Help & Support" [active] [ref=f67e147] [cursor=pointer]:
+          - /url: /support
+        - link "My Disputes" [ref=f67e152] [cursor=pointer]:
+          - /url: /disputes
+    - generic [ref=f67e156]:
+      - combobox "Select language" [ref=f67e159] [cursor=pointer]:
+        - option "🇬🇧 EN" [selected]
+        - option "🇪🇸 ES"
+        - option "🇫🇷 FR"
+        - option "🇵🇹 PT"
+        - option "🇩🇪 DE"
+      - link "Profile & Settings" [ref=f67e160] [cursor=pointer]:
+        - /url: /profile
+      - button "Log off" [ref=f67e164]
+  - main [ref=f67e169]:
+    - generic [ref=f67e247]:
+      - generic [ref=f67e248]:
+        - button "Back" [ref=f67e249]
+        - generic [ref=f67e257]:
+          - heading "Help & Support" [level=1] [ref=f67e258]
+          - paragraph [ref=f67e259]: We're here to help
+      - generic [ref=f67e260]:
+        - generic [ref=f67e262]:
+          - paragraph [ref=f67e263]: My conversations
+          - button "New conversation" [ref=f67e264]
+        - generic [ref=f67e268]:
+          - paragraph [ref=f67e270]: Contact us
+          - button [ref=f67e271]:
+            - generic [ref=f67e276]:
+              - paragraph [ref=f67e277]: Email support
+              - paragraph [ref=f67e278]: support@luminabank.online
+          - button [ref=f67e279]:
+            - generic [ref=f67e283]:
+              - paragraph [ref=f67e284]: Live chat
+              - paragraph [ref=f67e285]: Mon–Fri, 9am–6pm GMT
+          - button [ref=f67e286]:
+            - generic [ref=f67e290]:
+              - paragraph [ref=f67e291]: Phone
+              - paragraph [ref=f67e292]: +44 800 000 0000 · 24/7
+        - generic [ref=f67e293]:
+          - paragraph [ref=f67e295]: Frequently asked questions
+          - button [ref=f67e297]:
+            - paragraph [ref=f67e302]: How long do transfers take?
+          - button [ref=f67e306]:
+            - paragraph [ref=f67e311]: I've been locked out of my account
+          - button [ref=f67e315]:
+            - paragraph [ref=f67e319]: My card has been blocked — what do I do?
+          - button [ref=f67e323]:
+            - paragraph [ref=f67e328]: How do I enable two-factor authentication?
+          - button [ref=f67e332]:
+            - paragraph [ref=f67e338]: Why is my KYC verification taking long?
+          - button [ref=f67e342]:
+            - paragraph [ref=f67e346]: I don't recognise a transaction on my account
+          - button [ref=f67e350]:
+            - paragraph [ref=f67e355]: What are the daily transfer limits?
+          - button [ref=f67e359]:
+            - paragraph [ref=f67e364]: How do I change my password?
+        - paragraph [ref=f67e368]: Lumina Bank is a demo banking application. For urgent account security concerns, email security@luminabank.online

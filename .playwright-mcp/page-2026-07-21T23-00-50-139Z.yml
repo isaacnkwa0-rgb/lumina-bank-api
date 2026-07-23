@@ -1,0 +1,138 @@
+- generic [ref=f19e1]:
+  - complementary [ref=f19e2]:
+    - link [ref=f19e3] [cursor=pointer]:
+      - /url: /dashboard
+      - generic [ref=f19e7]:
+        - paragraph [ref=f19e8]: Lumina Bank
+        - paragraph [ref=f19e9]: Secure Banking
+    - generic [ref=f19e15]:
+      - paragraph [ref=f19e16]: Alex Morgan
+      - paragraph [ref=f19e17]: demo@lumina.bank
+    - navigation [ref=f19e18]:
+      - generic [ref=f19e19]:
+        - paragraph [ref=f19e20]: Overview
+        - link "Home" [ref=f19e21] [cursor=pointer]:
+          - /url: /dashboard
+        - link "Accounts" [ref=f19e28] [cursor=pointer]:
+          - /url: /accounts
+        - link "Transactions" [ref=f19e32] [cursor=pointer]:
+          - /url: /transactions
+        - link "Notifications" [ref=f19e37] [cursor=pointer]:
+          - /url: /notifications
+      - generic [ref=f19e42]:
+        - paragraph [ref=f19e43]: Move Money
+        - link "Transfer" [ref=f19e44] [cursor=pointer]:
+          - /url: /transfer
+        - link "Standing Orders" [ref=f19e49] [cursor=pointer]:
+          - /url: /standing-orders
+        - link "Direct Debits" [ref=f19e56] [cursor=pointer]:
+          - /url: /direct-debits
+        - link "Saved Payees" [ref=f19e60] [cursor=pointer]:
+          - /url: /beneficiaries
+      - generic [ref=f19e65]:
+        - paragraph [ref=f19e66]: Cards & Credit
+        - link "Cards" [ref=f19e67] [cursor=pointer]:
+          - /url: /cards
+        - link "Loans" [ref=f19e71] [cursor=pointer]:
+          - /url: /loans
+        - link "Mortgage" [ref=f19e75] [cursor=pointer]:
+          - /url: /mortgage
+      - generic [ref=f19e80]:
+        - paragraph [ref=f19e81]: Grow
+        - link "Investments" [ref=f19e82] [cursor=pointer]:
+          - /url: /investments
+        - link "Savings Goals" [ref=f19e87] [cursor=pointer]:
+          - /url: /goals
+        - link "Crypto" [ref=f19e93] [cursor=pointer]:
+          - /url: /crypto
+        - link "Insurance" [ref=f19e97] [cursor=pointer]:
+          - /url: /insurance
+      - generic [ref=f19e102]:
+        - paragraph [ref=f19e103]: Tools
+        - link "Analytics" [ref=f19e104] [cursor=pointer]:
+          - /url: /analytics
+        - link "Exchange Rates" [ref=f19e107] [cursor=pointer]:
+          - /url: /rates
+      - generic [ref=f19e112]:
+        - paragraph [ref=f19e113]: Support
+        - link "My Disputes" [ref=f19e114] [cursor=pointer]:
+          - /url: /disputes
+    - generic [ref=f19e118]:
+      - combobox "Select language" [ref=f19e121] [cursor=pointer]:
+        - option "🇬🇧 EN" [selected]
+        - option "🇪🇸 ES"
+        - option "🇫🇷 FR"
+        - option "🇵🇹 PT"
+        - option "🇩🇪 DE"
+      - link "Profile & Settings" [ref=f19e122] [cursor=pointer]:
+        - /url: /profile
+      - button "Log off" [ref=f19e126]
+  - main [ref=f19e131]:
+    - generic [ref=f19e662]:
+      - generic [ref=f19e663]:
+        - heading "Transfer & Pay" [level=1] [ref=f19e664]
+        - paragraph [ref=f19e665]: Send money quickly and securely
+      - generic [ref=f19e666]:
+        - button "Own accounts" [ref=f19e667]
+        - button "UK transfer" [ref=f19e671]
+        - button "International" [ref=f19e675]
+      - generic [ref=f19e716]:
+        - generic [ref=f19e717]:
+          - paragraph [ref=f19e718]: From
+          - generic [ref=f19e720]:
+            - generic [ref=f19e784]:
+              - paragraph [ref=f19e785]: Current Account
+              - paragraph [ref=f19e786]:
+                - text: ••0876·
+                - generic [ref=f19e787]: £22,693.30 available
+            - combobox [ref=f19e726] [cursor=pointer]:
+              - option "Choose source account"
+              - option "CURRENT — £22,693.30 (••0876)" [selected]
+              - option "SAVINGS — £25,200.00 (••2345)"
+              - option "BUSINESS — £8,900.00 (••9871)"
+        - generic [ref=f19e732]:
+          - paragraph [ref=f19e734]: Send to
+          - generic [ref=f19e736]:
+            - generic [ref=f19e737]:
+              - button "Saved payees" [ref=f19e738]
+              - button "New payee" [ref=f19e739]
+            - generic [ref=f19e740]:
+              - button "Landlord Landlord NatWest · ••9012" [active] [ref=f19e741]:
+                - generic [ref=f19e742]: Landlord
+                - generic [ref=f19e744]:
+                  - paragraph [ref=f19e745]: Landlord
+                  - paragraph [ref=f19e746]: NatWest · ••9012
+              - button "Paris Client Paris Client BNP Paribas · ••" [ref=f19e747]:
+                - generic [ref=f19e748]: Paris Client
+                - generic [ref=f19e750]:
+                  - paragraph [ref=f19e751]: Paris Client
+                  - paragraph [ref=f19e752]: BNP Paribas · ••
+              - button "Mum Mum Barclays · ••5678" [ref=f19e753]:
+                - generic [ref=f19e754]: Mum
+                - generic [ref=f19e756]:
+                  - paragraph [ref=f19e757]: Mum
+                  - paragraph [ref=f19e758]: Barclays · ••5678
+              - button "Dad Dad Lloyds Bank · ••4321" [ref=f19e759]:
+                - generic [ref=f19e760]: Dad
+                - generic [ref=f19e762]:
+                  - paragraph [ref=f19e763]: Dad
+                  - paragraph [ref=f19e764]: Lloyds Bank · ••4321
+              - button "Business Partner Business Partner HSBC UK · ••7890" [ref=f19e765]:
+                - generic [ref=f19e766]: Business Partner
+                - generic [ref=f19e768]:
+                  - paragraph [ref=f19e769]: Business Partner
+                  - paragraph [ref=f19e770]: HSBC UK · ••7890
+        - generic [ref=f19e771]:
+          - paragraph [ref=f19e772]: Amount
+          - generic [ref=f19e773]:
+            - generic [ref=f19e774]: £
+            - spinbutton "0.00" [ref=f19e775]
+        - generic [ref=f19e777]:
+          - generic [ref=f19e778]: Reference
+          - textbox "Reference" [ref=f19e779]:
+            - /placeholder: e.g. Rent July
+        - generic [ref=f19e780]:
+          - generic [ref=f19e781]: ℹ
+          - paragraph [ref=f19e782]: A £1.50 fee applies to external UK transfers. Lumina-to-Lumina transfers are instant and free.
+        - button "Send payment" [ref=f19e783]
+  - alert [ref=f19e233]

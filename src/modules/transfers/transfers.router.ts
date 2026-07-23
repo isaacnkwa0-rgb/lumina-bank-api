@@ -13,6 +13,7 @@ const internalSchema = z.object({
   toAccountId: z.string().uuid(),
   amount: z.number().positive().max(1000000),
   description: z.string().min(1).max(255),
+  transferOtp: z.string().length(6),
 });
 
 const domesticSchema = z.object({
@@ -23,6 +24,7 @@ const domesticSchema = z.object({
   amount: z.number().positive().max(1000000),
   description: z.string().min(1).max(255),
   saveBeneficiary: z.boolean().optional(),
+  transferOtp: z.string().length(6),
 });
 
 const internationalSchema = z.object({
@@ -35,6 +37,7 @@ const internationalSchema = z.object({
   toCurrency: z.string().length(3).toUpperCase(),
   amount: z.number().positive().max(1000000),
   description: z.string().min(1).max(255),
+  transferOtp: z.string().length(6),
 });
 
 const scheduleSchema = z.object({

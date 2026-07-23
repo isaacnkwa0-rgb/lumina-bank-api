@@ -29,8 +29,9 @@ export class TransfersService {
   // Own-accounts internal transfer (same user)
   async internal(
     userId: string,
-    data: { fromAccountId: string; toAccountId: string; amount: number; description: string }
+    data: { fromAccountId: string; toAccountId: string; amount: number; description: string; transferOtp: string }
   ) {
+    await this.checkTransferOtp(userId, data.transferOtp);
     if (data.fromAccountId === data.toAccountId) {
       throw new AppError('Cannot transfer to the same account', 400, ErrorCodes.TRNF_003);
     }
@@ -241,8 +242,10 @@ export class TransfersService {
       amount: number;
       description: string;
       saveBeneficiary?: boolean;
+      transferOtp: string;
     }
   ) {
+    await this.checkTransferOtp(userId, data.transferOtp);
     const fromAccount = await prisma.account.findFirst({
       where: { id: data.fromAccountId, userId },
       include: { user: { select: { id: true, firstName: true, lastName: true } } },
@@ -379,8 +382,10 @@ export class TransfersService {
       toCurrency: string;
       amount: number;
       description: string;
+      transferOtp: string;
     }
   ) {
+    await this.checkTransferOtp(userId, data.transferOtp);
     const fromAccount = await prisma.account.findFirst({ where: { id: data.fromAccountId, userId } });
     if (!fromAccount) throw new AppError('Source account not found', 404, ErrorCodes.ACCT_001);
     if (fromAccount.status === AccountStatus.FROZEN) throw new AppError('Source account is frozen', 400, ErrorCodes.ACCT_002);
@@ -529,6 +534,17 @@ export class TransfersService {
 
   async getFxQuote(fromCurrency: string, toCurrency: string, amount: number) {
     return ratesService.getQuote(fromCurrency, toCurrency, amount);
+  }
+
+  private async checkTransferOtp(userId: string, otp: string) {
+    const record = await prisma.otpCode.findFirst({
+      where: { userId, type: 'TRANSFER_AUTH', usedAt: null, expiresAt: { gt: new Date() } },
+      orderBy: { createdAt: 'desc' },
+    });
+    if (!record || record.code !== otp) {
+      throw new AppError('Invalid or expired transfer OTP', 401, ErrorCodes.AUTH_006);
+    }
+    await prisma.otpCode.update({ where: { id: record.id }, data: { usedAt: new Date() } });
   }
 
   private async notify(userId: string, title: string, body: string) {

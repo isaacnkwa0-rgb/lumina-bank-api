@@ -1,0 +1,73 @@
+- generic [active] [ref=f24e1]:
+  - complementary [ref=f24e2]:
+    - link [ref=f24e3] [cursor=pointer]:
+      - /url: /dashboard
+      - generic [ref=f24e7]:
+        - paragraph [ref=f24e8]: Lumina Bank
+        - paragraph [ref=f24e9]: Secure Banking
+    - navigation [ref=f24e10]:
+      - generic [ref=f24e11]:
+        - paragraph [ref=f24e12]: Overview
+        - link "Home" [ref=f24e13] [cursor=pointer]:
+          - /url: /dashboard
+        - link "Accounts" [ref=f24e18] [cursor=pointer]:
+          - /url: /accounts
+        - link "Transactions" [ref=f24e22] [cursor=pointer]:
+          - /url: /transactions
+        - link "Notifications" [ref=f24e27] [cursor=pointer]:
+          - /url: /notifications
+      - generic [ref=f24e32]:
+        - paragraph [ref=f24e33]: Move Money
+        - link "Transfer" [ref=f24e34] [cursor=pointer]:
+          - /url: /transfer
+        - link "Standing Orders" [ref=f24e39] [cursor=pointer]:
+          - /url: /standing-orders
+        - link "Direct Debits" [ref=f24e46] [cursor=pointer]:
+          - /url: /direct-debits
+        - link "Saved Payees" [ref=f24e50] [cursor=pointer]:
+          - /url: /beneficiaries
+      - generic [ref=f24e55]:
+        - paragraph [ref=f24e56]: Cards & Credit
+        - link "Cards" [ref=f24e57] [cursor=pointer]:
+          - /url: /cards
+        - link "Loans" [ref=f24e61] [cursor=pointer]:
+          - /url: /loans
+        - link "Mortgage" [ref=f24e65] [cursor=pointer]:
+          - /url: /mortgage
+      - generic [ref=f24e70]:
+        - paragraph [ref=f24e71]: Grow
+        - link "Investments" [ref=f24e72] [cursor=pointer]:
+          - /url: /investments
+        - link "Savings Goals" [ref=f24e77] [cursor=pointer]:
+          - /url: /goals
+        - link "Crypto" [ref=f24e83] [cursor=pointer]:
+          - /url: /crypto
+        - link "Insurance" [ref=f24e87] [cursor=pointer]:
+          - /url: /insurance
+      - generic [ref=f24e92]:
+        - paragraph [ref=f24e93]: Tools
+        - link "Analytics" [ref=f24e94] [cursor=pointer]:
+          - /url: /analytics
+        - link "Exchange Rates" [ref=f24e97] [cursor=pointer]:
+          - /url: /rates
+      - generic [ref=f24e102]:
+        - paragraph [ref=f24e103]: Support
+        - link "My Disputes" [ref=f24e104] [cursor=pointer]:
+          - /url: /disputes
+    - generic [ref=f24e108]:
+      - combobox "Select language" [ref=f24e111] [cursor=pointer]:
+        - option "🇬🇧 EN" [selected]
+        - option "🇪🇸 ES"
+        - option "🇫🇷 FR"
+        - option "🇵🇹 PT"
+        - option "🇩🇪 DE"
+      - link "Profile & Settings" [ref=f24e112] [cursor=pointer]:
+        - /url: /profile
+      - button "Log off" [ref=f24e116]
+  - main [ref=f24e121]:
+    - generic [ref=f24e123]:
+      - button [ref=f24e124]
+      - generic [ref=f24e132]:
+        - heading "Transfer PIN" [level=1] [ref=f24e133]
+        - paragraph [ref=f24e134]: 6-digit payment security PIN
+  - alert [ref=f24e139]

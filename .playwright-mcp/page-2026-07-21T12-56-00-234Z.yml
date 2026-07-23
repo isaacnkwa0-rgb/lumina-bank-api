@@ -1,0 +1,107 @@
+- generic [active] [ref=f1e1]:
+  - generic [ref=f1e2]:
+    - banner [ref=f1e4]:
+      - link "Lumina Bank" [ref=f1e5] [cursor=pointer]:
+        - /url: /
+      - combobox "Select language" [ref=f1e11] [cursor=pointer]:
+        - option "🇬🇧 EN" [selected]
+        - option "🇪🇸 ES"
+        - option "🇫🇷 FR"
+        - option "🇵🇹 PT"
+        - option "🇩🇪 DE"
+    - main [ref=f1e12]:
+      - generic [ref=f1e14]:
+        - generic [ref=f1e130]:
+          - generic [ref=f1e131]: Welcome
+          - generic [ref=f1e137]: Eligibility
+          - generic [ref=f1e143]: Personal
+          - generic [ref=f1e149]: Contact
+          - generic [ref=f1e155]: Email
+          - generic [ref=f1e161]: Address
+          - generic [ref=f1e166]: Finances
+          - generic [ref=f1e171]: Identity
+          - generic [ref=f1e177]:
+            - generic [ref=f1e178]: "9"
+            - generic [ref=f1e180]: Review
+          - generic [ref=f1e182]:
+            - generic [ref=f1e183]: "10"
+            - generic [ref=f1e185]: Consent
+          - generic [ref=f1e187]:
+            - generic [ref=f1e188]: "11"
+            - generic [ref=f1e190]: Complete
+        - region [ref=f1e398]:
+          - generic [ref=f1e399]:
+            - heading "Review Your Information" [level=2] [ref=f1e400]
+            - paragraph [ref=f1e401]: Check everything before you consent
+          - generic [ref=f1e402]:
+            - generic [ref=f1e403]:
+              - generic [ref=f1e404]: Personal Information
+              - button "Edit" [ref=f1e405]
+            - generic [ref=f1e409]:
+              - generic [ref=f1e410]:
+                - paragraph [ref=f1e411]: Name
+                - generic [ref=f1e412]: Isaac Nkwa
+              - generic [ref=f1e413]:
+                - paragraph [ref=f1e414]: Date of birth
+                - generic [ref=f1e415]: 1990-01-15
+              - generic [ref=f1e416]:
+                - paragraph [ref=f1e417]: Gender
+                - generic [ref=f1e418]: MALE
+              - generic [ref=f1e419]:
+                - paragraph [ref=f1e420]: Nationality
+                - generic [ref=f1e421]: United Kingdom
+          - generic [ref=f1e422]:
+            - generic [ref=f1e423]: Contact Information
+            - generic [ref=f1e425]:
+              - generic [ref=f1e426]:
+                - paragraph [ref=f1e427]: Email
+                - generic [ref=f1e428]: isaac.test@lumina.dev
+              - generic [ref=f1e432]:
+                - paragraph [ref=f1e433]: Phone
+                - generic [ref=f1e434]: +44 7700900001
+          - generic [ref=f1e438]:
+            - generic [ref=f1e439]:
+              - generic [ref=f1e440]: Home Address
+              - button "Edit" [ref=f1e441]
+            - generic [ref=f1e445]:
+              - generic [ref=f1e446]:
+                - paragraph [ref=f1e447]: Address
+                - generic [ref=f1e448]: 123 High Street, London, Greater London, EC1A 1BB
+              - generic [ref=f1e449]:
+                - paragraph [ref=f1e450]: Country
+                - generic [ref=f1e451]: United Kingdom
+          - generic [ref=f1e452]:
+            - generic [ref=f1e453]:
+              - generic [ref=f1e454]: Employment & Finances
+              - button "Edit" [ref=f1e455]
+            - generic [ref=f1e459]:
+              - generic [ref=f1e460]:
+                - paragraph [ref=f1e461]: Employment
+                - generic [ref=f1e462]: EMPLOYED
+              - generic [ref=f1e463]:
+                - paragraph [ref=f1e464]: Income range
+                - generic [ref=f1e465]: £20,000 – £50,000
+              - generic [ref=f1e466]:
+                - paragraph [ref=f1e467]: Source of funds
+                - generic [ref=f1e468]: Salary
+              - generic [ref=f1e469]:
+                - paragraph [ref=f1e470]: Monthly volume
+                - generic [ref=f1e471]: £1,000 – £5,000
+          - generic [ref=f1e472]:
+            - generic [ref=f1e473]:
+              - generic [ref=f1e474]: Identity Documents
+              - button "Edit" [ref=f1e475]
+            - generic [ref=f1e479]:
+              - generic [ref=f1e480]:
+                - paragraph [ref=f1e481]: Document type
+                - generic [ref=f1e482]: PASSPORT
+              - generic [ref=f1e483]:
+                - paragraph [ref=f1e484]: Status
+                - generic [ref=f1e485]: Submitted
+          - generic [ref=f1e490]:
+            - button "Back" [ref=f1e491]
+            - button "Continue" [ref=f1e492]
+        - paragraph [ref=f1e219]: 256-bit TLS encryption · FCA regulated · FSCS protected up to £85,000
+    - contentinfo [ref=f1e114]: © 2026 Lumina Bank. All rights reserved. Authorised by the FCA.
+  - button "Open Next.js Dev Tools" [ref=f1e120] [cursor=pointer]
+  - alert [ref=f1e128]

@@ -1,0 +1,76 @@
+- generic [active] [ref=f51e1]:
+  - generic [ref=f51e2]:
+    - banner [ref=f51e4]:
+      - link "Lumina Bank" [ref=f51e5] [cursor=pointer]:
+        - /url: /
+      - combobox "Select language" [ref=f51e11] [cursor=pointer]:
+        - option "🇬🇧 EN" [selected]
+        - option "🇪🇸 ES"
+        - option "🇫🇷 FR"
+        - option "🇵🇹 PT"
+        - option "🇩🇪 DE"
+    - main [ref=f51e12]:
+      - generic [ref=f51e14]:
+        - generic [ref=f51e16]:
+          - generic [ref=f51e18]:
+            - generic [ref=f51e19]: "1"
+            - generic [ref=f51e21]: Welcome
+          - generic [ref=f51e23]:
+            - generic [ref=f51e24]: "2"
+            - generic [ref=f51e26]: Eligibility
+          - generic [ref=f51e28]:
+            - generic [ref=f51e29]: "3"
+            - generic [ref=f51e31]: Personal
+          - generic [ref=f51e33]:
+            - generic [ref=f51e34]: "4"
+            - generic [ref=f51e36]: Contact
+          - generic [ref=f51e38]:
+            - generic [ref=f51e39]: "5"
+            - generic [ref=f51e41]: Email
+          - generic [ref=f51e43]:
+            - generic [ref=f51e44]: "6"
+            - generic [ref=f51e46]: Address
+          - generic [ref=f51e48]:
+            - generic [ref=f51e49]: "7"
+            - generic [ref=f51e51]: Finances
+          - generic [ref=f51e53]:
+            - generic [ref=f51e54]: "8"
+            - generic [ref=f51e56]: Identity
+          - generic [ref=f51e58]:
+            - generic [ref=f51e59]: "9"
+            - generic [ref=f51e61]: Review
+          - generic [ref=f51e63]:
+            - generic [ref=f51e64]: "10"
+            - generic [ref=f51e66]: Consent
+          - generic [ref=f51e68]:
+            - generic [ref=f51e69]: "11"
+            - generic [ref=f51e71]: Complete
+        - region [ref=f51e73]:
+          - heading "Open your account in 3–5 minutes" [level=2] [ref=f51e75]
+          - generic [ref=f51e76]:
+            - paragraph [ref=f51e77]: "What you'll need:"
+            - generic [ref=f51e78]:
+              - generic [ref=f51e79]: 🪪
+              - generic [ref=f51e80]: Government-issued ID
+            - generic [ref=f51e81]:
+              - generic [ref=f51e82]: ✉️
+              - generic [ref=f51e83]: Email address
+            - generic [ref=f51e84]:
+              - generic [ref=f51e85]: 📱
+              - generic [ref=f51e86]: Mobile phone
+            - generic [ref=f51e87]:
+              - generic [ref=f51e88]: 🏠
+              - generic [ref=f51e89]: Residential address
+          - generic [ref=f51e90]:
+            - generic [ref=f51e91]: 256-bit encryption
+            - generic [ref=f51e95]: FCA regulated
+            - generic [ref=f51e98]: FSCS protected
+          - paragraph [ref=f51e103]: Your data is never sold. We use it only to verify your identity and manage your account.
+          - button "Get Started" [ref=f51e104]
+          - paragraph [ref=f51e107]:
+            - text: Already have an account?
+            - link "Log on" [ref=f51e108] [cursor=pointer]:
+              - /url: /login
+        - paragraph [ref=f51e110]: 256-bit TLS encryption · FCA regulated · FSCS protected up to £85,000
+    - contentinfo [ref=f51e114]: © 2026 Lumina Bank. All rights reserved. Authorised by the FCA.
+  - alert [ref=f51e115]

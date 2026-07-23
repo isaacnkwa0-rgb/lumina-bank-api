@@ -1,0 +1,101 @@
+- generic [active] [ref=f1e1]:
+  - generic [ref=f1e2]:
+    - banner [ref=f1e4]:
+      - link "Lumina Bank" [ref=f1e5] [cursor=pointer]:
+        - /url: /
+      - combobox "Select language" [ref=f1e11] [cursor=pointer]:
+        - option "🇬🇧 EN" [selected]
+        - option "🇪🇸 ES"
+        - option "🇫🇷 FR"
+        - option "🇵🇹 PT"
+        - option "🇩🇪 DE"
+    - main [ref=f1e12]:
+      - generic [ref=f1e14]:
+        - generic [ref=f1e130]:
+          - generic [ref=f1e131]: Welcome
+          - generic [ref=f1e137]: Eligibility
+          - generic [ref=f1e143]: Personal
+          - generic [ref=f1e149]: Contact
+          - generic [ref=f1e155]: Email
+          - generic [ref=f1e162]:
+            - generic [ref=f1e163]: "6"
+            - generic [ref=f1e165]: Address
+          - generic [ref=f1e167]:
+            - generic [ref=f1e168]: "7"
+            - generic [ref=f1e170]: Finances
+          - generic [ref=f1e172]:
+            - generic [ref=f1e173]: "8"
+            - generic [ref=f1e175]: Identity
+          - generic [ref=f1e177]:
+            - generic [ref=f1e178]: "9"
+            - generic [ref=f1e180]: Review
+          - generic [ref=f1e182]:
+            - generic [ref=f1e183]: "10"
+            - generic [ref=f1e185]: Consent
+          - generic [ref=f1e187]:
+            - generic [ref=f1e188]: "11"
+            - generic [ref=f1e190]: Complete
+        - region [ref=f1e192]:
+          - generic [ref=f1e193]:
+            - heading "Home Address" [level=2] [ref=f1e194]
+            - paragraph [ref=f1e195]: Your address on record
+          - generic [ref=f1e196]:
+            - generic [ref=f1e197]: Address line 1
+            - textbox "Address line 1" [ref=f1e198]: 123 High Street
+          - generic [ref=f1e199]:
+            - generic [ref=f1e200]: Address line 2 (optional)
+            - textbox "Address line 2 (optional)" [ref=f1e201]
+          - generic [ref=f1e202]:
+            - generic [ref=f1e203]:
+              - generic [ref=f1e204]: City / Town
+              - textbox "City / Town" [ref=f1e205]: London
+            - generic [ref=f1e206]:
+              - generic [ref=f1e207]: County / State
+              - textbox "County / State" [ref=f1e208]: Greater London
+          - generic [ref=f1e209]:
+            - generic [ref=f1e210]:
+              - generic [ref=f1e211]: Postcode / ZIP
+              - textbox "Postcode / ZIP" [ref=f1e212]: EC1A 1BB
+            - generic [ref=f1e213]:
+              - generic [ref=f1e214]: Country
+              - combobox [ref=f1e215]:
+                - option "United Kingdom" [selected]
+                - option "United States"
+                - option "Canada"
+                - option "Australia"
+                - option "Germany"
+                - option "France"
+                - option "Spain"
+                - option "Portugal"
+                - option "Italy"
+                - option "Netherlands"
+                - option "Belgium"
+                - option "Switzerland"
+                - option "Austria"
+                - option "Sweden"
+                - option "Norway"
+                - option "Denmark"
+                - option "Finland"
+                - option "Ireland"
+                - option "New Zealand"
+                - option "Japan"
+                - option "South Korea"
+                - option "Singapore"
+                - option "United Arab Emirates"
+                - option "Saudi Arabia"
+                - option "India"
+                - option "Brazil"
+                - option "Mexico"
+                - option "South Africa"
+                - option "Ghana"
+                - option "Nigeria"
+                - option "Kenya"
+                - option "Egypt"
+                - option "Russia"
+          - generic [ref=f1e216]:
+            - button "Back" [ref=f1e217]
+            - button [disabled] [ref=f1e223]
+        - paragraph [ref=f1e219]: 256-bit TLS encryption · FCA regulated · FSCS protected up to £85,000
+    - contentinfo [ref=f1e114]: © 2026 Lumina Bank. All rights reserved. Authorised by the FCA.
+  - button "Open Next.js Dev Tools" [ref=f1e120] [cursor=pointer]
+  - alert [ref=f1e128]

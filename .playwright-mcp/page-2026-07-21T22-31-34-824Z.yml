@@ -1,0 +1,101 @@
+- generic [ref=f11e1]:
+  - alert [ref=f11e34]
+  - complementary [ref=f11e35]:
+    - link [ref=f11e36] [cursor=pointer]:
+      - /url: /dashboard
+      - generic [ref=f11e40]:
+        - paragraph [ref=f11e41]: Lumina Bank
+        - paragraph [ref=f11e42]: Secure Banking
+    - generic [ref=f11e48]:
+      - paragraph [ref=f11e49]: Alex Morgan
+      - paragraph [ref=f11e50]: demo@lumina.bank
+    - navigation [ref=f11e51]:
+      - generic [ref=f11e52]:
+        - paragraph [ref=f11e53]: Overview
+        - link "Home" [ref=f11e54] [cursor=pointer]:
+          - /url: /dashboard
+        - link "Accounts" [ref=f11e61] [cursor=pointer]:
+          - /url: /accounts
+        - link "Transactions" [ref=f11e65] [cursor=pointer]:
+          - /url: /transactions
+        - link "Notifications" [ref=f11e70] [cursor=pointer]:
+          - /url: /notifications
+      - generic [ref=f11e75]:
+        - paragraph [ref=f11e76]: Move Money
+        - link "Transfer" [ref=f11e77] [cursor=pointer]:
+          - /url: /transfer
+        - link "Standing Orders" [ref=f11e82] [cursor=pointer]:
+          - /url: /standing-orders
+        - link "Direct Debits" [ref=f11e89] [cursor=pointer]:
+          - /url: /direct-debits
+        - link "Saved Payees" [ref=f11e93] [cursor=pointer]:
+          - /url: /beneficiaries
+      - generic [ref=f11e98]:
+        - paragraph [ref=f11e99]: Cards & Credit
+        - link "Cards" [ref=f11e100] [cursor=pointer]:
+          - /url: /cards
+        - link "Loans" [ref=f11e104] [cursor=pointer]:
+          - /url: /loans
+        - link "Mortgage" [ref=f11e108] [cursor=pointer]:
+          - /url: /mortgage
+      - generic [ref=f11e113]:
+        - paragraph [ref=f11e114]: Grow
+        - link "Investments" [ref=f11e115] [cursor=pointer]:
+          - /url: /investments
+        - link "Savings Goals" [ref=f11e120] [cursor=pointer]:
+          - /url: /goals
+        - link "Crypto" [ref=f11e126] [cursor=pointer]:
+          - /url: /crypto
+        - link "Insurance" [ref=f11e130] [cursor=pointer]:
+          - /url: /insurance
+      - generic [ref=f11e135]:
+        - paragraph [ref=f11e136]: Tools
+        - link "Analytics" [ref=f11e137] [cursor=pointer]:
+          - /url: /analytics
+        - link "Exchange Rates" [ref=f11e140] [cursor=pointer]:
+          - /url: /rates
+      - generic [ref=f11e145]:
+        - paragraph [ref=f11e146]: Support
+        - link "My Disputes" [ref=f11e147] [cursor=pointer]:
+          - /url: /disputes
+    - generic [ref=f11e151]:
+      - combobox "Select language" [ref=f11e154] [cursor=pointer]:
+        - option "🇬🇧 EN" [selected]
+        - option "🇪🇸 ES"
+        - option "🇫🇷 FR"
+        - option "🇵🇹 PT"
+        - option "🇩🇪 DE"
+      - link "Profile & Settings" [ref=f11e155] [cursor=pointer]:
+        - /url: /profile
+      - button "Log off" [ref=f11e159]
+  - main [ref=f11e164]:
+    - generic [ref=f11e449]:
+      - generic [ref=f11e450]:
+        - button [ref=f11e451]
+        - generic [ref=f11e459]:
+          - heading "Transfer PIN" [level=1] [ref=f11e460]
+          - paragraph [ref=f11e461]: 6-digit payment security PIN
+      - generic [ref=f11e522]:
+        - generic [ref=f11e523]:
+          - paragraph [ref=f11e524]: Confirm your new PIN
+          - paragraph [ref=f11e525]: Enter the same PIN again to confirm
+        - generic [ref=f11e526]:
+          - generic [ref=f11e527]:
+            - textbox [ref=f11e529]: "1"
+            - textbox [ref=f11e532]: "2"
+            - textbox [ref=f11e535]: "3"
+            - textbox [ref=f11e538]: "4"
+            - textbox [active] [ref=f11e541]
+            - textbox [ref=f11e544]
+          - generic [ref=f11e546]:
+            - button "1" [ref=f11e547]
+            - button "2" [ref=f11e548]
+            - button "3" [ref=f11e549]
+            - button "4" [ref=f11e550]
+            - button "5" [ref=f11e551]
+            - button "6" [ref=f11e552]
+            - button "7" [ref=f11e553]
+            - button "8" [ref=f11e554]
+            - button "9" [ref=f11e555]
+            - button "0" [ref=f11e556]
+            - button "⌫" [ref=f11e557]

@@ -1,3 +1,4 @@
+import bcrypt from 'bcrypt';
 import { prisma } from '../../config/database';
 import { AppError } from '../../middleware/error.middleware';
 import { KycStatus, UserStatus, NotificationType, Prisma, TransferStatus, TransactionType, TransactionCategory, LoanStatus, LoanPaymentStatus, DisputeStatus, InsuranceStatus, CardStatus, LoanType, GoalStatus, CryptoOrderStatus } from '@prisma/client';
@@ -968,6 +969,50 @@ export class AdminService {
     ]);
 
     return prisma.account.findUnique({ where: { id: accountId } });
+  }
+
+  // ── Support Agents ────────────────────────────────────────────────────────────
+
+  async getAgents() {
+    return prisma.user.findMany({
+      where: { role: 'AGENT' },
+      select: {
+        id: true, firstName: true, lastName: true, email: true,
+        status: true, createdAt: true,
+        profile: { select: { avatarUrl: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async createAgent(data: { firstName: string; lastName: string; email: string; password: string; avatarUrl?: string }) {
+    const existing = await prisma.user.findUnique({ where: { email: data.email } });
+    if (existing) throw new AppError('Email already in use', 409, ErrorCodes.CONFLICT);
+
+    const passwordHash = await bcrypt.hash(data.password, 12);
+    const agent = await prisma.user.create({
+      data: {
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+        passwordHash,
+        role: 'AGENT',
+        isEmailVerified: true,
+        kycStatus: 'VERIFIED',
+        ...(data.avatarUrl ? {
+          profile: { create: { avatarUrl: data.avatarUrl } },
+        } : {}),
+      },
+      select: { id: true, firstName: true, lastName: true, email: true, role: true, createdAt: true },
+    });
+    return agent;
+  }
+
+  async deleteAgent(id: string) {
+    const agent = await prisma.user.findUnique({ where: { id } });
+    if (!agent || agent.role !== 'AGENT') throw new AppError('Agent not found', 404, ErrorCodes.NOT_FOUND);
+    await prisma.user.delete({ where: { id } });
+    return { id };
   }
 }
 

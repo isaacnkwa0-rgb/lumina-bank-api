@@ -1,0 +1,50 @@
+- generic [active] [ref=f1e1]:
+  - generic [ref=f1e2]:
+    - banner [ref=f1e4]:
+      - link "Lumina Bank" [ref=f1e5] [cursor=pointer]:
+        - /url: /
+      - combobox "Select language" [ref=f1e11] [cursor=pointer]:
+        - option "🇬🇧 EN" [selected]
+        - option "🇪🇸 ES"
+        - option "🇫🇷 FR"
+        - option "🇵🇹 PT"
+        - option "🇩🇪 DE"
+    - main [ref=f1e12]:
+      - generic [ref=f1e14]:
+        - generic [ref=f1e130]:
+          - generic [ref=f1e131]: Welcome
+          - generic [ref=f1e137]: Eligibility
+          - generic [ref=f1e143]: Personal
+          - generic [ref=f1e149]: Contact
+          - generic [ref=f1e155]: Email
+          - generic [ref=f1e161]: Address
+          - generic [ref=f1e166]: Finances
+          - generic [ref=f1e172]:
+            - generic [ref=f1e173]: "8"
+            - generic [ref=f1e175]: Identity
+          - generic [ref=f1e177]:
+            - generic [ref=f1e178]: "9"
+            - generic [ref=f1e180]: Review
+          - generic [ref=f1e182]:
+            - generic [ref=f1e183]: "10"
+            - generic [ref=f1e185]: Consent
+          - generic [ref=f1e187]:
+            - generic [ref=f1e188]: "11"
+            - generic [ref=f1e190]: Complete
+        - region [ref=f1e299]:
+          - heading "Identity Documents" [level=2] [ref=f1e355]
+          - paragraph [ref=f1e360]: You're about to securely submit your documents. These are encrypted during transfer.
+          - generic [ref=f1e361]:
+            - generic [ref=f1e362]:
+              - generic [ref=f1e363]: ID Front
+              - generic [ref=f1e364]: test-id.jpg
+            - generic [ref=f1e369]:
+              - generic [ref=f1e370]: ID Back
+              - generic [ref=f1e371]: test-id.jpg
+          - generic [ref=f1e376]:
+            - button "Back" [ref=f1e377]
+            - button "Submit Documents" [ref=f1e378]
+        - paragraph [ref=f1e219]: 256-bit TLS encryption · FCA regulated · FSCS protected up to £85,000
+    - contentinfo [ref=f1e114]: © 2026 Lumina Bank. All rights reserved. Authorised by the FCA.
+  - button "Open Next.js Dev Tools" [ref=f1e120] [cursor=pointer]
+  - alert [ref=f1e128]

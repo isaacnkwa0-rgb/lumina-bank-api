@@ -1,0 +1,105 @@
+- generic [ref=f1e1]:
+  - generic [ref=f1e2]:
+    - banner [ref=f1e4]:
+      - link "Lumina Bank" [ref=f1e5] [cursor=pointer]:
+        - /url: /
+      - combobox "Select language" [ref=f1e11] [cursor=pointer]:
+        - option "🇬🇧 EN" [selected]
+        - option "🇪🇸 ES"
+        - option "🇫🇷 FR"
+        - option "🇵🇹 PT"
+        - option "🇩🇪 DE"
+    - main [ref=f1e12]:
+      - generic [ref=f1e14]:
+        - generic [ref=f1e130]:
+          - generic [ref=f1e131]: Welcome
+          - generic [ref=f1e137]: Eligibility
+          - generic [ref=f1e143]: Personal
+          - generic [ref=f1e149]: Contact
+          - generic [ref=f1e155]: Email
+          - generic [ref=f1e161]: Address
+          - generic [ref=f1e167]:
+            - generic [ref=f1e168]: "7"
+            - generic [ref=f1e170]: Finances
+          - generic [ref=f1e172]:
+            - generic [ref=f1e173]: "8"
+            - generic [ref=f1e175]: Identity
+          - generic [ref=f1e177]:
+            - generic [ref=f1e178]: "9"
+            - generic [ref=f1e180]: Review
+          - generic [ref=f1e182]:
+            - generic [ref=f1e183]: "10"
+            - generic [ref=f1e185]: Consent
+          - generic [ref=f1e187]:
+            - generic [ref=f1e188]: "11"
+            - generic [ref=f1e190]: Complete
+        - region [ref=f1e230]:
+          - generic [ref=f1e231]:
+            - heading "Financial Profile" [level=2] [ref=f1e232]
+            - paragraph [ref=f1e233]: Required for regulatory compliance
+          - generic [ref=f1e234]:
+            - paragraph [ref=f1e235]: Employment
+            - generic [ref=f1e236]:
+              - button "Employed" [ref=f1e237]
+              - button "Self-employed" [ref=f1e239]
+              - button "Student" [ref=f1e241]
+              - button "Retired" [ref=f1e243]
+              - button "Unemployed" [ref=f1e245]
+          - generic [ref=f1e285]:
+            - generic [ref=f1e286]:
+              - generic [ref=f1e287]: Occupation
+              - textbox "Occupation" [ref=f1e288]
+            - generic [ref=f1e289]:
+              - generic [ref=f1e290]: Industry
+              - combobox [ref=f1e291]:
+                - option "Select industry" [selected]
+                - option "Finance"
+                - option "Technology"
+                - option "Healthcare"
+                - option "Education"
+                - option "Retail"
+                - option "Manufacturing"
+                - option "Construction"
+                - option "Transport"
+                - option "Hospitality"
+                - option "Media"
+                - option "Legal"
+                - option "Agriculture"
+                - option "Government"
+                - option "Other"
+            - generic [ref=f1e292]:
+              - generic [ref=f1e293]: Employer name (optional)
+              - textbox "Employer name (optional)" [ref=f1e294]
+          - generic [ref=f1e247]:
+            - paragraph [ref=f1e248]: Finances
+            - generic [ref=f1e249]: Annual income range
+            - generic [ref=f1e250]:
+              - button "Under £20,000" [ref=f1e251]
+              - button "£20,000 – £50,000" [active] [ref=f1e253]
+              - button "£50,000 – £100,000" [ref=f1e255]
+              - button "£100,000 – £250,000" [ref=f1e257]
+              - button "Over £250,000" [ref=f1e259]
+          - generic [ref=f1e261]:
+            - generic [ref=f1e262]: Source of funds (select all that apply)
+            - generic [ref=f1e263]:
+              - button "Salary" [ref=f1e264]
+              - button "Business income" [ref=f1e265]
+              - button "Investments" [ref=f1e266]
+              - button "Savings" [ref=f1e267]
+              - button "Inheritance" [ref=f1e268]
+              - button "Pension" [ref=f1e269]
+              - button "Other" [ref=f1e270]
+          - generic [ref=f1e271]:
+            - generic [ref=f1e272]: Expected monthly transaction volume
+            - generic [ref=f1e273]:
+              - button "Under £1,000" [ref=f1e274]
+              - button "£1,000 – £5,000" [ref=f1e276]
+              - button "£5,000 – £25,000" [ref=f1e278]
+              - button "Over £25,000" [ref=f1e280]
+          - generic [ref=f1e282]:
+            - button "Back" [ref=f1e283]
+            - button "Continue" [ref=f1e284]
+        - paragraph [ref=f1e219]: 256-bit TLS encryption · FCA regulated · FSCS protected up to £85,000
+    - contentinfo [ref=f1e114]: © 2026 Lumina Bank. All rights reserved. Authorised by the FCA.
+  - button "Open Next.js Dev Tools" [ref=f1e120] [cursor=pointer]
+  - alert [ref=f1e128]

@@ -1,0 +1,32 @@
+- generic [active] [ref=f7e1]:
+  - generic [ref=f7e2]:
+    - banner [ref=f7e3]:
+      - link "Back to app" [ref=f7e4] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f7e10]: Admin Console
+      - generic [ref=f7e11]: Internal
+      - button "Log off" [ref=f7e12]
+    - main [ref=f7e17]:
+      - generic [ref=f7e18]:
+        - generic [ref=f7e20]:
+          - heading "Admin Console" [level=1] [ref=f7e24]
+          - generic [ref=f7e25]: Internal
+        - generic [ref=f7e26]:
+          - button "Transfers" [ref=f7e27]
+          - button "Loans" [ref=f7e32]
+          - button "Mortgages" [ref=f7e36]
+          - button "Disputes" [ref=f7e41]
+          - button "Insurance" [ref=f7e45]
+          - button "Crypto" [ref=f7e49]
+          - button "Cards" [ref=f7e53]
+          - button "Transactions" [ref=f7e57]
+          - button "Rates" [ref=f7e62]
+          - button "Investments" [ref=f7e67]
+          - button "Goals" [ref=f7e72]
+          - button "Users" [ref=f7e78]
+          - button "KYC Review" [ref=f7e85]
+          - button "Audit Log" [ref=f7e90]
+        - generic [ref=f7e97]:
+          - button "Pending" [ref=f7e98]
+          - button "All" [ref=f7e99]
+  - alert [ref=f7e119]

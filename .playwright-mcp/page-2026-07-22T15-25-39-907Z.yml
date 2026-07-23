@@ -1,0 +1,22 @@
+- generic [ref=f38e2]:
+  - generic [ref=f38e3]:
+    - generic [ref=f38e4]: RAV Endpoint Protection
+    - heading "Website Blocked" [level=1] [ref=f38e13]
+    - paragraph [ref=f38e14]: This site has been blocked for your protection
+  - generic [ref=f38e15]:
+    - paragraph [ref=f38e16]: This website has been blocked because it may contain malware, phishing attempts, or other security threats that could compromise your device or personal information.
+    - generic [ref=f38e17]:
+      - generic [ref=f38e18]: Blocked URL
+      - generic [ref=f38e22]: https://luminabank.online/login
+    - button "Try again" [ref=f38e24] [cursor=pointer]
+    - generic [ref=f38e27]:
+      - generic [ref=f38e28]: Still want to access this site?
+      - paragraph [ref=f38e32]: "If you believe this site is safe, you can:"
+      - list [ref=f38e33]:
+        - listitem [ref=f38e34]:
+          - generic [ref=f38e37]: Click "Allow" in the notification popup
+        - listitem [ref=f38e38]:
+          - generic [ref=f38e41]: Add this site to the Rules list in RAV Endpoint Protection app
+        - listitem [ref=f38e42]:
+          - generic [ref=f38e45]: Temporarily disable Web Protection (not recommended)
+  - generic [ref=f38e46]: Web Protection Active

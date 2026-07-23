@@ -1,0 +1,127 @@
+- generic [ref=f62e1]:
+  - complementary [ref=f62e2]:
+    - link [ref=f62e3] [cursor=pointer]:
+      - /url: /dashboard
+      - generic [ref=f62e7]:
+        - paragraph [ref=f62e8]: Lumina Bank
+        - paragraph [ref=f62e9]: Secure Banking
+    - generic [ref=f62e15]:
+      - paragraph [ref=f62e16]: Isaac Nkwa
+      - paragraph [ref=f62e17]: isaacnkwa0@gmail.com
+    - navigation [ref=f62e18]:
+      - generic [ref=f62e19]:
+        - paragraph [ref=f62e20]: Overview
+        - link "Home" [ref=f62e21] [cursor=pointer]:
+          - /url: /dashboard
+        - link "Accounts" [ref=f62e26] [cursor=pointer]:
+          - /url: /accounts
+        - link "Transactions" [ref=f62e30] [cursor=pointer]:
+          - /url: /transactions
+        - link "Notifications" [ref=f62e35] [cursor=pointer]:
+          - /url: /notifications
+      - generic [ref=f62e40]:
+        - paragraph [ref=f62e41]: Move Money
+        - link "Transfer" [ref=f62e42] [cursor=pointer]:
+          - /url: /transfer
+        - link "Standing Orders" [ref=f62e47] [cursor=pointer]:
+          - /url: /standing-orders
+        - link "Direct Debits" [ref=f62e54] [cursor=pointer]:
+          - /url: /direct-debits
+        - link "Saved Payees" [ref=f62e58] [cursor=pointer]:
+          - /url: /beneficiaries
+      - generic [ref=f62e63]:
+        - paragraph [ref=f62e64]: Cards & Credit
+        - link "Cards" [ref=f62e65] [cursor=pointer]:
+          - /url: /cards
+        - link "Loans" [ref=f62e69] [cursor=pointer]:
+          - /url: /loans
+        - link "Mortgage" [ref=f62e73] [cursor=pointer]:
+          - /url: /mortgage
+      - generic [ref=f62e78]:
+        - paragraph [ref=f62e79]: Grow
+        - link "Investments" [ref=f62e80] [cursor=pointer]:
+          - /url: /investments
+        - link "Savings Goals" [ref=f62e85] [cursor=pointer]:
+          - /url: /goals
+        - link "Crypto" [ref=f62e91] [cursor=pointer]:
+          - /url: /crypto
+        - link "Insurance" [ref=f62e95] [cursor=pointer]:
+          - /url: /insurance
+      - generic [ref=f62e100]:
+        - paragraph [ref=f62e101]: Tools
+        - link "Analytics" [ref=f62e102] [cursor=pointer]:
+          - /url: /analytics
+        - link "Exchange Rates" [ref=f62e105] [cursor=pointer]:
+          - /url: /rates
+      - generic [ref=f62e110]:
+        - paragraph [ref=f62e111]: Support
+        - link "My Disputes" [ref=f62e112] [cursor=pointer]:
+          - /url: /disputes
+    - generic [ref=f62e116]:
+      - combobox "Select language" [ref=f62e119] [cursor=pointer]:
+        - option "🇬🇧 EN" [selected]
+        - option "🇪🇸 ES"
+        - option "🇫🇷 FR"
+        - option "🇵🇹 PT"
+        - option "🇩🇪 DE"
+      - link "Profile & Settings" [ref=f62e120] [cursor=pointer]:
+        - /url: /profile
+      - button "Log off" [ref=f62e124]
+  - main [ref=f62e129]:
+    - generic [ref=f62e299]:
+      - generic [ref=f62e300]:
+        - button "Back" [ref=f62e301]
+        - generic [ref=f62e309]:
+          - heading "Help & Support" [level=1] [ref=f62e310]
+          - paragraph [ref=f62e311]: We're here to help
+      - generic [ref=f62e312]:
+        - generic [ref=f62e313]:
+          - generic [ref=f62e314]:
+            - paragraph [ref=f62e315]: My conversations
+            - button "New conversation" [active] [ref=f62e316]
+          - generic [ref=f62e434]:
+            - paragraph [ref=f62e435]: New conversation
+            - textbox "Subject" [ref=f62e436]
+            - textbox "Describe your issue" [ref=f62e437]
+            - generic [ref=f62e438]:
+              - button "Cancel" [ref=f62e439]
+              - button "Send" [ref=f62e440]
+          - button "My card was declined Hi Isaac, thank you for reaching out. I can see your card is active in our system. This may have been a temporary network issue with the merchant terminal. Please try using it again � if it declines again, reply here and we will raise an investigation immediately. Resolved" [ref=f62e421]:
+            - generic [ref=f62e426]:
+              - paragraph [ref=f62e428]: My card was declined
+              - paragraph [ref=f62e429]: Hi Isaac, thank you for reaching out. I can see your card is active in our system. This may have been a temporary network issue with the merchant terminal. Please try using it again � if it declines again, reply here and we will raise an investigation immediately.
+            - generic [ref=f62e430]: Resolved
+        - generic [ref=f62e320]:
+          - paragraph [ref=f62e322]: Contact us
+          - button [ref=f62e323]:
+            - generic [ref=f62e328]:
+              - paragraph [ref=f62e329]: Email support
+              - paragraph [ref=f62e330]: support@luminabank.online
+          - button [ref=f62e331]:
+            - generic [ref=f62e335]:
+              - paragraph [ref=f62e336]: Live chat
+              - paragraph [ref=f62e337]: Mon–Fri, 9am–6pm GMT
+          - button [ref=f62e338]:
+            - generic [ref=f62e342]:
+              - paragraph [ref=f62e343]: Phone
+              - paragraph [ref=f62e344]: +44 800 000 0000 · 24/7
+        - generic [ref=f62e345]:
+          - paragraph [ref=f62e347]: Frequently asked questions
+          - button [ref=f62e349]:
+            - paragraph [ref=f62e354]: How long do transfers take?
+          - button [ref=f62e358]:
+            - paragraph [ref=f62e363]: I've been locked out of my account
+          - button [ref=f62e367]:
+            - paragraph [ref=f62e371]: My card has been blocked — what do I do?
+          - button [ref=f62e375]:
+            - paragraph [ref=f62e380]: How do I enable two-factor authentication?
+          - button [ref=f62e384]:
+            - paragraph [ref=f62e390]: Why is my KYC verification taking long?
+          - button [ref=f62e394]:
+            - paragraph [ref=f62e398]: I don't recognise a transaction on my account
+          - button [ref=f62e402]:
+            - paragraph [ref=f62e407]: What are the daily transfer limits?
+          - button [ref=f62e411]:
+            - paragraph [ref=f62e416]: How do I change my password?
+        - paragraph [ref=f62e420]: Lumina Bank is a demo banking application. For urgent account security concerns, email security@luminabank.online
+  - alert [ref=f62e252]

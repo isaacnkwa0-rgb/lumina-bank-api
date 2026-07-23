@@ -1,0 +1,91 @@
+- generic [active] [ref=f62e1]:
+  - complementary [ref=f62e2]:
+    - link [ref=f62e3] [cursor=pointer]:
+      - /url: /dashboard
+      - generic [ref=f62e7]:
+        - paragraph [ref=f62e8]: Lumina Bank
+        - paragraph [ref=f62e9]: Secure Banking
+    - generic [ref=f62e15]:
+      - paragraph [ref=f62e16]: Isaac Nkwa
+      - paragraph [ref=f62e17]: isaacnkwa0@gmail.com
+    - navigation [ref=f62e18]:
+      - generic [ref=f62e19]:
+        - paragraph [ref=f62e20]: Overview
+        - link "Home" [ref=f62e21] [cursor=pointer]:
+          - /url: /dashboard
+        - link "Accounts" [ref=f62e26] [cursor=pointer]:
+          - /url: /accounts
+        - link "Transactions" [ref=f62e30] [cursor=pointer]:
+          - /url: /transactions
+        - link "Notifications" [ref=f62e35] [cursor=pointer]:
+          - /url: /notifications
+      - generic [ref=f62e40]:
+        - paragraph [ref=f62e41]: Move Money
+        - link "Transfer" [ref=f62e42] [cursor=pointer]:
+          - /url: /transfer
+        - link "Standing Orders" [ref=f62e47] [cursor=pointer]:
+          - /url: /standing-orders
+        - link "Direct Debits" [ref=f62e54] [cursor=pointer]:
+          - /url: /direct-debits
+        - link "Saved Payees" [ref=f62e58] [cursor=pointer]:
+          - /url: /beneficiaries
+      - generic [ref=f62e63]:
+        - paragraph [ref=f62e64]: Cards & Credit
+        - link "Cards" [ref=f62e65] [cursor=pointer]:
+          - /url: /cards
+        - link "Loans" [ref=f62e69] [cursor=pointer]:
+          - /url: /loans
+        - link "Mortgage" [ref=f62e73] [cursor=pointer]:
+          - /url: /mortgage
+      - generic [ref=f62e78]:
+        - paragraph [ref=f62e79]: Grow
+        - link "Investments" [ref=f62e80] [cursor=pointer]:
+          - /url: /investments
+        - link "Savings Goals" [ref=f62e85] [cursor=pointer]:
+          - /url: /goals
+        - link "Crypto" [ref=f62e91] [cursor=pointer]:
+          - /url: /crypto
+        - link "Insurance" [ref=f62e95] [cursor=pointer]:
+          - /url: /insurance
+      - generic [ref=f62e100]:
+        - paragraph [ref=f62e101]: Tools
+        - link "Analytics" [ref=f62e102] [cursor=pointer]:
+          - /url: /analytics
+        - link "Exchange Rates" [ref=f62e105] [cursor=pointer]:
+          - /url: /rates
+      - generic [ref=f62e110]:
+        - paragraph [ref=f62e111]: Support
+        - link "My Disputes" [ref=f62e112] [cursor=pointer]:
+          - /url: /disputes
+    - generic [ref=f62e116]:
+      - combobox "Select language" [ref=f62e119] [cursor=pointer]:
+        - option "🇬🇧 EN" [selected]
+        - option "🇪🇸 ES"
+        - option "🇫🇷 FR"
+        - option "🇵🇹 PT"
+        - option "🇩🇪 DE"
+      - link "Profile & Settings" [ref=f62e120] [cursor=pointer]:
+        - /url: /profile
+      - button "Log off" [ref=f62e124]
+  - main [ref=f62e129]:
+    - generic [ref=f62e266]:
+      - generic [ref=f62e267]:
+        - button "All conversations" [ref=f62e268]
+        - generic [ref=f62e271]:
+          - generic [ref=f62e272]:
+            - paragraph [ref=f62e273]: Support ticket
+            - heading "My card was declined" [level=1] [ref=f62e274]
+          - generic [ref=f62e275]: Resolved
+      - generic [ref=f62e279]:
+        - generic [ref=f62e281]:
+          - generic [ref=f62e282]: Hello, my debit card was declined at a supermarket today. The balance is sufficient. Can you help?
+          - paragraph [ref=f62e283]: 22:07 · 22 Jul
+        - generic [ref=f62e285]:
+          - generic [ref=f62e286]: I tried again this morning and it is still declining.
+          - paragraph [ref=f62e287]: 22:07 · 22 Jul
+        - generic [ref=f62e289]:
+          - paragraph [ref=f62e290]: Support team
+          - generic [ref=f62e291]: Hi Isaac, thank you for reaching out. I can see your card is active in our system. This may have been a temporary network issue with the merchant terminal. Please try using it again � if it declines again, reply here and we will raise an investigation immediately.
+          - paragraph [ref=f62e292]: 22:15 · 22 Jul
+      - paragraph [ref=f62e298]: This conversation is resolved
+  - alert [ref=f62e252]

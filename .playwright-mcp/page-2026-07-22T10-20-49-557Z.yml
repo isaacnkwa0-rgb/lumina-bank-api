@@ -1,0 +1,147 @@
+- generic [ref=f25e1]:
+  - alert [ref=f25e233]
+  - complementary [ref=f25e387]:
+    - link [ref=f25e388] [cursor=pointer]:
+      - /url: /dashboard
+      - generic [ref=f25e392]:
+        - paragraph [ref=f25e393]: Lumina Bank
+        - paragraph [ref=f25e394]: Secure Banking
+    - generic [ref=f25e400]:
+      - paragraph [ref=f25e401]: Alex Morgan
+      - paragraph [ref=f25e402]: demo@lumina.bank
+    - navigation [ref=f25e403]:
+      - generic [ref=f25e404]:
+        - paragraph [ref=f25e405]: Overview
+        - link "Home" [ref=f25e406] [cursor=pointer]:
+          - /url: /dashboard
+        - link "Accounts" [ref=f25e413] [cursor=pointer]:
+          - /url: /accounts
+        - link "Transactions" [ref=f25e417] [cursor=pointer]:
+          - /url: /transactions
+        - link "Notifications" [ref=f25e422] [cursor=pointer]:
+          - /url: /notifications
+      - generic [ref=f25e427]:
+        - paragraph [ref=f25e428]: Move Money
+        - link "Transfer" [ref=f25e429] [cursor=pointer]:
+          - /url: /transfer
+        - link "Standing Orders" [ref=f25e434] [cursor=pointer]:
+          - /url: /standing-orders
+        - link "Direct Debits" [ref=f25e441] [cursor=pointer]:
+          - /url: /direct-debits
+        - link "Saved Payees" [ref=f25e445] [cursor=pointer]:
+          - /url: /beneficiaries
+      - generic [ref=f25e450]:
+        - paragraph [ref=f25e451]: Cards & Credit
+        - link "Cards" [ref=f25e452] [cursor=pointer]:
+          - /url: /cards
+        - link "Loans" [ref=f25e456] [cursor=pointer]:
+          - /url: /loans
+        - link "Mortgage" [ref=f25e460] [cursor=pointer]:
+          - /url: /mortgage
+      - generic [ref=f25e465]:
+        - paragraph [ref=f25e466]: Grow
+        - link "Investments" [ref=f25e467] [cursor=pointer]:
+          - /url: /investments
+        - link "Savings Goals" [ref=f25e472] [cursor=pointer]:
+          - /url: /goals
+        - link "Crypto" [ref=f25e478] [cursor=pointer]:
+          - /url: /crypto
+        - link "Insurance" [ref=f25e482] [cursor=pointer]:
+          - /url: /insurance
+      - generic [ref=f25e487]:
+        - paragraph [ref=f25e488]: Tools
+        - link "Analytics" [ref=f25e489] [cursor=pointer]:
+          - /url: /analytics
+        - link "Exchange Rates" [ref=f25e492] [cursor=pointer]:
+          - /url: /rates
+      - generic [ref=f25e497]:
+        - paragraph [ref=f25e498]: Support
+        - link "My Disputes" [ref=f25e499] [cursor=pointer]:
+          - /url: /disputes
+    - generic [ref=f25e503]:
+      - combobox "Select language" [ref=f25e506] [cursor=pointer]:
+        - option "🇬🇧 EN" [selected]
+        - option "🇪🇸 ES"
+        - option "🇫🇷 FR"
+        - option "🇵🇹 PT"
+        - option "🇩🇪 DE"
+      - link "Profile & Settings" [active] [ref=f25e507] [cursor=pointer]:
+        - /url: /profile
+      - button "Log off" [ref=f25e511]
+  - main [ref=f25e516]:
+    - generic [ref=f25e739]:
+      - generic [ref=f25e741]:
+        - generic [ref=f25e746]:
+          - paragraph [ref=f25e747]: Alex Morgan
+          - paragraph [ref=f25e748]: demo@lumina.bank
+        - generic [ref=f25e749]:
+          - generic [ref=f25e750]: PREMIUM
+          - generic [ref=f25e753]: Verified
+      - generic [ref=f25e757]:
+        - generic [ref=f25e758]:
+          - generic [ref=f25e759]:
+            - paragraph [ref=f25e760]: Personal information
+            - button "Edit" [ref=f25e761]
+          - generic [ref=f25e764]:
+            - generic [ref=f25e770]:
+              - paragraph [ref=f25e771]: Full name
+              - paragraph [ref=f25e772]: Alex Morgan
+            - generic [ref=f25e779]:
+              - paragraph [ref=f25e780]: Email address
+              - paragraph [ref=f25e781]: demo@lumina.bank
+            - generic [ref=f25e787]:
+              - paragraph [ref=f25e788]: Phone number
+              - paragraph [ref=f25e789]: Not set
+            - generic [ref=f25e795]:
+              - paragraph [ref=f25e796]: Date of birth
+              - paragraph [ref=f25e797]: Not set
+            - generic [ref=f25e804]:
+              - paragraph [ref=f25e805]: Nationality
+              - paragraph [ref=f25e806]: Not set
+            - generic [ref=f25e813]:
+              - paragraph [ref=f25e814]: Address
+              - paragraph [ref=f25e815]: Not set
+            - generic [ref=f25e822]:
+              - paragraph [ref=f25e823]: Occupation
+              - paragraph [ref=f25e824]: Not set
+        - generic [ref=f25e825]:
+          - paragraph [ref=f25e827]: Security
+          - button "Change password" [ref=f25e828]
+          - button "Two-factor authentication Off" [ref=f25e837]:
+            - generic [ref=f25e841]: Two-factor authentication
+            - generic [ref=f25e842]: "Off"
+          - button "Transfer PIN" [ref=f25e846]
+          - button "Identity verification (KYC) Verified" [ref=f25e855]:
+            - generic [ref=f25e861]: Identity verification (KYC)
+            - generic [ref=f25e862]: Verified
+        - generic [ref=f25e865]:
+          - paragraph [ref=f25e867]: Trusted devices
+          - paragraph [ref=f25e869]: No trusted devices recorded yet.
+        - generic [ref=f25e870]:
+          - paragraph [ref=f25e872]: Notifications
+          - generic [ref=f25e873]:
+            - generic [ref=f25e875]:
+              - generic [ref=f25e876]:
+                - paragraph [ref=f25e877]: Transaction alerts
+                - paragraph [ref=f25e878]: Debits and credits on your accounts
+              - switch [checked] [ref=f25e879]
+            - generic [ref=f25e883]:
+              - generic [ref=f25e884]:
+                - paragraph [ref=f25e885]: Security alerts
+                - paragraph [ref=f25e886]: Sign-ins and password changes
+              - switch [checked] [ref=f25e887]
+            - generic [ref=f25e891]:
+              - generic [ref=f25e892]:
+                - paragraph [ref=f25e893]: Offers & promotions
+                - paragraph [ref=f25e894]: Deals and product updates
+              - switch [ref=f25e895]
+            - generic [ref=f25e899]:
+              - generic [ref=f25e900]:
+                - paragraph [ref=f25e901]: Monthly statements
+                - paragraph [ref=f25e902]: Your end-of-month summary
+              - switch [checked] [ref=f25e903]
+        - generic [ref=f25e905]:
+          - paragraph [ref=f25e907]: Support
+          - button "Help & support" [ref=f25e908]
+        - button "Sign out" [ref=f25e917]
+        - paragraph [ref=f25e921]: Lumina Bank · v1.0.0 · © 2026

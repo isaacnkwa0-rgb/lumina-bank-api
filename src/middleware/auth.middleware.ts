@@ -60,3 +60,7 @@ export function requireRole(...roles: Role[]) {
 export function requireAdmin(req: Request, res: Response, next: NextFunction): void {
   requireRole(Role.ADMIN)(req, res, next);
 }
+
+export function requireAgentOrAdmin(req: Request, res: Response, next: NextFunction): void {
+  requireRole(Role.AGENT, Role.ADMIN)(req, res, next);
+}

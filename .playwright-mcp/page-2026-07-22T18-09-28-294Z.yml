@@ -1,0 +1,64 @@
+- generic [active] [ref=f51e1]:
+  - generic [ref=f51e2]:
+    - banner [ref=f51e4]:
+      - link "Lumina Bank" [ref=f51e5] [cursor=pointer]:
+        - /url: /
+      - combobox "Select language" [ref=f51e11] [cursor=pointer]:
+        - option "🇬🇧 EN" [selected]
+        - option "🇪🇸 ES"
+        - option "🇫🇷 FR"
+        - option "🇵🇹 PT"
+        - option "🇩🇪 DE"
+    - main [ref=f51e12]:
+      - generic [ref=f51e14]:
+        - generic [ref=f51e16]:
+          - generic [ref=f51e17]: Welcome
+          - generic [ref=f51e22]: Eligibility
+          - generic [ref=f51e27]: Personal
+          - generic [ref=f51e32]: Contact
+          - generic [ref=f51e38]:
+            - generic [ref=f51e39]: "5"
+            - generic [ref=f51e41]: Email
+          - generic [ref=f51e43]:
+            - generic [ref=f51e44]: "6"
+            - generic [ref=f51e46]: Address
+          - generic [ref=f51e48]:
+            - generic [ref=f51e49]: "7"
+            - generic [ref=f51e51]: Finances
+          - generic [ref=f51e53]:
+            - generic [ref=f51e54]: "8"
+            - generic [ref=f51e56]: Identity
+          - generic [ref=f51e58]:
+            - generic [ref=f51e59]: "9"
+            - generic [ref=f51e61]: Review
+          - generic [ref=f51e63]:
+            - generic [ref=f51e64]: "10"
+            - generic [ref=f51e66]: Consent
+          - generic [ref=f51e68]:
+            - generic [ref=f51e69]: "11"
+            - generic [ref=f51e71]: Complete
+        - region [ref=f51e243]:
+          - generic [ref=f51e244]:
+            - heading "Verify Your Email" [level=2] [ref=f51e249]
+            - paragraph [ref=f51e250]: We sent a 6-digit code to isaacnkwa0@gmail.com
+            - paragraph [ref=f51e251]: Code expires in 10 minutes
+          - alert [ref=f51e273]:
+            - paragraph [ref=f51e274]: Invalid or expired OTP code
+          - generic [ref=f51e253]:
+            - textbox [ref=f51e254]: "8"
+            - textbox [ref=f51e255]: "3"
+            - textbox [ref=f51e256]: "3"
+            - textbox [ref=f51e257]: "3"
+            - textbox [ref=f51e258]: "9"
+            - textbox [ref=f51e259]: "7"
+          - generic [ref=f51e260]:
+            - paragraph [ref=f51e276]: Resend in 30s
+            - paragraph [ref=f51e262]:
+              - text: Wrong email? Go back to change it.
+              - button "Back" [ref=f51e263]
+          - generic [ref=f51e264]:
+            - button "Back" [ref=f51e265]
+            - button "Continue" [ref=f51e275]
+        - paragraph [ref=f51e110]: 256-bit TLS encryption · FCA regulated · FSCS protected up to £85,000
+    - contentinfo [ref=f51e114]: © 2026 Lumina Bank. All rights reserved. Authorised by the FCA.
+  - alert [ref=f51e115]

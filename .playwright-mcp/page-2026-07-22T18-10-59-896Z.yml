@@ -1,0 +1,100 @@
+- generic [active] [ref=f51e1]:
+  - generic [ref=f51e2]:
+    - banner [ref=f51e4]:
+      - link "Lumina Bank" [ref=f51e5] [cursor=pointer]:
+        - /url: /
+      - combobox "Select language" [ref=f51e11] [cursor=pointer]:
+        - option "🇬🇧 EN" [selected]
+        - option "🇪🇸 ES"
+        - option "🇫🇷 FR"
+        - option "🇵🇹 PT"
+        - option "🇩🇪 DE"
+    - main [ref=f51e12]:
+      - generic [ref=f51e14]:
+        - generic [ref=f51e16]:
+          - generic [ref=f51e17]: Welcome
+          - generic [ref=f51e22]: Eligibility
+          - generic [ref=f51e27]: Personal
+          - generic [ref=f51e32]: Contact
+          - generic [ref=f51e37]: Email
+          - generic [ref=f51e43]:
+            - generic [ref=f51e44]: "6"
+            - generic [ref=f51e46]: Address
+          - generic [ref=f51e48]:
+            - generic [ref=f51e49]: "7"
+            - generic [ref=f51e51]: Finances
+          - generic [ref=f51e53]:
+            - generic [ref=f51e54]: "8"
+            - generic [ref=f51e56]: Identity
+          - generic [ref=f51e58]:
+            - generic [ref=f51e59]: "9"
+            - generic [ref=f51e61]: Review
+          - generic [ref=f51e63]:
+            - generic [ref=f51e64]: "10"
+            - generic [ref=f51e66]: Consent
+          - generic [ref=f51e68]:
+            - generic [ref=f51e69]: "11"
+            - generic [ref=f51e71]: Complete
+        - region [ref=f51e280]:
+          - generic [ref=f51e281]:
+            - heading "Home Address" [level=2] [ref=f51e282]
+            - paragraph [ref=f51e283]: Your address on record
+          - generic [ref=f51e284]:
+            - generic [ref=f51e285]: Address line 1
+            - textbox "Address line 1" [ref=f51e286]
+          - generic [ref=f51e287]:
+            - generic [ref=f51e288]: Address line 2 (optional)
+            - textbox "Address line 2 (optional)" [ref=f51e289]
+          - generic [ref=f51e290]:
+            - generic [ref=f51e291]:
+              - generic [ref=f51e292]: City / Town
+              - textbox "City / Town" [ref=f51e293]
+            - generic [ref=f51e294]:
+              - generic [ref=f51e295]: County / State
+              - textbox "County / State" [ref=f51e296]
+          - generic [ref=f51e297]:
+            - generic [ref=f51e298]:
+              - generic [ref=f51e299]: Postcode / ZIP
+              - textbox "Postcode / ZIP" [ref=f51e300]
+            - generic [ref=f51e301]:
+              - generic [ref=f51e302]: Country
+              - combobox [ref=f51e303]:
+                - option "United Kingdom" [selected]
+                - option "United States"
+                - option "Canada"
+                - option "Australia"
+                - option "Germany"
+                - option "France"
+                - option "Spain"
+                - option "Portugal"
+                - option "Italy"
+                - option "Netherlands"
+                - option "Belgium"
+                - option "Switzerland"
+                - option "Austria"
+                - option "Sweden"
+                - option "Norway"
+                - option "Denmark"
+                - option "Finland"
+                - option "Ireland"
+                - option "New Zealand"
+                - option "Japan"
+                - option "South Korea"
+                - option "Singapore"
+                - option "United Arab Emirates"
+                - option "Saudi Arabia"
+                - option "India"
+                - option "Brazil"
+                - option "Mexico"
+                - option "South Africa"
+                - option "Ghana"
+                - option "Nigeria"
+                - option "Kenya"
+                - option "Egypt"
+                - option "Russia"
+          - generic [ref=f51e304]:
+            - button "Back" [ref=f51e305]
+            - button "Continue" [ref=f51e306]
+        - paragraph [ref=f51e110]: 256-bit TLS encryption · FCA regulated · FSCS protected up to £85,000
+    - contentinfo [ref=f51e114]: © 2026 Lumina Bank. All rights reserved. Authorised by the FCA.
+  - alert [ref=f51e115]

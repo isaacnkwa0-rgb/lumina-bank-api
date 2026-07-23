@@ -1,0 +1,22 @@
+- generic [active] [ref=f48e1]:
+  - generic [ref=f48e2]:
+    - banner [ref=f48e4]:
+      - link "Lumina Bank" [ref=f48e5] [cursor=pointer]:
+        - /url: /
+      - combobox "Select language" [ref=f48e11] [cursor=pointer]:
+        - option "🇬🇧 EN" [selected]
+        - option "🇪🇸 ES"
+        - option "🇫🇷 FR"
+        - option "🇵🇹 PT"
+        - option "🇩🇪 DE"
+    - main [ref=f48e12]:
+      - generic [ref=f48e14]:
+        - heading "Check your email" [level=2] [ref=f48e34]
+        - paragraph [ref=f48e35]: If an account exists with that email, we've sent a password reset link. Check your inbox.
+        - link "Enter reset code" [ref=f48e36] [cursor=pointer]:
+          - /url: /reset-password
+        - paragraph [ref=f48e37]:
+          - link "Back to log on" [ref=f48e38] [cursor=pointer]:
+            - /url: /login
+    - contentinfo [ref=f48e29]: © 2026 Lumina Bank. All rights reserved. Authorised by the FCA.
+  - alert [ref=f48e30]

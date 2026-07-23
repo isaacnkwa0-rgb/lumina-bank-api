@@ -38,6 +38,7 @@ enum KycStatus {
 
 enum Role {
   USER
+  AGENT
   ADMIN
 }
 

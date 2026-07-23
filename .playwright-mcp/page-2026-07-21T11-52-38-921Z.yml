@@ -1,0 +1,63 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e4]:
+      - link "Lumina Bank" [ref=e5] [cursor=pointer]:
+        - /url: /
+      - combobox "Select language" [ref=e11] [cursor=pointer]:
+        - option "🇬🇧 EN" [selected]
+        - option "🇪🇸 ES"
+        - option "🇫🇷 FR"
+        - option "🇵🇹 PT"
+        - option "🇩🇪 DE"
+    - main [ref=e12]:
+      - generic [ref=e14]:
+        - generic [ref=e16]:
+          - generic [ref=e17]: Welcome
+          - generic [ref=e22]: Eligibility
+          - generic [ref=e27]: Personal
+          - generic [ref=e32]: Contact
+          - generic [ref=e37]: Email
+          - generic [ref=e43]:
+            - generic [ref=e44]: "6"
+            - generic [ref=e46]: Phone
+          - generic [ref=e48]:
+            - generic [ref=e49]: "7"
+            - generic [ref=e51]: Address
+          - generic [ref=e53]:
+            - generic [ref=e54]: "8"
+            - generic [ref=e56]: Finances
+          - generic [ref=e58]:
+            - generic [ref=e59]: "9"
+            - generic [ref=e61]: Identity
+          - generic [ref=e63]:
+            - generic [ref=e64]: "10"
+            - generic [ref=e66]: Review
+          - generic [ref=e68]:
+            - generic [ref=e69]: "11"
+            - generic [ref=e71]: Consent
+          - generic [ref=e73]:
+            - generic [ref=e74]: "12"
+            - generic [ref=e76]: Complete
+        - region [ref=e284]:
+          - generic [ref=e285]:
+            - heading "Verify Your Phone" [level=2] [ref=e289]
+            - paragraph [ref=e290]: We sent a 6-digit code to +44 7700900001
+          - alert [ref=e291]:
+            - paragraph [ref=e292]: Route POST /api/v1/auth/send-phone-otp not found
+          - generic [ref=e294]:
+            - textbox [ref=e295]
+            - textbox [ref=e296]
+            - textbox [ref=e297]
+            - textbox [ref=e298]
+            - textbox [ref=e299]
+            - textbox [ref=e300]
+          - generic [ref=e301]:
+            - button "Resend code" [ref=e302]
+            - button "Try a different number" [ref=e303]
+          - generic [ref=e304]:
+            - button "Back" [ref=e305]
+            - button "Continue" [ref=e306]
+        - paragraph [ref=e115]: 256-bit TLS encryption · FCA regulated · FSCS protected up to £85,000
+    - contentinfo [ref=e119]: © 2026 Lumina Bank. All rights reserved. Authorised by the FCA.
+  - button "Open Next.js Dev Tools" [ref=e126] [cursor=pointer]
+  - alert [ref=e120]

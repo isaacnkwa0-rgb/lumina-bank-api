@@ -1,0 +1,76 @@
+- generic [active] [ref=f25e1]:
+  - alert [ref=f25e233]
+  - complementary [ref=f25e387]:
+    - link [ref=f25e388] [cursor=pointer]:
+      - /url: /dashboard
+      - generic [ref=f25e392]:
+        - paragraph [ref=f25e393]: Lumina Bank
+        - paragraph [ref=f25e394]: Secure Banking
+    - generic [ref=f25e400]:
+      - paragraph [ref=f25e401]: Alex Morgan
+      - paragraph [ref=f25e402]: demo@lumina.bank
+    - navigation [ref=f25e403]:
+      - generic [ref=f25e404]:
+        - paragraph [ref=f25e405]: Overview
+        - link "Home" [ref=f25e406] [cursor=pointer]:
+          - /url: /dashboard
+        - link "Accounts" [ref=f25e413] [cursor=pointer]:
+          - /url: /accounts
+        - link "Transactions" [ref=f25e417] [cursor=pointer]:
+          - /url: /transactions
+        - link "Notifications" [ref=f25e422] [cursor=pointer]:
+          - /url: /notifications
+      - generic [ref=f25e427]:
+        - paragraph [ref=f25e428]: Move Money
+        - link "Transfer" [ref=f25e429] [cursor=pointer]:
+          - /url: /transfer
+        - link "Standing Orders" [ref=f25e434] [cursor=pointer]:
+          - /url: /standing-orders
+        - link "Direct Debits" [ref=f25e441] [cursor=pointer]:
+          - /url: /direct-debits
+        - link "Saved Payees" [ref=f25e445] [cursor=pointer]:
+          - /url: /beneficiaries
+      - generic [ref=f25e450]:
+        - paragraph [ref=f25e451]: Cards & Credit
+        - link "Cards" [ref=f25e452] [cursor=pointer]:
+          - /url: /cards
+        - link "Loans" [ref=f25e456] [cursor=pointer]:
+          - /url: /loans
+        - link "Mortgage" [ref=f25e460] [cursor=pointer]:
+          - /url: /mortgage
+      - generic [ref=f25e465]:
+        - paragraph [ref=f25e466]: Grow
+        - link "Investments" [ref=f25e467] [cursor=pointer]:
+          - /url: /investments
+        - link "Savings Goals" [ref=f25e472] [cursor=pointer]:
+          - /url: /goals
+        - link "Crypto" [ref=f25e478] [cursor=pointer]:
+          - /url: /crypto
+        - link "Insurance" [ref=f25e482] [cursor=pointer]:
+          - /url: /insurance
+      - generic [ref=f25e487]:
+        - paragraph [ref=f25e488]: Tools
+        - link "Analytics" [ref=f25e489] [cursor=pointer]:
+          - /url: /analytics
+        - link "Exchange Rates" [ref=f25e492] [cursor=pointer]:
+          - /url: /rates
+      - generic [ref=f25e497]:
+        - paragraph [ref=f25e498]: Support
+        - link "My Disputes" [ref=f25e499] [cursor=pointer]:
+          - /url: /disputes
+    - generic [ref=f25e503]:
+      - combobox "Select language" [ref=f25e506] [cursor=pointer]:
+        - option "🇬🇧 EN" [selected]
+        - option "🇪🇸 ES"
+        - option "🇫🇷 FR"
+        - option "🇵🇹 PT"
+        - option "🇩🇪 DE"
+      - link "Profile & Settings" [ref=f25e507] [cursor=pointer]:
+        - /url: /profile
+      - button "Log off" [ref=f25e511]
+  - main [ref=f25e516]:
+    - generic [ref=f25e923]:
+      - button [ref=f25e924]
+      - generic [ref=f25e932]:
+        - heading "Transfer PIN" [level=1] [ref=f25e933]
+        - paragraph [ref=f25e934]: 6-digit payment security PIN

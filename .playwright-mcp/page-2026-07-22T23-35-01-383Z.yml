@@ -1,0 +1,93 @@
+- generic [active] [ref=f63e1]:
+  - complementary [ref=f63e2]:
+    - link [ref=f63e3] [cursor=pointer]:
+      - /url: /dashboard
+      - generic [ref=f63e7]:
+        - paragraph [ref=f63e8]: Lumina Bank
+        - paragraph [ref=f63e9]: Secure Banking
+    - navigation [ref=f63e10]:
+      - generic [ref=f63e11]:
+        - paragraph [ref=f63e12]: Overview
+        - link "Home" [ref=f63e13] [cursor=pointer]:
+          - /url: /dashboard
+        - link "Accounts" [ref=f63e20] [cursor=pointer]:
+          - /url: /accounts
+        - link "Transactions" [ref=f63e24] [cursor=pointer]:
+          - /url: /transactions
+        - link "Notifications" [ref=f63e29] [cursor=pointer]:
+          - /url: /notifications
+      - generic [ref=f63e34]:
+        - paragraph [ref=f63e35]: Move Money
+        - link "Transfer" [ref=f63e36] [cursor=pointer]:
+          - /url: /transfer
+        - link "Standing Orders" [ref=f63e41] [cursor=pointer]:
+          - /url: /standing-orders
+        - link "Direct Debits" [ref=f63e48] [cursor=pointer]:
+          - /url: /direct-debits
+        - link "Saved Payees" [ref=f63e52] [cursor=pointer]:
+          - /url: /beneficiaries
+      - generic [ref=f63e57]:
+        - paragraph [ref=f63e58]: Cards & Credit
+        - link "Cards" [ref=f63e59] [cursor=pointer]:
+          - /url: /cards
+        - link "Loans" [ref=f63e63] [cursor=pointer]:
+          - /url: /loans
+        - link "Mortgage" [ref=f63e67] [cursor=pointer]:
+          - /url: /mortgage
+      - generic [ref=f63e72]:
+        - paragraph [ref=f63e73]: Grow
+        - link "Investments" [ref=f63e74] [cursor=pointer]:
+          - /url: /investments
+        - link "Savings Goals" [ref=f63e79] [cursor=pointer]:
+          - /url: /goals
+        - link "Crypto" [ref=f63e85] [cursor=pointer]:
+          - /url: /crypto
+        - link "Insurance" [ref=f63e89] [cursor=pointer]:
+          - /url: /insurance
+      - generic [ref=f63e94]:
+        - paragraph [ref=f63e95]: Tools
+        - link "Analytics" [ref=f63e96] [cursor=pointer]:
+          - /url: /analytics
+        - link "Exchange Rates" [ref=f63e99] [cursor=pointer]:
+          - /url: /rates
+      - generic [ref=f63e104]:
+        - paragraph [ref=f63e105]: Support
+        - link "Help & Support" [ref=f63e106] [cursor=pointer]:
+          - /url: /support
+        - link "My Disputes" [ref=f63e111] [cursor=pointer]:
+          - /url: /disputes
+    - generic [ref=f63e115]:
+      - combobox "Select language" [ref=f63e118] [cursor=pointer]:
+        - option "🇬🇧 EN" [selected]
+        - option "🇪🇸 ES"
+        - option "🇫🇷 FR"
+        - option "🇵🇹 PT"
+        - option "🇩🇪 DE"
+      - link "Profile & Settings" [ref=f63e119] [cursor=pointer]:
+        - /url: /profile
+      - button "Log off" [ref=f63e123]
+  - main [ref=f63e128]:
+    - generic [ref=f63e129]:
+      - generic [ref=f63e136]:
+        - link "Send" [ref=f63e137] [cursor=pointer]:
+          - /url: /transfer
+        - link "Pay" [ref=f63e143] [cursor=pointer]:
+          - /url: /pay
+        - link "Top Up" [ref=f63e149] [cursor=pointer]:
+          - /url: /topup
+        - button "More" [ref=f63e154]
+      - generic [ref=f63e162]:
+        - heading "Your accounts" [level=2] [ref=f63e163]
+        - link "View all" [ref=f63e164] [cursor=pointer]:
+          - /url: /accounts
+      - generic [ref=f63e172]:
+        - heading "Recent transactions" [level=2] [ref=f63e173]
+        - generic [ref=f63e174]:
+          - button "Refresh" [ref=f63e175]
+          - link "View all" [ref=f63e181] [cursor=pointer]:
+            - /url: /transactions
+      - generic [ref=f63e216]:
+        - heading "Savings goals" [level=2] [ref=f63e217]
+        - link "View all" [ref=f63e218] [cursor=pointer]:
+          - /url: /goals
+  - alert [ref=f63e230]

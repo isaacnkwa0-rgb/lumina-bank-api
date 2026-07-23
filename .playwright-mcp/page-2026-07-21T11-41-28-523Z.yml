@@ -1,0 +1,147 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e4]:
+      - link "Lumina Bank" [ref=e5] [cursor=pointer]:
+        - /url: /
+      - combobox "Select language" [ref=e11] [cursor=pointer]:
+        - option "🇬🇧 EN" [selected]
+        - option "🇪🇸 ES"
+        - option "🇫🇷 FR"
+        - option "🇵🇹 PT"
+        - option "🇩🇪 DE"
+    - main [ref=e12]:
+      - generic [ref=e14]:
+        - generic [ref=e16]:
+          - generic [ref=e17]: Welcome
+          - generic [ref=e23]:
+            - generic [ref=e24]: "2"
+            - generic [ref=e26]: Eligibility
+          - generic [ref=e28]:
+            - generic [ref=e29]: "3"
+            - generic [ref=e31]: Personal
+          - generic [ref=e33]:
+            - generic [ref=e34]: "4"
+            - generic [ref=e36]: Contact
+          - generic [ref=e38]:
+            - generic [ref=e39]: "5"
+            - generic [ref=e41]: Email
+          - generic [ref=e43]:
+            - generic [ref=e44]: "6"
+            - generic [ref=e46]: Phone
+          - generic [ref=e48]:
+            - generic [ref=e49]: "7"
+            - generic [ref=e51]: Address
+          - generic [ref=e53]:
+            - generic [ref=e54]: "8"
+            - generic [ref=e56]: Finances
+          - generic [ref=e58]:
+            - generic [ref=e59]: "9"
+            - generic [ref=e61]: Identity
+          - generic [ref=e63]:
+            - generic [ref=e64]: "10"
+            - generic [ref=e66]: Review
+          - generic [ref=e68]:
+            - generic [ref=e69]: "11"
+            - generic [ref=e71]: Consent
+          - generic [ref=e73]:
+            - generic [ref=e74]: "12"
+            - generic [ref=e76]: Complete
+        - region [ref=e132]:
+          - generic [ref=e133]:
+            - heading "Eligibility" [level=2] [ref=e134]
+            - paragraph [ref=e135]: Tell us about yourself
+          - generic [ref=e136]:
+            - generic [ref=e137]: Country of residence
+            - combobox [ref=e138]:
+              - option "United Kingdom" [selected]
+              - option "United States"
+              - option "Canada"
+              - option "Australia"
+              - option "Germany"
+              - option "France"
+              - option "Spain"
+              - option "Portugal"
+              - option "Italy"
+              - option "Netherlands"
+              - option "Belgium"
+              - option "Switzerland"
+              - option "Austria"
+              - option "Sweden"
+              - option "Norway"
+              - option "Denmark"
+              - option "Finland"
+              - option "Ireland"
+              - option "New Zealand"
+              - option "Japan"
+              - option "South Korea"
+              - option "Singapore"
+              - option "United Arab Emirates"
+              - option "Saudi Arabia"
+              - option "India"
+              - option "Brazil"
+              - option "Mexico"
+              - option "South Africa"
+              - option "Ghana"
+              - option "Nigeria"
+              - option "Kenya"
+              - option "Egypt"
+              - option "Iran"
+              - option "North Korea"
+              - option "Cuba"
+              - option "Syria"
+              - option "Myanmar"
+              - option "Russia"
+          - generic [ref=e139]:
+            - generic [ref=e140]: Tax residency country
+            - combobox [ref=e141]:
+              - option "United Kingdom" [selected]
+              - option "United States"
+              - option "Canada"
+              - option "Australia"
+              - option "Germany"
+              - option "France"
+              - option "Spain"
+              - option "Portugal"
+              - option "Italy"
+              - option "Netherlands"
+              - option "Belgium"
+              - option "Switzerland"
+              - option "Austria"
+              - option "Sweden"
+              - option "Norway"
+              - option "Denmark"
+              - option "Finland"
+              - option "Ireland"
+              - option "New Zealand"
+              - option "Japan"
+              - option "South Korea"
+              - option "Singapore"
+              - option "United Arab Emirates"
+              - option "Saudi Arabia"
+              - option "India"
+              - option "Brazil"
+              - option "Mexico"
+              - option "South Africa"
+              - option "Ghana"
+              - option "Nigeria"
+              - option "Kenya"
+              - option "Egypt"
+              - option "Russia"
+          - generic [ref=e143] [cursor=pointer]:
+            - checkbox "I confirm I am 18 years or older" [ref=e144]
+            - generic [ref=e145]: I confirm I am 18 years or older
+          - generic [ref=e146]:
+            - paragraph [ref=e147]: Account type
+            - generic [ref=e148]:
+              - button "Personal" [ref=e149]
+              - button "Student" [ref=e151]
+              - button "Joint" [ref=e153]
+              - button "Business" [ref=e155]
+              - button "Premium" [ref=e157]
+          - generic [ref=e159]:
+            - button "Back" [ref=e160]
+            - button "Continue" [ref=e161]
+        - paragraph [ref=e115]: 256-bit TLS encryption · FCA regulated · FSCS protected up to £85,000
+    - contentinfo [ref=e119]: © 2026 Lumina Bank. All rights reserved. Authorised by the FCA.
+  - button "Open Next.js Dev Tools" [ref=e126] [cursor=pointer]
+  - alert [ref=e120]

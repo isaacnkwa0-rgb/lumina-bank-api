@@ -1,0 +1,104 @@
+- generic [ref=f63e1]:
+  - generic [ref=f63e127]:
+    - banner [ref=f63e379]:
+      - button "Open menu" [ref=f63e380]
+      - link "Lumina Bank" [ref=f63e382] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f63e387]:
+        - combobox "Select language" [ref=f63e389] [cursor=pointer]:
+          - option "🇬🇧 EN" [selected]
+          - option "🇪🇸 ES"
+          - option "🇫🇷 FR"
+          - option "🇵🇹 PT"
+          - option "🇩🇪 DE"
+        - link "Notifications" [ref=f63e390] [cursor=pointer]:
+          - /url: /notifications
+          - generic [ref=f63e394]: "6"
+        - button "Profile" [ref=f63e395]
+        - button "Log off" [ref=f63e399]
+    - main [ref=f63e128]:
+      - generic [ref=f63e257]:
+        - generic [ref=f63e258]:
+          - button "Back" [ref=f63e259]
+          - generic [ref=f63e267]:
+            - heading "Help & Support" [level=1] [ref=f63e268]
+            - paragraph [ref=f63e269]: We're here to help
+        - generic [ref=f63e270]:
+          - generic [ref=f63e271]:
+            - generic [ref=f63e272]:
+              - paragraph [ref=f63e273]: My conversations
+              - button "New conversation" [ref=f63e274]
+            - generic [ref=f63e276]:
+              - button "Question about international transfers Also, is there a minimum transfer amount for international payments? Open" [ref=f63e403]:
+                - generic [ref=f63e407]:
+                  - paragraph [ref=f63e409]: Question about international transfers
+                  - paragraph [ref=f63e410]: Also, is there a minimum transfer amount for international payments?
+                - generic [ref=f63e411]: Open
+              - button "My card was declined Hi Isaac, thank you for reaching out. I can see your card is active in our system. This may have been a temporary network issue with the merchant terminal. Please try using it again � if it declines again, reply here and we will raise an investigation immediately. Resolved" [ref=f63e415]:
+                - generic [ref=f63e420]:
+                  - paragraph [ref=f63e422]: My card was declined
+                  - paragraph [ref=f63e423]: Hi Isaac, thank you for reaching out. I can see your card is active in our system. This may have been a temporary network issue with the merchant terminal. Please try using it again � if it declines again, reply here and we will raise an investigation immediately.
+                - generic [ref=f63e424]: Resolved
+          - generic [ref=f63e278]:
+            - paragraph [ref=f63e280]: Contact us
+            - button [ref=f63e281]:
+              - generic [ref=f63e286]:
+                - paragraph [ref=f63e287]: Email support
+                - paragraph [ref=f63e288]: support@luminabank.online
+            - button [ref=f63e289]:
+              - generic [ref=f63e293]:
+                - paragraph [ref=f63e294]: Live chat
+                - paragraph [ref=f63e295]: Mon–Fri, 9am–6pm GMT
+            - button [ref=f63e296]:
+              - generic [ref=f63e300]:
+                - paragraph [ref=f63e301]: Phone
+                - paragraph [ref=f63e302]: +44 800 000 0000 · 24/7
+          - generic [ref=f63e303]:
+            - paragraph [ref=f63e305]: Frequently asked questions
+            - button [ref=f63e307]:
+              - paragraph [ref=f63e312]: How long do transfers take?
+            - button [ref=f63e316]:
+              - paragraph [ref=f63e321]: I've been locked out of my account
+            - button [ref=f63e325]:
+              - paragraph [ref=f63e329]: My card has been blocked — what do I do?
+            - button [ref=f63e333]:
+              - paragraph [ref=f63e338]: How do I enable two-factor authentication?
+            - button [ref=f63e342]:
+              - paragraph [ref=f63e348]: Why is my KYC verification taking long?
+            - button [ref=f63e352]:
+              - paragraph [ref=f63e356]: I don't recognise a transaction on my account
+            - button [ref=f63e360]:
+              - paragraph [ref=f63e365]: What are the daily transfer limits?
+            - button [ref=f63e369]:
+              - paragraph [ref=f63e374]: How do I change my password?
+          - paragraph [ref=f63e378]: Lumina Bank is a demo banking application. For urgent account security concerns, email security@luminabank.online
+    - navigation [ref=f63e428]:
+      - generic [ref=f63e429]:
+        - link "Home" [ref=f63e430] [cursor=pointer]:
+          - /url: /dashboard
+        - link "Accounts" [ref=f63e435] [cursor=pointer]:
+          - /url: /accounts
+        - link "Transfer" [ref=f63e439] [cursor=pointer]:
+          - /url: /transfer
+        - link "Cards" [ref=f63e444] [cursor=pointer]:
+          - /url: /cards
+        - button "More" [active] [ref=f63e448]
+    - generic [ref=f63e457]:
+      - generic [ref=f63e458]:
+        - heading "More" [level=2] [ref=f63e459]
+        - button [ref=f63e460]
+      - generic [ref=f63e464]:
+        - button "Transactions" [ref=f63e465]
+        - button "Analytics" [ref=f63e471]
+        - button "Crypto" [ref=f63e475]
+        - button "Investments" [ref=f63e480]
+        - button "Loans" [ref=f63e486]
+        - button "Mortgage" [ref=f63e491]
+        - button "Insurance" [ref=f63e497]
+        - button "Savings Goals" [ref=f63e503]
+        - button "Exchange Rates" [ref=f63e510]
+        - button "Saved Payees" [ref=f63e516]
+        - button "Notifications" [ref=f63e522]
+        - button "Help & Support" [ref=f63e528]
+        - button "Profile & Settings" [ref=f63e534]
+  - alert [ref=f63e230]

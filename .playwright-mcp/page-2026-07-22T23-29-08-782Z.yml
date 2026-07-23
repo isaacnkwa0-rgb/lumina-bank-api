@@ -1,0 +1,91 @@
+- generic [active] [ref=f62e1]:
+  - complementary [ref=f62e2]:
+    - link [ref=f62e3] [cursor=pointer]:
+      - /url: /dashboard
+      - generic [ref=f62e7]:
+        - paragraph [ref=f62e8]: Lumina Bank
+        - paragraph [ref=f62e9]: Secure Banking
+    - generic [ref=f62e15]:
+      - paragraph [ref=f62e16]: Isaac Nkwa
+      - paragraph [ref=f62e17]: isaacnkwa0@gmail.com
+    - navigation [ref=f62e18]:
+      - generic [ref=f62e19]:
+        - paragraph [ref=f62e20]: Overview
+        - link "Home" [ref=f62e21] [cursor=pointer]:
+          - /url: /dashboard
+        - link "Accounts" [ref=f62e26] [cursor=pointer]:
+          - /url: /accounts
+        - link "Transactions" [ref=f62e30] [cursor=pointer]:
+          - /url: /transactions
+        - link "Notifications" [ref=f62e35] [cursor=pointer]:
+          - /url: /notifications
+      - generic [ref=f62e40]:
+        - paragraph [ref=f62e41]: Move Money
+        - link "Transfer" [ref=f62e42] [cursor=pointer]:
+          - /url: /transfer
+        - link "Standing Orders" [ref=f62e47] [cursor=pointer]:
+          - /url: /standing-orders
+        - link "Direct Debits" [ref=f62e54] [cursor=pointer]:
+          - /url: /direct-debits
+        - link "Saved Payees" [ref=f62e58] [cursor=pointer]:
+          - /url: /beneficiaries
+      - generic [ref=f62e63]:
+        - paragraph [ref=f62e64]: Cards & Credit
+        - link "Cards" [ref=f62e65] [cursor=pointer]:
+          - /url: /cards
+        - link "Loans" [ref=f62e69] [cursor=pointer]:
+          - /url: /loans
+        - link "Mortgage" [ref=f62e73] [cursor=pointer]:
+          - /url: /mortgage
+      - generic [ref=f62e78]:
+        - paragraph [ref=f62e79]: Grow
+        - link "Investments" [ref=f62e80] [cursor=pointer]:
+          - /url: /investments
+        - link "Savings Goals" [ref=f62e85] [cursor=pointer]:
+          - /url: /goals
+        - link "Crypto" [ref=f62e91] [cursor=pointer]:
+          - /url: /crypto
+        - link "Insurance" [ref=f62e95] [cursor=pointer]:
+          - /url: /insurance
+      - generic [ref=f62e100]:
+        - paragraph [ref=f62e101]: Tools
+        - link "Analytics" [ref=f62e102] [cursor=pointer]:
+          - /url: /analytics
+        - link "Exchange Rates" [ref=f62e105] [cursor=pointer]:
+          - /url: /rates
+      - generic [ref=f62e110]:
+        - paragraph [ref=f62e111]: Support
+        - link "My Disputes" [ref=f62e112] [cursor=pointer]:
+          - /url: /disputes
+    - generic [ref=f62e116]:
+      - combobox "Select language" [ref=f62e119] [cursor=pointer]:
+        - option "🇬🇧 EN" [selected]
+        - option "🇪🇸 ES"
+        - option "🇫🇷 FR"
+        - option "🇵🇹 PT"
+        - option "🇩🇪 DE"
+      - link "Profile & Settings" [ref=f62e120] [cursor=pointer]:
+        - /url: /profile
+      - button "Log off" [ref=f62e124]
+  - main [ref=f62e129]:
+    - generic [ref=f62e441]:
+      - generic [ref=f62e442]:
+        - button "All conversations" [ref=f62e449]
+        - generic [ref=f62e444]:
+          - generic [ref=f62e452]:
+            - paragraph [ref=f62e453]: Support ticket
+            - heading "Question about international transfers" [level=1] [ref=f62e454]
+          - generic [ref=f62e455]: Open
+      - generic [ref=f62e445]:
+        - generic [ref=f62e459]:
+          - generic [ref=f62e460]: Hi, I want to transfer money to a friend in France. What are the fees and how long does it take?
+          - paragraph [ref=f62e461]: 00:29 · 23 Jul
+        - generic [ref=f62e478]:
+          - generic [ref=f62e479]: Also, is there a minimum transfer amount for international payments?
+          - paragraph [ref=f62e480]: 00:29 · 23 Jul
+      - generic [ref=f62e469]:
+        - generic [ref=f62e470]:
+          - textbox "Type a message…" [ref=f62e471]
+          - button [disabled] [ref=f62e472]
+        - button "Close this conversation" [ref=f62e476]
+  - alert [ref=f62e252]

@@ -81,7 +81,7 @@ function layout(title: string, body: string): string {
   <div class="body">${body}</div>
   <div class="foot">
     <p>This is an automated notification. Please do not reply to this email.</p>
-    <p>For help, visit <strong>luminabank.online/help</strong> or call <strong>0800 123 4567</strong> (free, 24/7).</p>
+    <p>For help, email <a href="mailto:support@luminabank.online" style="color:#DB0011">support@luminabank.online</a> or call <strong>0800 123 4567</strong> (free, 24/7).</p>
     <p class="reg">Lumina Bank plc is authorised by the Prudential Regulation Authority and regulated by the Financial Conduct Authority and the Prudential Regulation Authority (FCA Register No. 123456). Registered in England &amp; Wales No. 12345678. Registered office: 1 Lumina Square, London, EC2V 8RF.</p>
     <p class="reg">© ${new Date().getFullYear()} Lumina Bank plc. All rights reserved. FSCS protected up to £85,000.</p>
   </div>
@@ -178,7 +178,7 @@ function txLayout(opts: {
   <tr>
     <td style="background:#f7f7f7;border-top:1px solid #e8e8e8;padding:20px 28px">
       <p style="margin:0 0 5px;font-size:11.5px;color:#888;line-height:1.55">This is an automated notification sent to you because you have transaction alerts enabled. Do not reply to this email.</p>
-      <p style="margin:0 0 5px;font-size:11.5px;color:#888">Help: <strong>0800 123 4567</strong> · luminabank.online/help</p>
+      <p style="margin:0 0 5px;font-size:11.5px;color:#888">Help: <a href="mailto:support@luminabank.online" style="color:#DB0011;text-decoration:none">support@luminabank.online</a> · <strong>0800 123 4567</strong></p>
       <p style="margin:12px 0 0;font-size:10px;color:#bbb;line-height:1.55">Lumina Bank plc is authorised by the Prudential Regulation Authority and regulated by the Financial Conduct Authority and the Prudential Regulation Authority (FRN 123456). Registered in England &amp; Wales No. 12345678. Registered office: 1 Lumina Square, London EC2V 8RF. FSCS protected up to £85,000.</p>
     </td>
   </tr>

@@ -1,0 +1,106 @@
+- generic [active] [ref=f51e1]:
+  - generic [ref=f51e2]:
+    - banner [ref=f51e4]:
+      - link "Lumina Bank" [ref=f51e5] [cursor=pointer]:
+        - /url: /
+      - combobox "Select language" [ref=f51e11] [cursor=pointer]:
+        - option "🇬🇧 EN" [selected]
+        - option "🇪🇸 ES"
+        - option "🇫🇷 FR"
+        - option "🇵🇹 PT"
+        - option "🇩🇪 DE"
+    - main [ref=f51e12]:
+      - generic [ref=f51e14]:
+        - generic [ref=f51e16]:
+          - generic [ref=f51e17]: Welcome
+          - generic [ref=f51e22]: Eligibility
+          - generic [ref=f51e27]: Personal
+          - generic [ref=f51e32]: Contact
+          - generic [ref=f51e37]: Email
+          - generic [ref=f51e42]: Address
+          - generic [ref=f51e47]: Finances
+          - generic [ref=f51e52]: Identity
+          - generic [ref=f51e58]:
+            - generic [ref=f51e59]: "9"
+            - generic [ref=f51e61]: Review
+          - generic [ref=f51e63]:
+            - generic [ref=f51e64]: "10"
+            - generic [ref=f51e66]: Consent
+          - generic [ref=f51e68]:
+            - generic [ref=f51e69]: "11"
+            - generic [ref=f51e71]: Complete
+        - region [ref=f51e478]:
+          - generic [ref=f51e479]:
+            - heading "Review Your Information" [level=2] [ref=f51e480]
+            - paragraph [ref=f51e481]: Check everything before you consent
+          - generic [ref=f51e482]:
+            - generic [ref=f51e483]:
+              - generic [ref=f51e484]: Personal Information
+              - button "Edit" [ref=f51e485]
+            - generic [ref=f51e489]:
+              - generic [ref=f51e490]:
+                - paragraph [ref=f51e491]: Name
+                - generic [ref=f51e492]: Isaac Nkwa
+              - generic [ref=f51e493]:
+                - paragraph [ref=f51e494]: Date of birth
+                - generic [ref=f51e495]: 1998-01-15
+              - generic [ref=f51e496]:
+                - paragraph [ref=f51e497]: Gender
+                - generic [ref=f51e498]: MALE
+              - generic [ref=f51e499]:
+                - paragraph [ref=f51e500]: Nationality
+                - generic [ref=f51e501]: United Kingdom
+          - generic [ref=f51e502]:
+            - generic [ref=f51e503]: Contact Information
+            - generic [ref=f51e505]:
+              - generic [ref=f51e506]:
+                - paragraph [ref=f51e507]: Email
+                - generic [ref=f51e508]: isaacnkwa0@gmail.com
+              - generic [ref=f51e512]:
+                - paragraph [ref=f51e513]: Phone
+                - generic [ref=f51e514]: +44 7700900123
+          - generic [ref=f51e518]:
+            - generic [ref=f51e519]:
+              - generic [ref=f51e520]: Home Address
+              - button "Edit" [ref=f51e521]
+            - generic [ref=f51e525]:
+              - generic [ref=f51e526]:
+                - paragraph [ref=f51e527]: Address
+                - generic [ref=f51e528]: 12 Baker Street, London, Greater London, NW1 6XE
+              - generic [ref=f51e529]:
+                - paragraph [ref=f51e530]: Country
+                - generic [ref=f51e531]: United Kingdom
+          - generic [ref=f51e532]:
+            - generic [ref=f51e533]:
+              - generic [ref=f51e534]: Employment & Finances
+              - button "Edit" [ref=f51e535]
+            - generic [ref=f51e539]:
+              - generic [ref=f51e540]:
+                - paragraph [ref=f51e541]: Employment
+                - generic [ref=f51e542]: EMPLOYED
+              - generic [ref=f51e543]:
+                - paragraph [ref=f51e544]: Income range
+                - generic [ref=f51e545]: £50,000 – £100,000
+              - generic [ref=f51e546]:
+                - paragraph [ref=f51e547]: Source of funds
+                - generic [ref=f51e548]: Salary
+              - generic [ref=f51e549]:
+                - paragraph [ref=f51e550]: Monthly volume
+                - generic [ref=f51e551]: £1,000 – £5,000
+          - generic [ref=f51e552]:
+            - generic [ref=f51e553]:
+              - generic [ref=f51e554]: Identity Documents
+              - button "Edit" [ref=f51e555]
+            - generic [ref=f51e559]:
+              - generic [ref=f51e560]:
+                - paragraph [ref=f51e561]: Document type
+                - generic [ref=f51e562]: PASSPORT
+              - generic [ref=f51e563]:
+                - paragraph [ref=f51e564]: Status
+                - generic [ref=f51e565]: Submitted
+          - generic [ref=f51e570]:
+            - button "Back" [ref=f51e571]
+            - button "Continue" [ref=f51e572]
+        - paragraph [ref=f51e110]: 256-bit TLS encryption · FCA regulated · FSCS protected up to £85,000
+    - contentinfo [ref=f51e114]: © 2026 Lumina Bank. All rights reserved. Authorised by the FCA.
+  - alert [ref=f51e115]
