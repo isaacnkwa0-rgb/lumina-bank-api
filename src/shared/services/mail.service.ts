@@ -510,6 +510,30 @@ export const mailService = {
     });
   },
 
+  async sendCardUnblocked(to: string, last4: string): Promise<void> {
+    const body = `
+      <p>Your Lumina Bank card ending in <strong>${last4}</strong> has been <strong>unblocked</strong> and is ready to use.</p>
+      <p>You can now make purchases and withdrawals as normal.</p>
+      <p class="note">If you did not request this or this was unexpected, please contact support immediately.</p>`;
+    await send({ to, subject: `Card ending ${last4} unblocked | Lumina Bank`, html: layout('Card Unblocked', body) });
+  },
+
+  async sendAccountFrozen(to: string): Promise<void> {
+    const body = `
+      <p>Your Lumina Bank account has been <strong>temporarily frozen</strong>.</p>
+      <p>While frozen, you will not be able to make payments or transfers from this account. Your funds remain safe.</p>
+      <p>Please contact our support team if you have any questions or to request a review of this decision.</p>`;
+    await send({ to, subject: 'Your account has been frozen | Lumina Bank', html: layout('Account Frozen', body) });
+  },
+
+  async sendAccountUnfrozen(to: string): Promise<void> {
+    const body = `
+      <p>Your Lumina Bank account has been <strong>unfrozen</strong> and is now fully accessible.</p>
+      <p>You can make payments and transfers as normal.</p>
+      <p class="note">If you did not request this or this was unexpected, please contact support immediately.</p>`;
+    await send({ to, subject: 'Your account has been unfrozen | Lumina Bank', html: layout('Account Unfrozen', body) });
+  },
+
   async sendTicketClosed(to: string, opts: { firstName: string; subject: string }): Promise<void> {
     const { firstName, subject } = opts;
     const body = `

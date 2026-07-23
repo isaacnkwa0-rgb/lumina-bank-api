@@ -519,13 +519,15 @@ export class AdminService {
   }
 
   async unblockCard(id: string) {
-    const card = await prisma.card.findUnique({ where: { id } });
+    const card = await prisma.card.findUnique({ where: { id }, include: { user: { select: { email: true } } } });
     if (!card) throw new AppError('Card not found', 404, ErrorCodes.NOT_FOUND);
     if (card.status === CardStatus.CANCELLED || card.status === CardStatus.EXPIRED) {
       throw new AppError('Cannot unblock a cancelled or expired card', 400, ErrorCodes.CONFLICT);
     }
     const updated = await prisma.card.update({ where: { id }, data: { status: CardStatus.ACTIVE } });
-    await prisma.notification.create({ data: { userId: card.userId, type: NotificationType.SYSTEM, title: 'Card Unblocked', body: `Your card ending ${card.maskedPan.slice(-4)} has been unblocked and is ready to use.` } });
+    const last4 = card.maskedPan.slice(-4);
+    await prisma.notification.create({ data: { userId: card.userId, type: NotificationType.SYSTEM, title: 'Card Unblocked', body: `Your card ending ${last4} has been unblocked and is ready to use.` } });
+    mailService.sendCardUnblocked(card.user.email, last4).catch(() => {});
     return updated;
   }
 
@@ -676,15 +678,25 @@ export class AdminService {
   }
 
   async freezeAccount(accountId: string) {
-    const account = await prisma.account.findUnique({ where: { id: accountId } });
+    const account = await prisma.account.findUnique({
+      where: { id: accountId },
+      include: { user: { select: { email: true } } },
+    });
     if (!account) throw new AppError('Account not found', 404, ErrorCodes.NOT_FOUND);
-    return prisma.account.update({ where: { id: accountId }, data: { status: 'FROZEN' } });
+    const updated = await prisma.account.update({ where: { id: accountId }, data: { status: 'FROZEN' } });
+    mailService.sendAccountFrozen(account.user.email).catch(() => {});
+    return updated;
   }
 
   async unfreezeAccount(accountId: string) {
-    const account = await prisma.account.findUnique({ where: { id: accountId } });
+    const account = await prisma.account.findUnique({
+      where: { id: accountId },
+      include: { user: { select: { email: true } } },
+    });
     if (!account) throw new AppError('Account not found', 404, ErrorCodes.NOT_FOUND);
-    return prisma.account.update({ where: { id: accountId }, data: { status: 'ACTIVE' } });
+    const updated = await prisma.account.update({ where: { id: accountId }, data: { status: 'ACTIVE' } });
+    mailService.sendAccountUnfrozen(account.user.email).catch(() => {});
+    return updated;
   }
 
   async closeAccount(accountId: string) {

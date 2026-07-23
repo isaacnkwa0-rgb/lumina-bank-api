@@ -23,7 +23,6 @@ const DAILY_TX_COUNT_LIMITS: Record<UserTier, number> = {
   BUSINESS: 100,
 };
 
-const ALERT_THRESHOLD = 1_000;
 
 export class TransfersService {
   // Own-accounts internal transfer (same user)
@@ -115,6 +114,21 @@ export class TransfersService {
     });
 
     await this.notify(userId, 'Transfer sent', `£${data.amount.toFixed(2)} moved to your ${toAccount.type} account`);
+
+    const user = await prisma.user.findUnique({ where: { id: userId }, select: { email: true } });
+    if (user) {
+      const fromAfter = fromAccount.balance.minus(new Decimal(data.amount));
+      mailService.sendTransferNotification(user.email, {
+        amount: data.amount.toFixed(2),
+        currency: fromAccount.currency,
+        recipient: `Your ${toAccount.type.toLowerCase()} account`,
+        reference: transfer.id,
+        description: data.description,
+        accountNumber: fromAccount.accountNumber,
+        balanceAfter: fromAfter.toFixed(2),
+      }).catch(() => {});
+    }
+
     return transfer;
   }
 
@@ -366,7 +380,20 @@ export class TransfersService {
     }
 
     await this.notify(userId, 'Transfer submitted', `£${data.amount.toFixed(2)} to ${data.toAccountName} is being processed (1–2 business days)`);
-    await this.alertIfLarge(userId, data.amount, fromAccount.currency, data.toAccountName, transfer.id);
+
+    const user = await prisma.user.findUnique({ where: { id: userId }, select: { email: true } });
+    if (user) {
+      mailService.sendTransferNotification(user.email, {
+        amount: data.amount.toFixed(2),
+        currency: fromAccount.currency,
+        recipient: data.toAccountName,
+        reference: transfer.id,
+        description: data.description,
+        accountNumber: fromAccount.accountNumber,
+        balanceAfter: balanceAfter.toFixed(2),
+      }).catch(() => {});
+    }
+
     return transfer;
   }
 
@@ -458,7 +485,19 @@ export class TransfersService {
     });
 
     await this.notify(userId, 'International transfer submitted', `£${data.amount.toFixed(2)} to ${data.toAccountName} is being processed (3–5 business days)`);
-    await this.alertIfLarge(userId, data.amount, fromAccount.currency, data.toAccountName, transfer.id);
+
+    const user = await prisma.user.findUnique({ where: { id: userId }, select: { email: true } });
+    if (user) {
+      mailService.sendTransferNotification(user.email, {
+        amount: data.amount.toFixed(2),
+        currency: fromAccount.currency,
+        recipient: data.toAccountName,
+        reference: transfer.id,
+        description: data.description,
+        balanceAfter: balanceAfter.toFixed(2),
+      }).catch(() => {});
+    }
+
     return { transfer, quote };
   }
 
@@ -608,19 +647,7 @@ export class TransfersService {
     }
   }
 
-  private async alertIfLarge(userId: string, amount: number, currency: string, recipient: string, reference: string) {
-    if (amount < ALERT_THRESHOLD) return;
-    const user = await prisma.user.findUnique({ where: { id: userId }, select: { email: true } });
-    if (!user) return;
-    mailService
-      .sendTransferNotification(user.email, {
-        amount: amount.toFixed(2),
-        currency,
-        recipient,
-        reference,
-      })
-      .catch(() => {});
-  }
 }
+
 
 export const transfersService = new TransfersService();
