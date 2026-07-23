@@ -1025,6 +1025,36 @@ export class AdminService {
     return agent;
   }
 
+  async updateAgent(id: string, data: { firstName?: string; lastName?: string; avatarUrl?: string; password?: string }) {
+    const agent = await prisma.user.findUnique({ where: { id }, include: { profile: true } });
+    if (!agent || agent.role !== 'AGENT') throw new AppError('Agent not found', 404, ErrorCodes.NOT_FOUND);
+
+    const { firstName, lastName, avatarUrl, password } = data;
+    const passwordHash = password ? await bcrypt.hash(password, 12) : undefined;
+
+    await prisma.user.update({
+      where: { id },
+      data: {
+        ...(firstName ? { firstName } : {}),
+        ...(lastName ? { lastName } : {}),
+        ...(passwordHash ? { passwordHash } : {}),
+      },
+    });
+
+    if (avatarUrl !== undefined) {
+      if (agent.profile) {
+        await prisma.profile.update({ where: { userId: id }, data: { avatarUrl } });
+      } else {
+        await prisma.profile.create({ data: { userId: id, avatarUrl } });
+      }
+    }
+
+    return prisma.user.findUnique({
+      where: { id },
+      select: { id: true, firstName: true, lastName: true, email: true, status: true, createdAt: true, profile: { select: { avatarUrl: true } } },
+    });
+  }
+
   async deleteAgent(id: string) {
     const agent = await prisma.user.findUnique({ where: { id } });
     if (!agent || agent.role !== 'AGENT') throw new AppError('Agent not found', 404, ErrorCodes.NOT_FOUND);

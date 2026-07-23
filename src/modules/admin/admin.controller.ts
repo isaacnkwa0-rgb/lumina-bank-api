@@ -424,6 +424,13 @@ export class AdminController {
     } catch (err) { next(err); }
   }
 
+  async updateAgent(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = await adminService.updateAgent(req.params.id as string, req.body);
+      sendSuccess(res, data, 'Agent updated');
+    } catch (err) { next(err); }
+  }
+
   async deleteAgent(req: Request, res: Response, next: NextFunction) {
     try {
       const data = await adminService.deleteAgent(req.params.id as string);

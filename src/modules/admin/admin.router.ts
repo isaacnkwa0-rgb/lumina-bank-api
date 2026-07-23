@@ -82,6 +82,7 @@ router.patch('/support/tickets/:id/resolve', adminController.resolveSupportTicke
 // Support Agents (admin-only)
 router.get('/agents', adminController.getAgents.bind(adminController));
 router.post('/agents', adminController.createAgent.bind(adminController));
+router.patch('/agents/:id', adminController.updateAgent.bind(adminController));
 router.delete('/agents/:id', adminController.deleteAgent.bind(adminController));
 
 export default router;
