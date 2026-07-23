@@ -270,6 +270,7 @@ model User {
   otpCodes      OtpCode[]
   disputes         Dispute[]
   supportTickets   SupportTicket[]
+  supportMessages  SupportMessage[]
   insuranceQuotes  InsuranceQuote[]
   standingOrders   StandingOrder[]
   directDebits     DirectDebit[]
@@ -694,8 +695,10 @@ model SupportMessage {
   createdAt  DateTime   @default(now())
 
   ticket SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  sender User          @relation(fields: [senderId], references: [id])
 
   @@index([ticketId])
+  @@index([senderId])
   @@index([createdAt])
 }
 

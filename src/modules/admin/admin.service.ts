@@ -847,10 +847,16 @@ export class AdminService {
   }
 
   async replyToTicket(ticketId: string, agentId: string, body: string) {
-    const ticket = await prisma.supportTicket.findUnique({
-      where: { id: ticketId },
-      include: { user: { select: { email: true, firstName: true } } },
-    });
+    const [ticket, agent] = await Promise.all([
+      prisma.supportTicket.findUnique({
+        where: { id: ticketId },
+        include: { user: { select: { email: true, firstName: true } } },
+      }),
+      prisma.user.findUnique({
+        where: { id: agentId },
+        select: { firstName: true, lastName: true, profile: { select: { avatarUrl: true } } },
+      }),
+    ]);
     if (!ticket) throw new AppError('Ticket not found', 404, ErrorCodes.NOT_FOUND);
 
     const { SenderRole, SupportTicketStatus, NotificationType } = await import('@prisma/client');
@@ -858,6 +864,9 @@ export class AdminService {
     const [message] = await Promise.all([
       prisma.supportMessage.create({
         data: { ticketId, senderId: agentId, senderRole: SenderRole.AGENT, body },
+        include: {
+          sender: { select: { firstName: true, lastName: true, profile: { select: { avatarUrl: true } } } },
+        },
       }),
       prisma.supportTicket.update({
         where: { id: ticketId },
@@ -873,10 +882,13 @@ export class AdminService {
       }),
     ]);
 
+    const agentName = agent ? `${agent.firstName} ${agent.lastName}` : undefined;
     mailService.sendSupportReply(ticket.user.email, {
       firstName: ticket.user.firstName,
       subject: ticket.subject,
       replyBody: body,
+      agentName,
+      agentAvatarUrl: agent?.profile?.avatarUrl,
     }).catch(() => {});
 
     return message;
@@ -905,6 +917,11 @@ export class AdminService {
         },
       }),
     ]);
+
+    mailService.sendTicketResolved(ticket.user.email, {
+      firstName: ticket.user.firstName,
+      subject: ticket.subject,
+    }).catch(() => {});
 
     return updated;
   }

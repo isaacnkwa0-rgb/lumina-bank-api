@@ -2,9 +2,23 @@ import { prisma } from '../../config/database';
 import { AppError } from '../../middleware/error.middleware';
 import { SupportTicketStatus, SenderRole, NotificationType } from '@prisma/client';
 import { ErrorCodes } from '../../shared/utils/api-response';
+import { mailService } from '../../shared/services/mail.service';
+
+const senderSelect = {
+  select: {
+    firstName: true,
+    lastName: true,
+    profile: { select: { avatarUrl: true } },
+  },
+} as const;
 
 export class SupportService {
   async createTicket(userId: string, subject: string, body: string) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { email: true, firstName: true },
+    });
+
     const ticket = await prisma.supportTicket.create({
       data: {
         userId,
@@ -13,7 +27,11 @@ export class SupportService {
           create: { senderId: userId, senderRole: SenderRole.CUSTOMER, body },
         },
       },
-      include: { messages: true },
+      include: {
+        messages: {
+          include: { sender: senderSelect },
+        },
+      },
     });
 
     await prisma.notification.create({
@@ -24,6 +42,10 @@ export class SupportService {
         body: `Your ticket "${subject}" has been received. Our team will respond shortly.`,
       },
     });
+
+    if (user) {
+      mailService.sendTicketSubmitted(user.email, { firstName: user.firstName, subject }).catch(() => {});
+    }
 
     return ticket;
   }
@@ -36,6 +58,7 @@ export class SupportService {
         messages: {
           orderBy: { createdAt: 'desc' },
           take: 1,
+          include: { sender: senderSelect },
         },
         _count: {
           select: {
@@ -62,12 +85,14 @@ export class SupportService {
     const ticket = await prisma.supportTicket.findFirst({
       where: { id, userId },
       include: {
-        messages: { orderBy: { createdAt: 'asc' } },
+        messages: {
+          orderBy: { createdAt: 'asc' },
+          include: { sender: senderSelect },
+        },
       },
     });
     if (!ticket) throw new AppError('Ticket not found', 404, ErrorCodes.NOT_FOUND);
 
-    // Mark agent messages as read
     await prisma.supportMessage.updateMany({
       where: { ticketId: id, senderRole: SenderRole.AGENT, isRead: false },
       data: { isRead: true },
@@ -85,6 +110,7 @@ export class SupportService {
     const [message] = await Promise.all([
       prisma.supportMessage.create({
         data: { ticketId, senderId: userId, senderRole: SenderRole.CUSTOMER, body },
+        include: { sender: senderSelect },
       }),
       prisma.supportTicket.update({
         where: { id: ticketId },
@@ -96,15 +122,25 @@ export class SupportService {
   }
 
   async closeTicket(id: string, userId: string) {
-    const ticket = await prisma.supportTicket.findFirst({ where: { id, userId } });
+    const ticket = await prisma.supportTicket.findFirst({
+      where: { id, userId },
+      include: { user: { select: { email: true, firstName: true } } },
+    });
     if (!ticket) throw new AppError('Ticket not found', 404, ErrorCodes.NOT_FOUND);
     if (ticket.status === SupportTicketStatus.CLOSED)
       throw new AppError('Ticket is already closed', 400, ErrorCodes.VAL_001);
 
-    return prisma.supportTicket.update({
+    const updated = await prisma.supportTicket.update({
       where: { id },
       data: { status: SupportTicketStatus.CLOSED },
     });
+
+    mailService.sendTicketClosed(ticket.user.email, {
+      firstName: ticket.user.firstName,
+      subject: ticket.subject,
+    }).catch(() => {});
+
+    return updated;
   }
 }
 

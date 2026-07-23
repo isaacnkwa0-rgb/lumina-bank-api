@@ -453,20 +453,78 @@ export const mailService = {
     });
   },
 
-  async sendSupportReply(to: string, opts: { firstName: string; subject: string; replyBody: string }): Promise<void> {
-    const { firstName, subject, replyBody } = opts;
+  async sendTicketSubmitted(to: string, opts: { firstName: string; subject: string }): Promise<void> {
+    const { firstName, subject } = opts;
+    const body = `
+      <p>Hi ${firstName},</p>
+      <p>We have received your support request and a member of our team will be in touch shortly.</p>
+      <div style="background:#F8F8F8;border:1px solid #E8E8E8;border-radius:4px;padding:14px 18px;margin:20px 0;">
+        <p style="margin:0 0 4px;font-size:11px;color:#AAAAAA;text-transform:uppercase;letter-spacing:1px">Your ticket</p>
+        <p style="margin:0;font-size:15px;font-weight:700;color:#333;">${subject}</p>
+      </div>
+      <p>You can view your conversation and send additional messages by logging in to the Lumina Bank app.</p>
+      <p class="note">If you did not raise this ticket, please contact us at <a href="mailto:support@luminabank.online">support@luminabank.online</a>.</p>`;
+    await send({
+      to,
+      subject: `We received your request: ${subject} | Lumina Bank`,
+      html: layout('Support Request Received', body),
+    });
+  },
+
+  async sendSupportReply(to: string, opts: { firstName: string; subject: string; replyBody: string; agentName?: string; agentAvatarUrl?: string | null }): Promise<void> {
+    const { firstName, subject, replyBody, agentName } = opts;
+    const agentLine = agentName
+      ? `<p style="margin:0 0 12px;font-size:13px;font-weight:600;color:#DB0011;">${agentName} &middot; Lumina Bank Support</p>`
+      : '';
     const body = `
       <p>Hi ${firstName},</p>
       <p>Our support team has replied to your ticket: <strong>${subject}</strong></p>
       <div style="background:#F8F8F8;border-left:4px solid #DB0011;padding:14px 18px;margin:20px 0;border-radius:4px;">
+        ${agentLine}
         <p style="margin:0;color:#333;line-height:1.6;">${replyBody.replace(/\n/g, '<br/>')}</p>
       </div>
       <p>Log in to your account to continue the conversation or mark the ticket as resolved.</p>
       <p class="note">If you did not raise this ticket, please contact us immediately at <a href="mailto:support@luminabank.online">support@luminabank.online</a>.</p>`;
     await send({
       to,
-      subject: `Support reply: ${subject} | Lumina Bank`,
+      subject: `New reply: ${subject} | Lumina Bank`,
       html: layout('Support Team Reply', body),
+    });
+  },
+
+  async sendTicketResolved(to: string, opts: { firstName: string; subject: string }): Promise<void> {
+    const { firstName, subject } = opts;
+    const body = `
+      <p>Hi ${firstName},</p>
+      <p>Your support ticket has been <strong>resolved</strong> by our team.</p>
+      <div style="background:#F8F8F8;border:1px solid #E8E8E8;border-radius:4px;padding:14px 18px;margin:20px 0;">
+        <p style="margin:0 0 4px;font-size:11px;color:#AAAAAA;text-transform:uppercase;letter-spacing:1px">Resolved ticket</p>
+        <p style="margin:0;font-size:15px;font-weight:700;color:#333;">${subject}</p>
+      </div>
+      <p>If you are satisfied with the resolution, no further action is needed. If the issue persists, you can open a new conversation from the Lumina Bank app.</p>
+      <p class="note">Thank you for banking with Lumina Bank.</p>`;
+    await send({
+      to,
+      subject: `Ticket resolved: ${subject} | Lumina Bank`,
+      html: layout('Ticket Resolved', body),
+    });
+  },
+
+  async sendTicketClosed(to: string, opts: { firstName: string; subject: string }): Promise<void> {
+    const { firstName, subject } = opts;
+    const body = `
+      <p>Hi ${firstName},</p>
+      <p>Your support ticket has been <strong>closed</strong>.</p>
+      <div style="background:#F8F8F8;border:1px solid #E8E8E8;border-radius:4px;padding:14px 18px;margin:20px 0;">
+        <p style="margin:0 0 4px;font-size:11px;color:#AAAAAA;text-transform:uppercase;letter-spacing:1px">Closed ticket</p>
+        <p style="margin:0;font-size:15px;font-weight:700;color:#333;">${subject}</p>
+      </div>
+      <p>If you need further assistance, you can always open a new conversation from the Help &amp; Support section of the Lumina Bank app.</p>
+      <p class="note">Thank you for banking with Lumina Bank.</p>`;
+    await send({
+      to,
+      subject: `Ticket closed: ${subject} | Lumina Bank`,
+      html: layout('Ticket Closed', body),
     });
   },
 };
