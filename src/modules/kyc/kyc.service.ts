@@ -2,46 +2,22 @@ import { prisma } from '../../config/database';
 import { AppError } from '../../middleware/error.middleware';
 import { KycStatus, NotificationType } from '@prisma/client';
 
-interface KycFiles {
-  idFront?: Express.Multer.File[];
-  idBack?: Express.Multer.File[];
-}
-
 export class KycService {
   async getStatus(userId: string) {
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: {
-        kycStatus: true,
-        kycDocuments: true,
-      },
+      select: { kycStatus: true, kycDocuments: true },
     });
     if (!user) throw new AppError('User not found', 404);
-    return {
-      status: user.kycStatus,
-      documents: user.kycDocuments,
-    };
+    return { status: user.kycStatus, documents: user.kycDocuments };
   }
 
-  async submit(userId: string, files: KycFiles) {
-    const idFront = files.idFront?.[0];
-    const idBack = files.idBack?.[0];
-
-    if (!idFront || !idBack) {
-      throw new AppError('Both documents are required: idFront and idBack', 400);
-    }
-
-    const kycDocuments = {
-      idFront: idFront.path || idFront.filename,
-      idBack: idBack.path || idBack.filename,
-    };
+  async submit(userId: string, urls: { idFrontUrl: string; idBackUrl: string }) {
+    const kycDocuments = { idFront: urls.idFrontUrl, idBack: urls.idBackUrl };
 
     const user = await prisma.user.update({
       where: { id: userId },
-      data: {
-        kycStatus: KycStatus.PENDING,
-        kycDocuments,
-      },
+      data: { kycStatus: KycStatus.PENDING, kycDocuments },
       select: { id: true, kycStatus: true },
     });
 
@@ -54,10 +30,7 @@ export class KycService {
       },
     });
 
-    return {
-      status: user.kycStatus,
-      message: 'Documents submitted successfully and are under review',
-    };
+    return { status: user.kycStatus, message: 'Documents submitted successfully and are under review' };
   }
 
   async getDocuments(userId: string) {
@@ -71,5 +44,4 @@ export class KycService {
 }
 
 export default new KycService();
-
 export const kycService = new KycService();

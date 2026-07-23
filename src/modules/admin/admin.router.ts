@@ -1,22 +1,12 @@
 import { Router } from 'express';
 import multer from 'multer';
-import path from 'path';
-import fs from 'fs';
 import { adminService } from './admin.service';
 import adminController from './admin.controller';
 import { authenticate, requireAdmin, requireAgentOrAdmin } from '../../middleware/auth.middleware';
-
-const avatarUploadDir = 'uploads/';
-if (!fs.existsSync(avatarUploadDir)) fs.mkdirSync(avatarUploadDir, { recursive: true });
+import { uploadBuffer } from '../../config/cloudinary';
 
 const avatarUpload = multer({
-  storage: multer.diskStorage({
-    destination: avatarUploadDir,
-    filename: (_req, file, cb) => {
-      const ext = path.extname(file.originalname).toLowerCase() || '.jpg';
-      cb(null, `agent-avatar-${Date.now()}${ext}`);
-    },
-  }),
+  storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
     cb(null, file.mimetype.startsWith('image/'));
@@ -107,7 +97,7 @@ router.patch('/agents/:id', requireAdmin, adminController.updateAgent.bind(admin
 router.post('/agents/:id/avatar', requireAdmin, avatarUpload.single('avatar'), async (req, res, next) => {
   try {
     if (!req.file) { res.status(400).json({ success: false, error: { message: 'No file uploaded' } }); return; }
-    const avatarUrl = `/uploads/${req.file.filename}`;
+    const avatarUrl = await uploadBuffer(req.file.buffer, 'lumina-bank/agents');
     await adminService.updateAgent(req.params.id as string, { avatarUrl });
     res.json({ success: true, data: { avatarUrl }, message: 'Avatar updated' });
   } catch (err) { next(err); }
