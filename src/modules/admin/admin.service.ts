@@ -88,6 +88,7 @@ export class AdminService {
     if (!user) throw new AppError('User not found', 404, ErrorCodes.NOT_FOUND);
     if (user.status === UserStatus.SUSPENDED) throw new AppError('User is already suspended', 400, ErrorCodes.CONFLICT);
     const updated = await prisma.user.update({ where: { id }, data: { status: UserStatus.SUSPENDED }, select: { id: true, email: true, status: true } });
+    await prisma.notification.create({ data: { userId: id, type: NotificationType.SYSTEM, title: 'Account suspended', body: 'Your account has been suspended. Please contact support for assistance.' } }).catch(() => {});
     mailService.sendAccountSuspended(user.email).catch(() => {});
     return updated;
   }
@@ -96,6 +97,7 @@ export class AdminService {
     const user = await prisma.user.findUnique({ where: { id } });
     if (!user) throw new AppError('User not found', 404, ErrorCodes.NOT_FOUND);
     const updated = await prisma.user.update({ where: { id }, data: { status: UserStatus.ACTIVE }, select: { id: true, email: true, status: true } });
+    await prisma.notification.create({ data: { userId: id, type: NotificationType.SYSTEM, title: 'Account reactivated', body: 'Your account has been reactivated. Welcome back!' } }).catch(() => {});
     mailService.sendAccountReactivated(user.email).catch(() => {});
     return updated;
   }
@@ -685,10 +687,11 @@ export class AdminService {
   async freezeAccount(accountId: string) {
     const account = await prisma.account.findUnique({
       where: { id: accountId },
-      include: { user: { select: { email: true } } },
+      include: { user: { select: { id: true, email: true } } },
     });
     if (!account) throw new AppError('Account not found', 404, ErrorCodes.NOT_FOUND);
     const updated = await prisma.account.update({ where: { id: accountId }, data: { status: 'FROZEN' } });
+    await prisma.notification.create({ data: { userId: account.user.id, type: NotificationType.SYSTEM, title: 'Account frozen', body: `Your ${account.type.toLowerCase()} account ending ${account.accountNumber.slice(-4)} has been temporarily frozen. Contact support for details.` } }).catch(() => {});
     mailService.sendAccountFrozen(account.user.email).catch(() => {});
     return updated;
   }
@@ -696,10 +699,11 @@ export class AdminService {
   async unfreezeAccount(accountId: string) {
     const account = await prisma.account.findUnique({
       where: { id: accountId },
-      include: { user: { select: { email: true } } },
+      include: { user: { select: { id: true, email: true } } },
     });
     if (!account) throw new AppError('Account not found', 404, ErrorCodes.NOT_FOUND);
     const updated = await prisma.account.update({ where: { id: accountId }, data: { status: 'ACTIVE' } });
+    await prisma.notification.create({ data: { userId: account.user.id, type: NotificationType.SYSTEM, title: 'Account unfrozen', body: `Your ${account.type.toLowerCase()} account ending ${account.accountNumber.slice(-4)} has been unfrozen and is now active.` } }).catch(() => {});
     mailService.sendAccountUnfrozen(account.user.email).catch(() => {});
     return updated;
   }

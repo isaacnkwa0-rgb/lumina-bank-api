@@ -581,7 +581,7 @@ export class TransfersService {
       orderBy: { createdAt: 'desc' },
     });
     if (!record || record.code !== otp) {
-      throw new AppError('Invalid or expired transfer OTP', 401, ErrorCodes.AUTH_006);
+      throw new AppError('Invalid or expired OTP code. Please request a new one.', 422, ErrorCodes.AUTH_006);
     }
     await prisma.otpCode.update({ where: { id: record.id }, data: { usedAt: new Date() } });
   }
