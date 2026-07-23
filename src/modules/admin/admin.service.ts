@@ -669,7 +669,7 @@ export class AdminService {
   async getUserAccounts(userId: string) {
     return prisma.account.findMany({
       where: { userId },
-      select: { id: true, accountNumber: true, type: true, status: true, currency: true, balance: true, availableBalance: true, isFrozen: true },
+      select: { id: true, accountNumber: true, type: true, status: true, currency: true, balance: true, availableBalance: true },
       orderBy: { createdAt: 'asc' },
     });
   }
