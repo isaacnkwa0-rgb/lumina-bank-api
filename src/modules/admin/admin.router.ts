@@ -112,6 +112,7 @@ router.get('/notifications/unread-count', requireAdmin, adminController.getUnrea
 router.get('/notifications/:id', requireAdmin, adminController.getAdminNotification.bind(adminController));
 router.patch('/notifications/read-all', requireAdmin, adminController.markAllNotificationsRead.bind(adminController));
 router.patch('/notifications/:id/read', requireAdmin, adminController.markNotificationRead.bind(adminController));
+router.patch('/notifications/:id/unread', requireAdmin, adminController.markNotificationUnread.bind(adminController));
 router.delete('/notifications', requireAdmin, adminController.deleteAllNotifications.bind(adminController));
 router.delete('/notifications/:id', requireAdmin, adminController.deleteNotification.bind(adminController));
 

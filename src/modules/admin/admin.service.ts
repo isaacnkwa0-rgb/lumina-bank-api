@@ -1150,6 +1150,12 @@ export class AdminService {
     return { updated: count };
   }
 
+  async markNotificationUnread(id: string) {
+    const notification = await prisma.adminNotification.findUnique({ where: { id } });
+    if (!notification) throw new AppError('Notification not found', 404, ErrorCodes.NOT_FOUND);
+    return prisma.adminNotification.update({ where: { id }, data: { isRead: false } });
+  }
+
   async getUnreadNotificationCount() {
     const count = await prisma.adminNotification.count({ where: { isRead: false } });
     return { unreadCount: count };

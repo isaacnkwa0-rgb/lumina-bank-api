@@ -479,6 +479,13 @@ export class AdminController {
     } catch (err) { next(err); }
   }
 
+  async markNotificationUnread(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = await adminService.markNotificationUnread(req.params.id as string);
+      sendSuccess(res, data, 'Notification marked as unread');
+    } catch (err) { next(err); }
+  }
+
   async getUnreadNotificationCount(req: Request, res: Response, next: NextFunction) {
     try {
       const data = await adminService.getUnreadNotificationCount();
