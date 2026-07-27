@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { adminService } from './admin.service';
 import { sendSuccess } from '../../shared/utils/api-response';
+import { AppError } from '../../middleware/error.middleware';
 
 export class AdminController {
   async getUsers(req: Request, res: Response, next: NextFunction) {
@@ -435,6 +436,19 @@ export class AdminController {
     try {
       const data = await adminService.deleteAgent(req.params.id as string);
       sendSuccess(res, data, 'Agent deleted');
+    } catch (err) { next(err); }
+  }
+
+  async sendBulkEmail(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { subject, body, recipientType, userIds } = req.body;
+      if (!subject?.trim() || !body?.trim()) throw new AppError('Subject and body are required', 400);
+      if (!['ALL', 'SELECTED'].includes(recipientType)) throw new AppError('recipientType must be ALL or SELECTED', 400);
+      if (recipientType === 'SELECTED' && (!Array.isArray(userIds) || userIds.length === 0)) {
+        throw new AppError('At least one user must be selected', 400);
+      }
+      const data = await adminService.sendBulkEmail({ subject, body, recipientType, userIds });
+      sendSuccess(res, data, `Email sent to ${data.sent} user(s)`);
     } catch (err) { next(err); }
   }
 }

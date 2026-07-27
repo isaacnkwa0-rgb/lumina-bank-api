@@ -2,6 +2,8 @@ import { prisma } from '../../config/database';
 import { AppError } from '../../middleware/error.middleware';
 import { TransactionType, TransactionStatus, LoanStatus, LoanType, LoanPaymentStatus, TransactionCategory } from '@prisma/client';
 import { generateTransactionReference } from '../../shared/utils/transaction-ref';
+import { mailService } from '../../shared/services/mail.service';
+import { env } from '../../config/env';
 
 const LOAN_LIMITS: Record<string, number> = {
   PERSONAL: 50000,
@@ -111,19 +113,22 @@ export class LoansService {
     const annualRate = ANNUAL_RATES[type] ?? 0.1;
     const monthlyPayment = calcMonthlyPayment(amount, annualRate, termMonths);
 
-    const loan = await prisma.loan.create({
-      data: {
-        userId,
-        accountId: accountId ?? null,
-        type: type as LoanType,
-        principalAmount: amount,
-        termMonths,
-        outstandingBalance: amount,
-        monthlyPayment,
-        interestRate: annualRate,
-        status: LoanStatus.PENDING,
-      },
-    });
+    const [loan, userRecord] = await Promise.all([
+      prisma.loan.create({
+        data: {
+          userId,
+          accountId: accountId ?? null,
+          type: type as LoanType,
+          principalAmount: amount,
+          termMonths,
+          outstandingBalance: amount,
+          monthlyPayment,
+          interestRate: annualRate,
+          status: LoanStatus.PENDING,
+        },
+      }),
+      prisma.user.findUnique({ where: { id: userId }, select: { firstName: true, lastName: true, email: true } }),
+    ]);
 
     await prisma.notification.create({
       data: {
@@ -133,6 +138,18 @@ export class LoansService {
         body: `Your ${type.toLowerCase()} loan application for £${amount.toLocaleString()} is under review. We'll notify you within 1–2 business days.`,
       },
     });
+
+    if (userRecord) {
+      mailService.sendNewLoanApplicationAlert(env.ADMIN_EMAIL, {
+        firstName: userRecord.firstName,
+        lastName: userRecord.lastName,
+        email: userRecord.email,
+        loanType: type,
+        amount,
+        termMonths,
+        loanId: loan.id,
+      }).catch(() => {});
+    }
 
     return { ...loan, upcomingPayments: 0 };
   }

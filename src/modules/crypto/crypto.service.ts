@@ -4,6 +4,8 @@ import { prisma } from '../../config/database';
 import { AppError } from '../../middleware/error.middleware';
 import { ErrorCodes } from '../../shared/utils/api-response';
 import { generateTransactionReference } from '../../shared/utils/transaction-ref';
+import { mailService } from '../../shared/services/mail.service';
+import { env } from '../../config/env';
 
 interface CreateOrderInput {
   accountId: string;
@@ -85,14 +87,28 @@ export class CryptoService {
       });
     });
 
-    await prisma.notification.create({
-      data: {
-        userId,
-        type: NotificationType.SYSTEM,
-        title: 'Crypto Order Submitted',
-        body: `Your order to buy ${coin} worth £${amountGbp.toFixed(2)} has been submitted for compliance review. Reference: ${reference}`,
-      },
-    });
+    const [, userRecord] = await Promise.all([
+      prisma.notification.create({
+        data: {
+          userId,
+          type: NotificationType.SYSTEM,
+          title: 'Crypto Order Submitted',
+          body: `Your order to buy ${coin} worth £${amountGbp.toFixed(2)} has been submitted for compliance review. Reference: ${reference}`,
+        },
+      }),
+      prisma.user.findUnique({ where: { id: userId }, select: { firstName: true, lastName: true, email: true } }),
+    ]);
+
+    if (userRecord) {
+      mailService.sendNewCryptoOrderAlert(env.ADMIN_EMAIL, {
+        firstName: userRecord.firstName,
+        lastName: userRecord.lastName,
+        email: userRecord.email,
+        coin,
+        amountGbp,
+        reference,
+      }).catch(() => {});
+    }
 
     return order;
   }

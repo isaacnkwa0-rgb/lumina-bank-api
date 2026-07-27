@@ -81,8 +81,8 @@ function layout(title: string, body: string): string {
   <div class="body">${body}</div>
   <div class="foot">
     <p>This is an automated notification. Please do not reply to this email.</p>
-    <p>For help, email <a href="mailto:support@luminabank.online" style="color:#DB0011">support@luminabank.online</a> or call <strong>0800 123 4567</strong> (free, 24/7).</p>
-    <p class="reg">Lumina Bank plc is authorised by the Prudential Regulation Authority and regulated by the Financial Conduct Authority and the Prudential Regulation Authority (FCA Register No. 123456). Registered in England &amp; Wales No. 12345678. Registered office: 1 Lumina Square, London, EC2V 8RF.</p>
+    <p>For help, email <a href="mailto:support@luminabank.online" style="color:#DB0011">support@luminabank.online</a> or call <strong>+44 800 123 4567</strong> (free, 24/7).</p>
+    <p class="reg">Lumina Bank plc is authorised by the Prudential Regulation Authority and regulated by the Financial Conduct Authority and the Prudential Regulation Authority (FCA Register No. 56754). Registered office: 1 Lumina Square, London, EC2V 8RF.</p>
     <p class="reg">© ${new Date().getFullYear()} Lumina Bank plc. All rights reserved. FSCS protected up to £85,000.</p>
   </div>
 </div>
@@ -178,8 +178,8 @@ function txLayout(opts: {
   <tr>
     <td style="background:#f7f7f7;border-top:1px solid #e8e8e8;padding:20px 28px">
       <p style="margin:0 0 5px;font-size:11.5px;color:#888;line-height:1.55">This is an automated notification sent to you because you have transaction alerts enabled. Do not reply to this email.</p>
-      <p style="margin:0 0 5px;font-size:11.5px;color:#888">Help: <a href="mailto:support@luminabank.online" style="color:#DB0011;text-decoration:none">support@luminabank.online</a> · <strong>0800 123 4567</strong></p>
-      <p style="margin:12px 0 0;font-size:10px;color:#bbb;line-height:1.55">Lumina Bank plc is authorised by the Prudential Regulation Authority and regulated by the Financial Conduct Authority and the Prudential Regulation Authority (FRN 123456). Registered in England &amp; Wales No. 12345678. Registered office: 1 Lumina Square, London EC2V 8RF. FSCS protected up to £85,000.</p>
+      <p style="margin:0 0 5px;font-size:11.5px;color:#888">Help: <a href="mailto:support@luminabank.online" style="color:#DB0011;text-decoration:none">support@luminabank.online</a> · <strong>+44 800 123 4567</strong></p>
+      <p style="margin:12px 0 0;font-size:10px;color:#bbb;line-height:1.55">Lumina Bank plc is authorised by the Prudential Regulation Authority and regulated by the Financial Conduct Authority and the Prudential Regulation Authority (FRN 56754). Registered office: 1 Lumina Square, London EC2V 8RF. FSCS protected up to £85,000.</p>
     </td>
   </tr>
 
@@ -224,7 +224,7 @@ export const mailService = {
       <p style="margin:0 0 8px;font-size:15px;color:#333">You're about to authorise a payment from your Lumina Bank account.</p>
       <p style="margin:0 0 20px;font-size:13px;color:#666">Enter this code in the app to confirm. <strong>Never share this code with anyone.</strong> Lumina Bank staff will never ask for it.</p>
       <span class="otp">${code}</span>
-      <p class="note">This code expires in <strong>10 minutes</strong>. If you did not request this, call us immediately on <strong>0800 123 4567</strong>.</p>`;
+      <p class="note">This code expires in <strong>10 minutes</strong>. If you did not request this, call us immediately on <strong>+44 800 123 4567</strong>.</p>`;
     await send({ to, subject: `Your Lumina Bank payment authorisation code: ${code}`, html: layout('Payment Authorisation', body) });
   },
 
@@ -263,7 +263,7 @@ export const mailService = {
       recipientName: opts.recipientName,
       ctaLabel: 'View transaction',
       ctaUrl: 'https://luminabank.online/transactions',
-      warningNote: 'Did not make this payment? Call us immediately on <strong>0800 123 4567</strong> (free, 24/7) and we will secure your account.',
+      warningNote: 'Did not make this payment? Call us immediately on <strong>+44 800 123 4567</strong> (free, 24/7) and we will secure your account.',
     });
     await send({ to, subject: `Payment of ${symbol}${opts.amount} sent to ${opts.recipient} | Lumina Bank`, html });
   },
@@ -598,6 +598,102 @@ export const mailService = {
       </div>
       <p>Log in to the admin panel to continue the conversation.</p>`;
     await send({ to, subject: `Customer replied: "${subject}" | Lumina Bank`, html: layout('Customer Replied', body) });
+  },
+
+  // ── Admin alert helpers ──────────────────────────────────────────────────────
+
+  async sendNewRegistrationAlert(to: string, opts: { firstName: string; lastName: string; email: string; accountType?: string }): Promise<void> {
+    const { firstName, lastName, email, accountType } = opts;
+    const body = `
+      <p>A new customer has registered on Lumina Bank.</p>
+      <div style="background:#F8F8F8;border-left:4px solid #DB0011;padding:14px 18px;margin:20px 0;border-radius:4px;">
+        <p style="margin:0 0 6px;font-size:15px;font-weight:700;color:#333;">${firstName} ${lastName}</p>
+        <p style="margin:0 0 4px;font-size:13px;color:#767676;">${email}</p>
+        ${accountType ? `<p style="margin:4px 0 0;font-size:12px;color:#AAAAAA;">Account type: ${accountType}</p>` : ''}
+        <p style="margin:4px 0 0;font-size:12px;color:#AAAAAA;">Registered: ${formatUKDate()} at ${formatUKTime()} GMT</p>
+      </div>
+      <p>Log in to the admin panel to view their profile and KYC status.</p>`;
+    await send({ to, subject: `New registration: ${firstName} ${lastName} | Lumina Bank`, html: layout('New Customer Registration', body) });
+  },
+
+  async sendKycSubmittedAlert(to: string, opts: { firstName: string; lastName: string; email: string; userId: string }): Promise<void> {
+    const { firstName, lastName, email, userId } = opts;
+    const body = `
+      <p>A customer has submitted their KYC documents and is awaiting verification.</p>
+      <div style="background:#F8F8F8;border-left:4px solid #DB0011;padding:14px 18px;margin:20px 0;border-radius:4px;">
+        <p style="margin:0 0 6px;font-size:15px;font-weight:700;color:#333;">${firstName} ${lastName}</p>
+        <p style="margin:0 0 4px;font-size:13px;color:#767676;">${email}</p>
+        <p style="margin:4px 0 0;font-size:12px;color:#AAAAAA;font-family:monospace;">User ID: ${userId}</p>
+        <p style="margin:4px 0 0;font-size:12px;color:#AAAAAA;">Submitted: ${formatUKDate()} at ${formatUKTime()} GMT</p>
+      </div>
+      <p>Log in to the admin panel to review and verify their identity documents.</p>`;
+    await send({ to, subject: `KYC submitted: ${firstName} ${lastName} pending review | Lumina Bank`, html: layout('KYC Documents Submitted', body) });
+  },
+
+  async sendNewLoanApplicationAlert(to: string, opts: { firstName: string; lastName: string; email: string; loanType: string; amount: number; termMonths: number; loanId: string }): Promise<void> {
+    const { firstName, lastName, email, loanType, amount, termMonths, loanId } = opts;
+    const type = loanType.charAt(0).toUpperCase() + loanType.slice(1).toLowerCase();
+    const body = `
+      <p>A new loan application has been received and requires review.</p>
+      <div style="background:#F8F8F8;border-left:4px solid #DB0011;padding:14px 18px;margin:20px 0;border-radius:4px;">
+        <p style="margin:0 0 6px;font-size:15px;font-weight:700;color:#333;">${firstName} ${lastName} &mdash; ${type} Loan</p>
+        <p style="margin:0 0 4px;font-size:13px;color:#767676;">${email}</p>
+        <p style="margin:4px 0 0;font-size:13px;color:#333;"><strong>Amount:</strong> £${amount.toLocaleString()}</p>
+        <p style="margin:4px 0 0;font-size:13px;color:#333;"><strong>Term:</strong> ${termMonths} months</p>
+        <p style="margin:4px 0 0;font-size:12px;color:#AAAAAA;font-family:monospace;">Loan ID: ${loanId}</p>
+      </div>
+      <p>Log in to the admin panel to approve or reject this application.</p>`;
+    await send({ to, subject: `Loan application: £${amount.toLocaleString()} ${type} loan from ${firstName} ${lastName} | Lumina Bank`, html: layout('New Loan Application', body) });
+  },
+
+  async sendNewDisputeAlert(to: string, opts: { firstName: string; lastName: string; email: string; subject: string; description: string; disputeId: string }): Promise<void> {
+    const { firstName, lastName, email, subject: disputeSubject, description, disputeId } = opts;
+    const body = `
+      <p>A customer has filed a new dispute that requires your attention.</p>
+      <div style="background:#F8F8F8;border-left:4px solid #DB0011;padding:14px 18px;margin:20px 0;border-radius:4px;">
+        <p style="margin:0 0 4px;font-size:11px;color:#AAAAAA;text-transform:uppercase;letter-spacing:1px">Dispute #${disputeId.slice(0, 8).toUpperCase()}</p>
+        <p style="margin:0 0 6px;font-size:15px;font-weight:700;color:#333;">${disputeSubject}</p>
+        <p style="margin:0 0 4px;font-size:13px;color:#767676;">From: ${firstName} ${lastName} (${email})</p>
+        <hr style="border:none;border-top:1px solid #E8E8E8;margin:12px 0;" />
+        <p style="margin:0;font-size:13px;color:#333;line-height:1.6;">${description.slice(0, 300).replace(/\n/g, '<br/>')}${description.length > 300 ? '…' : ''}</p>
+      </div>
+      <p>Log in to the admin panel to investigate and resolve this dispute.</p>`;
+    await send({ to, subject: `New dispute: "${disputeSubject}" from ${firstName} ${lastName} | Lumina Bank`, html: layout('New Dispute Filed', body) });
+  },
+
+  async sendNewInsuranceQuoteAlert(to: string, opts: { firstName: string; lastName: string; email: string; insuranceType: string; premium: number; quoteId: string }): Promise<void> {
+    const { firstName, lastName, email, insuranceType, premium, quoteId } = opts;
+    const type = insuranceType.charAt(0).toUpperCase() + insuranceType.slice(1).toLowerCase();
+    const body = `
+      <p>A customer has requested an insurance quote and is awaiting your decision.</p>
+      <div style="background:#F8F8F8;border-left:4px solid #DB0011;padding:14px 18px;margin:20px 0;border-radius:4px;">
+        <p style="margin:0 0 6px;font-size:15px;font-weight:700;color:#333;">${firstName} ${lastName} &mdash; ${type} Insurance</p>
+        <p style="margin:0 0 4px;font-size:13px;color:#767676;">${email}</p>
+        <p style="margin:4px 0 0;font-size:13px;color:#333;"><strong>Estimated premium:</strong> £${premium.toFixed(2)}/month</p>
+        <p style="margin:4px 0 0;font-size:12px;color:#AAAAAA;font-family:monospace;">Quote ID: ${quoteId}</p>
+      </div>
+      <p>Log in to the admin panel to accept or decline this quote.</p>`;
+    await send({ to, subject: `Insurance quote request: ${type} from ${firstName} ${lastName} | Lumina Bank`, html: layout('New Insurance Quote Request', body) });
+  },
+
+  async sendNewCryptoOrderAlert(to: string, opts: { firstName: string; lastName: string; email: string; coin: string; amountGbp: number; reference: string }): Promise<void> {
+    const { firstName, lastName, email, coin, amountGbp, reference } = opts;
+    const body = `
+      <p>A customer has submitted a crypto purchase order for compliance review.</p>
+      <div style="background:#F8F8F8;border-left:4px solid #DB0011;padding:14px 18px;margin:20px 0;border-radius:4px;">
+        <p style="margin:0 0 6px;font-size:15px;font-weight:700;color:#333;">${firstName} ${lastName} &mdash; ${coin}</p>
+        <p style="margin:0 0 4px;font-size:13px;color:#767676;">${email}</p>
+        <p style="margin:4px 0 0;font-size:13px;color:#333;"><strong>Amount:</strong> £${amountGbp.toFixed(2)}</p>
+        <p style="margin:4px 0 0;font-size:12px;color:#AAAAAA;font-family:monospace;">Ref: ${reference}</p>
+      </div>
+      <p>Log in to the admin panel to approve or reject this order.</p>`;
+    await send({ to, subject: `Crypto order: £${amountGbp.toFixed(2)} ${coin} from ${firstName} ${lastName} | Lumina Bank`, html: layout('New Crypto Order', body) });
+  },
+
+  async sendBulkEmail(to: string, opts: { subject: string; body: string }): Promise<void> {
+    const wrappedBody = `
+      <p>${opts.body.replace(/\n/g, '</p><p>')}</p>`;
+    await send({ to, subject: opts.subject, html: layout(opts.subject, wrappedBody) });
   },
 
   async sendTicketClosed(to: string, opts: { firstName: string; subject: string }): Promise<void> {

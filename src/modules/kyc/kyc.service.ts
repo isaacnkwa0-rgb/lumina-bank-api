@@ -1,6 +1,8 @@
 import { prisma } from '../../config/database';
 import { AppError } from '../../middleware/error.middleware';
 import { KycStatus, NotificationType } from '@prisma/client';
+import { mailService } from '../../shared/services/mail.service';
+import { env } from '../../config/env';
 
 export class KycService {
   async getStatus(userId: string) {
@@ -18,7 +20,7 @@ export class KycService {
     const user = await prisma.user.update({
       where: { id: userId },
       data: { kycStatus: KycStatus.PENDING, kycDocuments },
-      select: { id: true, kycStatus: true },
+      select: { id: true, kycStatus: true, firstName: true, lastName: true, email: true },
     });
 
     await prisma.notification.create({
@@ -29,6 +31,13 @@ export class KycService {
         type: NotificationType.SYSTEM,
       },
     });
+
+    mailService.sendKycSubmittedAlert(env.ADMIN_EMAIL, {
+      userId,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+    }).catch(() => {});
 
     return { status: user.kycStatus, message: 'Documents submitted successfully and are under review' };
   }

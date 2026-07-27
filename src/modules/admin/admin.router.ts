@@ -104,4 +104,6 @@ router.post('/agents/:id/avatar', requireAdmin, avatarUpload.single('avatar'), a
 });
 router.delete('/agents/:id', requireAdmin, adminController.deleteAgent.bind(adminController));
 
+router.post('/mail/send', requireAdmin, adminController.sendBulkEmail.bind(adminController));
+
 export default router;

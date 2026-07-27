@@ -629,7 +629,38 @@ export class AdminService {
     const user = await prisma.user.findUnique({ where: { id } });
     if (!user) throw new AppError('User not found', 404, ErrorCodes.NOT_FOUND);
     if (user.role === 'ADMIN') throw new AppError('Cannot delete admin accounts', 403, ErrorCodes.FORBIDDEN);
-    await prisma.user.delete({ where: { id } });
+
+    await prisma.$transaction(async (tx) => {
+      // Nullify audit logs (userId is optional — keep logs but detach from deleted user)
+      await tx.auditLog.updateMany({ where: { userId: id }, data: { userId: null } });
+
+      // Delete support messages sent by this user (no cascade on senderId)
+      await tx.supportMessage.deleteMany({ where: { senderId: id } });
+
+      // Get user's account IDs to handle Transfer FK constraints
+      const accounts = await tx.account.findMany({ where: { userId: id }, select: { id: true } });
+      const accountIds = accounts.map((a) => a.id);
+
+      if (accountIds.length > 0) {
+        // Delete outgoing transfers (no cascade from Account on Transfer)
+        await tx.transfer.deleteMany({ where: { fromAccountId: { in: accountIds } } });
+        // Nullify incoming transfer references (toAccountId is optional)
+        await tx.transfer.updateMany({ where: { toAccountId: { in: accountIds } }, data: { toAccountId: null } });
+      }
+
+      // Nullify beneficiary references on transfers before beneficiaries cascade-delete
+      const beneficiaries = await tx.beneficiary.findMany({ where: { userId: id }, select: { id: true } });
+      const beneficiaryIds = beneficiaries.map((b) => b.id);
+      if (beneficiaryIds.length > 0) {
+        await tx.transfer.updateMany({ where: { toBeneficiaryId: { in: beneficiaryIds } }, data: { toBeneficiaryId: null } });
+      }
+
+      // Delete the user — cascades Profile, Account, Card, Beneficiary, Portfolio,
+      // Loan, SavingsGoal, Notification, Device, RefreshToken, OtpCode,
+      // Dispute, SupportTicket, InsuranceQuote, StandingOrder, DirectDebit, CryptoOrder
+      await tx.user.delete({ where: { id } });
+    });
+
     return { id, deleted: true };
   }
 
@@ -1062,8 +1093,36 @@ export class AdminService {
   async deleteAgent(id: string) {
     const agent = await prisma.user.findUnique({ where: { id } });
     if (!agent || agent.role !== 'AGENT') throw new AppError('Agent not found', 404, ErrorCodes.NOT_FOUND);
-    await prisma.user.delete({ where: { id } });
+
+    await prisma.$transaction(async (tx) => {
+      await tx.auditLog.updateMany({ where: { userId: id }, data: { userId: null } });
+      await tx.supportMessage.deleteMany({ where: { senderId: id } });
+      await tx.user.delete({ where: { id } });
+    });
+
     return { id };
+  }
+
+  async sendBulkEmail(opts: { subject: string; body: string; recipientType: 'ALL' | 'SELECTED'; userIds?: string[] }) {
+    const { subject, body, recipientType, userIds } = opts;
+
+    const users = await prisma.user.findMany({
+      where: {
+        role: 'USER',
+        status: 'ACTIVE',
+        isEmailVerified: true,
+        ...(recipientType === 'SELECTED' && userIds?.length ? { id: { in: userIds } } : {}),
+      },
+      select: { email: true },
+    });
+
+    const results = await Promise.allSettled(
+      users.map((u) => mailService.sendBulkEmail(u.email, { subject, body })),
+    );
+
+    const sent = results.filter((r) => r.status === 'fulfilled').length;
+    const failed = results.filter((r) => r.status === 'rejected').length;
+    return { total: users.length, sent, failed };
   }
 }
 

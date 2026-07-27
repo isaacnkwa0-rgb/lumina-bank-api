@@ -2,6 +2,8 @@ import { prisma } from '../../config/database';
 import { AppError } from '../../middleware/error.middleware';
 import { DisputeStatus, NotificationType } from '@prisma/client';
 import { ErrorCodes } from '../../shared/utils/api-response';
+import { mailService } from '../../shared/services/mail.service';
+import { env } from '../../config/env';
 
 export class DisputesService {
   async createDispute(userId: string, data: { subject: string; description: string; transactionId?: string }) {
@@ -12,9 +14,12 @@ export class DisputesService {
       if (!tx) throw new AppError('Transaction not found', 404, ErrorCodes.NOT_FOUND);
     }
 
-    const dispute = await prisma.dispute.create({
-      data: { userId, subject, description, transactionId: transactionId ?? null, status: DisputeStatus.OPEN },
-    });
+    const [dispute, userRecord] = await Promise.all([
+      prisma.dispute.create({
+        data: { userId, subject, description, transactionId: transactionId ?? null, status: DisputeStatus.OPEN },
+      }),
+      prisma.user.findUnique({ where: { id: userId }, select: { firstName: true, lastName: true, email: true } }),
+    ]);
 
     await prisma.notification.create({
       data: {
@@ -24,6 +29,17 @@ export class DisputesService {
         body: `Your dispute "${subject}" has been received. We'll review it within 3–5 business days.`,
       },
     });
+
+    if (userRecord) {
+      mailService.sendNewDisputeAlert(env.ADMIN_EMAIL, {
+        firstName: userRecord.firstName,
+        lastName: userRecord.lastName,
+        email: userRecord.email,
+        subject,
+        description,
+        disputeId: dispute.id,
+      }).catch(() => {});
+    }
 
     return dispute;
   }

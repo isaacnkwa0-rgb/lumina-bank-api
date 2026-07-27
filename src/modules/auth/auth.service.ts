@@ -91,6 +91,13 @@ export class AuthService {
 
     await this.sendEmailOtp(user.id, user.email, 'EMAIL_VERIFICATION');
 
+    mailService.sendNewRegistrationAlert(env.ADMIN_EMAIL, {
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      accountType: data.accountType,
+    }).catch(() => {});
+
     const tokens = await this.issueTokens(user.id, user.email, user.role, user.tier, user.status);
 
     return {

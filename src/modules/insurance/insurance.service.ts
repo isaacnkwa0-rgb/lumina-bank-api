@@ -1,6 +1,8 @@
 import { prisma } from '../../config/database';
 import { AppError } from '../../middleware/error.middleware';
 import { InsuranceType, InsuranceStatus, NotificationType } from '@prisma/client';
+import { mailService } from '../../shared/services/mail.service';
+import { env } from '../../config/env';
 
 const BASE_PREMIUMS: Record<InsuranceType, number> = {
   LIFE:     8.50,
@@ -46,16 +48,19 @@ export class InsuranceService {
     const insuranceType = type as InsuranceType;
     const premium = estimatePremium(insuranceType, details);
 
-    const quote = await prisma.insuranceQuote.create({
-      data: {
-        userId,
-        type: insuranceType,
-        status: InsuranceStatus.QUOTED,
-        details: details as object,
-        premium,
-        notes: notes ?? null,
-      },
-    });
+    const [quote, userRecord] = await Promise.all([
+      prisma.insuranceQuote.create({
+        data: {
+          userId,
+          type: insuranceType,
+          status: InsuranceStatus.QUOTED,
+          details: details as object,
+          premium,
+          notes: notes ?? null,
+        },
+      }),
+      prisma.user.findUnique({ where: { id: userId }, select: { firstName: true, lastName: true, email: true } }),
+    ]);
 
     await prisma.notification.create({
       data: {
@@ -65,6 +70,17 @@ export class InsuranceService {
         body: `Your ${insuranceType.toLowerCase()} insurance quote is ready. Estimated premium: £${premium.toFixed(2)}/mo. Our team will be in touch within 24 hours.`,
       },
     });
+
+    if (userRecord) {
+      mailService.sendNewInsuranceQuoteAlert(env.ADMIN_EMAIL, {
+        firstName: userRecord.firstName,
+        lastName: userRecord.lastName,
+        email: userRecord.email,
+        insuranceType,
+        premium,
+        quoteId: quote.id,
+      }).catch(() => {});
+    }
 
     return { ...quote, premium };
   }
