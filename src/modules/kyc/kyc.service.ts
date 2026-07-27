@@ -1,8 +1,7 @@
 import { prisma } from '../../config/database';
 import { AppError } from '../../middleware/error.middleware';
 import { KycStatus, NotificationType } from '@prisma/client';
-import { mailService } from '../../shared/services/mail.service';
-import { env } from '../../config/env';
+import { notifyAdmin } from '../../shared/utils/notify-admin';
 
 export class KycService {
   async getStatus(userId: string) {
@@ -32,12 +31,7 @@ export class KycService {
       },
     });
 
-    mailService.sendKycSubmittedAlert(env.ADMIN_EMAIL, {
-      userId,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      email: user.email,
-    }).catch(() => {});
+    notifyAdmin({ type: 'KYC_SUBMITTED', userId, firstName: user.firstName, lastName: user.lastName, email: user.email });
 
     return { status: user.kycStatus, message: 'Documents submitted successfully and are under review' };
   }

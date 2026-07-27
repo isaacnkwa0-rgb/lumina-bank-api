@@ -1124,6 +1124,31 @@ export class AdminService {
     const failed = results.filter((r) => r.status === 'rejected').length;
     return { total: users.length, sent, failed };
   }
+
+  async getAdminNotifications(opts: { page?: number; limit?: number; type?: string; unreadOnly?: boolean }) {
+    const { skip, take, page, limit } = getPagination(opts);
+    const where: Prisma.AdminNotificationWhereInput = {
+      ...(opts.type ? { type: opts.type as any } : {}),
+      ...(opts.unreadOnly ? { isRead: false } : {}),
+    };
+    const [items, total, unreadCount] = await Promise.all([
+      prisma.adminNotification.findMany({ where, orderBy: { createdAt: 'desc' }, skip, take }),
+      prisma.adminNotification.count({ where }),
+      prisma.adminNotification.count({ where: { isRead: false } }),
+    ]);
+    return { items, unreadCount, pagination: buildPaginationMeta(total, page, limit) };
+  }
+
+  async markNotificationRead(id: string) {
+    const notification = await prisma.adminNotification.findUnique({ where: { id } });
+    if (!notification) throw new AppError('Notification not found', 404, ErrorCodes.NOT_FOUND);
+    return prisma.adminNotification.update({ where: { id }, data: { isRead: true } });
+  }
+
+  async markAllNotificationsRead() {
+    const { count } = await prisma.adminNotification.updateMany({ where: { isRead: false }, data: { isRead: true } });
+    return { updated: count };
+  }
 }
 
 export const adminService = new AdminService();

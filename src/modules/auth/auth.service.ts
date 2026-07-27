@@ -12,6 +12,7 @@ import { ErrorCodes } from '../../shared/utils/api-response';
 import { generateAccountNumber, generateSortCode, generateIBAN } from '../../shared/utils/account-number';
 import { hashToken, encrypt, decrypt } from '../../shared/utils/crypto';
 import { mailService } from '../../shared/services/mail.service';
+import { notifyAdmin } from '../../shared/utils/notify-admin';
 import { AccountType } from '@prisma/client';
 
 function encryptSsn(ssn: string): string {
@@ -91,12 +92,7 @@ export class AuthService {
 
     await this.sendEmailOtp(user.id, user.email, 'EMAIL_VERIFICATION');
 
-    mailService.sendNewRegistrationAlert(env.ADMIN_EMAIL, {
-      firstName: user.firstName,
-      lastName: user.lastName,
-      email: user.email,
-      accountType: data.accountType,
-    }).catch(() => {});
+    notifyAdmin({ type: 'NEW_REGISTRATION', firstName: user.firstName, lastName: user.lastName, email: user.email, accountType: data.accountType });
 
     const tokens = await this.issueTokens(user.id, user.email, user.role, user.tier, user.status);
 

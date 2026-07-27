@@ -823,3 +823,26 @@ model CryptoOrder {
   @@index([status])
   @@index([createdAt])
 }
+
+enum AdminNotificationType {
+  NEW_REGISTRATION
+  KYC_SUBMITTED
+  LOAN_APPLICATION
+  DISPUTE_FILED
+  INSURANCE_QUOTE
+  CRYPTO_ORDER
+}
+
+model AdminNotification {
+  id        String                @id @default(uuid())
+  type      AdminNotificationType
+  title     String
+  message   String
+  metadata  Json?
+  isRead    Boolean               @default(false)
+  createdAt DateTime              @default(now())
+
+  @@index([isRead])
+  @@index([type])
+  @@index([createdAt])
+}

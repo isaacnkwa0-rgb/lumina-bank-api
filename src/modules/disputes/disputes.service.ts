@@ -2,8 +2,7 @@ import { prisma } from '../../config/database';
 import { AppError } from '../../middleware/error.middleware';
 import { DisputeStatus, NotificationType } from '@prisma/client';
 import { ErrorCodes } from '../../shared/utils/api-response';
-import { mailService } from '../../shared/services/mail.service';
-import { env } from '../../config/env';
+import { notifyAdmin } from '../../shared/utils/notify-admin';
 
 export class DisputesService {
   async createDispute(userId: string, data: { subject: string; description: string; transactionId?: string }) {
@@ -31,14 +30,7 @@ export class DisputesService {
     });
 
     if (userRecord) {
-      mailService.sendNewDisputeAlert(env.ADMIN_EMAIL, {
-        firstName: userRecord.firstName,
-        lastName: userRecord.lastName,
-        email: userRecord.email,
-        subject,
-        description,
-        disputeId: dispute.id,
-      }).catch(() => {});
+      notifyAdmin({ type: 'DISPUTE_FILED', firstName: userRecord.firstName, lastName: userRecord.lastName, email: userRecord.email, subject, description, disputeId: dispute.id });
     }
 
     return dispute;

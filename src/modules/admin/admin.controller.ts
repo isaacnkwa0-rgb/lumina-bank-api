@@ -451,6 +451,33 @@ export class AdminController {
       sendSuccess(res, data, `Email sent to ${data.sent} user(s)`);
     } catch (err) { next(err); }
   }
+
+  async getAdminNotifications(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { page, limit, type, unread } = req.query as Record<string, string>;
+      const data = await adminService.getAdminNotifications({
+        page: page ? Number(page) : undefined,
+        limit: limit ? Number(limit) : undefined,
+        type,
+        unreadOnly: unread === 'true',
+      });
+      sendSuccess(res, data);
+    } catch (err) { next(err); }
+  }
+
+  async markNotificationRead(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = await adminService.markNotificationRead(req.params.id as string);
+      sendSuccess(res, data, 'Notification marked as read');
+    } catch (err) { next(err); }
+  }
+
+  async markAllNotificationsRead(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = await adminService.markAllNotificationsRead();
+      sendSuccess(res, data, `${data.updated} notification(s) marked as read`);
+    } catch (err) { next(err); }
+  }
 }
 
 export default new AdminController();

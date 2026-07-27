@@ -1,8 +1,7 @@
 import { prisma } from '../../config/database';
 import { AppError } from '../../middleware/error.middleware';
 import { InsuranceType, InsuranceStatus, NotificationType } from '@prisma/client';
-import { mailService } from '../../shared/services/mail.service';
-import { env } from '../../config/env';
+import { notifyAdmin } from '../../shared/utils/notify-admin';
 
 const BASE_PREMIUMS: Record<InsuranceType, number> = {
   LIFE:     8.50,
@@ -72,14 +71,7 @@ export class InsuranceService {
     });
 
     if (userRecord) {
-      mailService.sendNewInsuranceQuoteAlert(env.ADMIN_EMAIL, {
-        firstName: userRecord.firstName,
-        lastName: userRecord.lastName,
-        email: userRecord.email,
-        insuranceType,
-        premium,
-        quoteId: quote.id,
-      }).catch(() => {});
+      notifyAdmin({ type: 'INSURANCE_QUOTE', firstName: userRecord.firstName, lastName: userRecord.lastName, email: userRecord.email, insuranceType, premium, quoteId: quote.id });
     }
 
     return { ...quote, premium };

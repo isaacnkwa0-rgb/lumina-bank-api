@@ -106,4 +106,9 @@ router.delete('/agents/:id', requireAdmin, adminController.deleteAgent.bind(admi
 
 router.post('/mail/send', requireAdmin, adminController.sendBulkEmail.bind(adminController));
 
+// Admin notifications
+router.get('/notifications', requireAdmin, adminController.getAdminNotifications.bind(adminController));
+router.patch('/notifications/read-all', requireAdmin, adminController.markAllNotificationsRead.bind(adminController));
+router.patch('/notifications/:id/read', requireAdmin, adminController.markNotificationRead.bind(adminController));
+
 export default router;

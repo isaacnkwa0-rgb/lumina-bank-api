@@ -4,8 +4,7 @@ import { prisma } from '../../config/database';
 import { AppError } from '../../middleware/error.middleware';
 import { ErrorCodes } from '../../shared/utils/api-response';
 import { generateTransactionReference } from '../../shared/utils/transaction-ref';
-import { mailService } from '../../shared/services/mail.service';
-import { env } from '../../config/env';
+import { notifyAdmin } from '../../shared/utils/notify-admin';
 
 interface CreateOrderInput {
   accountId: string;
@@ -100,14 +99,7 @@ export class CryptoService {
     ]);
 
     if (userRecord) {
-      mailService.sendNewCryptoOrderAlert(env.ADMIN_EMAIL, {
-        firstName: userRecord.firstName,
-        lastName: userRecord.lastName,
-        email: userRecord.email,
-        coin,
-        amountGbp,
-        reference,
-      }).catch(() => {});
+      notifyAdmin({ type: 'CRYPTO_ORDER', firstName: userRecord.firstName, lastName: userRecord.lastName, email: userRecord.email, coin, amountGbp, reference });
     }
 
     return order;

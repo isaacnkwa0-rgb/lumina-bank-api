@@ -2,8 +2,7 @@ import { prisma } from '../../config/database';
 import { AppError } from '../../middleware/error.middleware';
 import { TransactionType, TransactionStatus, LoanStatus, LoanType, LoanPaymentStatus, TransactionCategory } from '@prisma/client';
 import { generateTransactionReference } from '../../shared/utils/transaction-ref';
-import { mailService } from '../../shared/services/mail.service';
-import { env } from '../../config/env';
+import { notifyAdmin } from '../../shared/utils/notify-admin';
 
 const LOAN_LIMITS: Record<string, number> = {
   PERSONAL: 50000,
@@ -140,15 +139,7 @@ export class LoansService {
     });
 
     if (userRecord) {
-      mailService.sendNewLoanApplicationAlert(env.ADMIN_EMAIL, {
-        firstName: userRecord.firstName,
-        lastName: userRecord.lastName,
-        email: userRecord.email,
-        loanType: type,
-        amount,
-        termMonths,
-        loanId: loan.id,
-      }).catch(() => {});
+      notifyAdmin({ type: 'LOAN_APPLICATION', firstName: userRecord.firstName, lastName: userRecord.lastName, email: userRecord.email, loanType: type, amount, termMonths, loanId: loan.id });
     }
 
     return { ...loan, upcomingPayments: 0 };
