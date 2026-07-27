@@ -12,6 +12,7 @@ import { mailService } from '../../shared/services/mail.service';
 const DAILY_LIMITS: Record<UserTier, number> = {
   STANDARD: 5_000,
   PREMIUM: 25_000,
+  ELITE: 75_000,
   PRIVATE: 100_000,
   BUSINESS: 100_000,
 };
@@ -19,6 +20,7 @@ const DAILY_LIMITS: Record<UserTier, number> = {
 const DAILY_TX_COUNT_LIMITS: Record<UserTier, number> = {
   STANDARD: 10,
   PREMIUM: 30,
+  ELITE: 75,
   PRIVATE: 100,
   BUSINESS: 100,
 };

@@ -12,6 +12,7 @@ datasource db {
 enum UserTier {
   STANDARD
   PREMIUM
+  ELITE
   PRIVATE
   BUSINESS
 }

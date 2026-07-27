@@ -444,7 +444,7 @@ export class AdminController {
       const { subject, body, recipientType, userId, userIds } = req.body;
       if (!subject?.trim() || !body?.trim()) throw new AppError('Subject and body are required', 400);
 
-      const validTypes = ['ALL', 'SINGLE', 'SELECTED', 'KYC_PENDING', 'KYC_VERIFIED', 'KYC_REJECTED', 'TIER_STANDARD', 'TIER_PREMIUM', 'MARKETING_CONSENT', 'SUSPENDED'];
+      const validTypes = ['ALL', 'SINGLE', 'SELECTED', 'KYC_PENDING', 'KYC_VERIFIED', 'KYC_REJECTED', 'TIER_STANDARD', 'TIER_PREMIUM', 'TIER_ELITE', 'MARKETING_CONSENT', 'SUSPENDED'];
       if (!validTypes.includes(recipientType)) {
         throw new AppError(`recipientType must be one of: ${validTypes.join(', ')}`, 400);
       }

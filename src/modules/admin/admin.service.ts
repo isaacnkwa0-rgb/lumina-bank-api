@@ -1106,7 +1106,7 @@ export class AdminService {
   async sendBulkEmail(opts: {
     subject: string;
     body: string;
-    recipientType: 'ALL' | 'SINGLE' | 'SELECTED' | 'KYC_PENDING' | 'KYC_VERIFIED' | 'KYC_REJECTED' | 'TIER_STANDARD' | 'TIER_PREMIUM' | 'MARKETING_CONSENT' | 'SUSPENDED';
+    recipientType: 'ALL' | 'SINGLE' | 'SELECTED' | 'KYC_PENDING' | 'KYC_VERIFIED' | 'KYC_REJECTED' | 'TIER_STANDARD' | 'TIER_PREMIUM' | 'TIER_ELITE' | 'MARKETING_CONSENT' | 'SUSPENDED';
     userId?: string;
     userIds?: string[];
   }) {
@@ -1123,6 +1123,7 @@ export class AdminService {
       KYC_REJECTED:      { ...baseWhere, status: 'ACTIVE', kycStatus: 'REJECTED' },
       TIER_STANDARD:     { ...baseWhere, status: 'ACTIVE', tier: 'STANDARD' },
       TIER_PREMIUM:      { ...baseWhere, status: 'ACTIVE', tier: 'PREMIUM' },
+      TIER_ELITE:        { ...baseWhere, status: 'ACTIVE', tier: 'ELITE' },
       MARKETING_CONSENT: { ...baseWhere, status: 'ACTIVE', marketingConsent: true },
       SUSPENDED:         { ...baseWhere, status: 'SUSPENDED' },
     };
