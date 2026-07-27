@@ -441,13 +441,21 @@ export class AdminController {
 
   async sendBulkEmail(req: Request, res: Response, next: NextFunction) {
     try {
-      const { subject, body, recipientType, userIds } = req.body;
+      const { subject, body, recipientType, userId, userIds } = req.body;
       if (!subject?.trim() || !body?.trim()) throw new AppError('Subject and body are required', 400);
-      if (!['ALL', 'SELECTED'].includes(recipientType)) throw new AppError('recipientType must be ALL or SELECTED', 400);
-      if (recipientType === 'SELECTED' && (!Array.isArray(userIds) || userIds.length === 0)) {
-        throw new AppError('At least one user must be selected', 400);
+
+      const validTypes = ['ALL', 'SINGLE', 'SELECTED', 'KYC_PENDING', 'KYC_VERIFIED', 'KYC_REJECTED', 'TIER_STANDARD', 'TIER_PREMIUM', 'MARKETING_CONSENT', 'SUSPENDED'];
+      if (!validTypes.includes(recipientType)) {
+        throw new AppError(`recipientType must be one of: ${validTypes.join(', ')}`, 400);
       }
-      const data = await adminService.sendBulkEmail({ subject, body, recipientType, userIds });
+      if (recipientType === 'SINGLE' && !userId) {
+        throw new AppError('userId is required for SINGLE recipient type', 400);
+      }
+      if (recipientType === 'SELECTED' && (!Array.isArray(userIds) || userIds.length === 0)) {
+        throw new AppError('At least one userId must be provided in userIds for SELECTED recipient type', 400);
+      }
+
+      const data = await adminService.sendBulkEmail({ subject, body, recipientType, userId, userIds });
       sendSuccess(res, data, `Email sent to ${data.sent} user(s)`);
     } catch (err) { next(err); }
   }

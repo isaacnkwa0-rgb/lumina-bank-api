@@ -690,9 +690,9 @@ export const mailService = {
     await send({ to, subject: `Crypto order: £${amountGbp.toFixed(2)} ${coin} from ${firstName} ${lastName} | Lumina Bank`, html: layout('New Crypto Order', body) });
   },
 
-  async sendBulkEmail(to: string, opts: { subject: string; body: string }): Promise<void> {
-    const wrappedBody = `
-      <p>${opts.body.replace(/\n/g, '</p><p>')}</p>`;
+  async sendBulkEmail(to: string, opts: { subject: string; body: string; firstName?: string }): Promise<void> {
+    const greeting = opts.firstName ? `<p>Hi ${opts.firstName},</p>` : '';
+    const wrappedBody = `${greeting}<p>${opts.body.replace(/\n/g, '</p><p>')}</p>`;
     await send({ to, subject: opts.subject, html: layout(opts.subject, wrappedBody) });
   },
 

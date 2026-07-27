@@ -1103,21 +1103,37 @@ export class AdminService {
     return { id };
   }
 
-  async sendBulkEmail(opts: { subject: string; body: string; recipientType: 'ALL' | 'SELECTED'; userIds?: string[] }) {
-    const { subject, body, recipientType, userIds } = opts;
+  async sendBulkEmail(opts: {
+    subject: string;
+    body: string;
+    recipientType: 'ALL' | 'SINGLE' | 'SELECTED' | 'KYC_PENDING' | 'KYC_VERIFIED' | 'KYC_REJECTED' | 'TIER_STANDARD' | 'TIER_PREMIUM' | 'MARKETING_CONSENT' | 'SUSPENDED';
+    userId?: string;
+    userIds?: string[];
+  }) {
+    const { subject, body, recipientType, userId, userIds } = opts;
+
+    const baseWhere: Prisma.UserWhereInput = { role: 'USER', isEmailVerified: true };
+
+    const whereMap: Record<string, Prisma.UserWhereInput> = {
+      ALL:               { ...baseWhere, status: 'ACTIVE' },
+      SINGLE:            { ...baseWhere, id: userId },
+      SELECTED:          { ...baseWhere, status: 'ACTIVE', id: { in: userIds ?? [] } },
+      KYC_PENDING:       { ...baseWhere, status: 'ACTIVE', kycStatus: 'PENDING' },
+      KYC_VERIFIED:      { ...baseWhere, status: 'ACTIVE', kycStatus: 'VERIFIED' },
+      KYC_REJECTED:      { ...baseWhere, status: 'ACTIVE', kycStatus: 'REJECTED' },
+      TIER_STANDARD:     { ...baseWhere, status: 'ACTIVE', tier: 'STANDARD' },
+      TIER_PREMIUM:      { ...baseWhere, status: 'ACTIVE', tier: 'PREMIUM' },
+      MARKETING_CONSENT: { ...baseWhere, status: 'ACTIVE', marketingConsent: true },
+      SUSPENDED:         { ...baseWhere, status: 'SUSPENDED' },
+    };
 
     const users = await prisma.user.findMany({
-      where: {
-        role: 'USER',
-        status: 'ACTIVE',
-        isEmailVerified: true,
-        ...(recipientType === 'SELECTED' && userIds?.length ? { id: { in: userIds } } : {}),
-      },
-      select: { email: true },
+      where: whereMap[recipientType],
+      select: { email: true, firstName: true },
     });
 
     const results = await Promise.allSettled(
-      users.map((u) => mailService.sendBulkEmail(u.email, { subject, body })),
+      users.map((u) => mailService.sendBulkEmail(u.email, { subject, body, firstName: u.firstName })),
     );
 
     const sent = results.filter((r) => r.status === 'fulfilled').length;
