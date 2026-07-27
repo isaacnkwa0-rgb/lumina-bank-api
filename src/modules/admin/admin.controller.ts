@@ -492,6 +492,13 @@ export class AdminController {
       sendSuccess(res, data, 'Notification deleted');
     } catch (err) { next(err); }
   }
+
+  async deleteAllNotifications(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = await adminService.deleteAllNotifications();
+      sendSuccess(res, data, `${data.deleted} notification(s) deleted`);
+    } catch (err) { next(err); }
+  }
 }
 
 export default new AdminController();

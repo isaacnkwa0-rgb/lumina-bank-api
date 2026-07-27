@@ -111,6 +111,7 @@ router.get('/notifications', requireAdmin, adminController.getAdminNotifications
 router.get('/notifications/unread-count', requireAdmin, adminController.getUnreadNotificationCount.bind(adminController));
 router.patch('/notifications/read-all', requireAdmin, adminController.markAllNotificationsRead.bind(adminController));
 router.patch('/notifications/:id/read', requireAdmin, adminController.markNotificationRead.bind(adminController));
+router.delete('/notifications', requireAdmin, adminController.deleteAllNotifications.bind(adminController));
 router.delete('/notifications/:id', requireAdmin, adminController.deleteNotification.bind(adminController));
 
 export default router;

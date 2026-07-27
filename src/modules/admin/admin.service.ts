@@ -1161,6 +1161,11 @@ export class AdminService {
     await prisma.adminNotification.delete({ where: { id } });
     return { id, deleted: true };
   }
+
+  async deleteAllNotifications() {
+    const { count } = await prisma.adminNotification.deleteMany({});
+    return { deleted: count };
+  }
 }
 
 export const adminService = new AdminService();
