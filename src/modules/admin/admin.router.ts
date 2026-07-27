@@ -109,6 +109,7 @@ router.post('/mail/send', requireAdmin, adminController.sendBulkEmail.bind(admin
 // Admin notifications
 router.get('/notifications', requireAdmin, adminController.getAdminNotifications.bind(adminController));
 router.get('/notifications/unread-count', requireAdmin, adminController.getUnreadNotificationCount.bind(adminController));
+router.get('/notifications/:id', requireAdmin, adminController.getAdminNotification.bind(adminController));
 router.patch('/notifications/read-all', requireAdmin, adminController.markAllNotificationsRead.bind(adminController));
 router.patch('/notifications/:id/read', requireAdmin, adminController.markNotificationRead.bind(adminController));
 router.delete('/notifications', requireAdmin, adminController.deleteAllNotifications.bind(adminController));
