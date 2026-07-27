@@ -478,6 +478,13 @@ export class AdminController {
       sendSuccess(res, data, `${data.updated} notification(s) marked as read`);
     } catch (err) { next(err); }
   }
+
+  async getUnreadNotificationCount(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = await adminService.getUnreadNotificationCount();
+      sendSuccess(res, data);
+    } catch (err) { next(err); }
+  }
 }
 
 export default new AdminController();

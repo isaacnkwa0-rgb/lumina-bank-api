@@ -1149,6 +1149,11 @@ export class AdminService {
     const { count } = await prisma.adminNotification.updateMany({ where: { isRead: false }, data: { isRead: true } });
     return { updated: count };
   }
+
+  async getUnreadNotificationCount() {
+    const count = await prisma.adminNotification.count({ where: { isRead: false } });
+    return { unreadCount: count };
+  }
 }
 
 export const adminService = new AdminService();
