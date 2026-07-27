@@ -1154,6 +1154,13 @@ export class AdminService {
     const count = await prisma.adminNotification.count({ where: { isRead: false } });
     return { unreadCount: count };
   }
+
+  async deleteNotification(id: string) {
+    const notification = await prisma.adminNotification.findUnique({ where: { id } });
+    if (!notification) throw new AppError('Notification not found', 404, ErrorCodes.NOT_FOUND);
+    await prisma.adminNotification.delete({ where: { id } });
+    return { id, deleted: true };
+  }
 }
 
 export const adminService = new AdminService();

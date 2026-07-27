@@ -485,6 +485,13 @@ export class AdminController {
       sendSuccess(res, data);
     } catch (err) { next(err); }
   }
+
+  async deleteNotification(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = await adminService.deleteNotification(req.params.id as string);
+      sendSuccess(res, data, 'Notification deleted');
+    } catch (err) { next(err); }
+  }
 }
 
 export default new AdminController();
