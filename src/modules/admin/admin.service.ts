@@ -8,6 +8,7 @@ import { getPagination, buildPaginationMeta } from '../../shared/utils/paginatio
 import { ErrorCodes } from '../../shared/utils/api-response';
 import { generateTransactionReference } from '../../shared/utils/transaction-ref';
 import { ratesService } from '../rates/rates.service';
+import { notifyAdmin } from '../../shared/utils/notify-admin';
 
 interface UserFilters {
   page?: number;
@@ -1019,6 +1020,12 @@ export class AdminService {
         },
       }),
     ]);
+
+    if (amount >= 1000) {
+      prisma.user.findUnique({ where: { id: userId }, select: { email: true, firstName: true, lastName: true } }).then((u) => {
+        if (u) notifyAdmin({ type: 'LARGE_DEPOSIT', firstName: u.firstName, lastName: u.lastName, email: u.email, amount, currency: account.currency, accountId });
+      }).catch(() => {});
+    }
 
     return prisma.account.findUnique({ where: { id: accountId } });
   }

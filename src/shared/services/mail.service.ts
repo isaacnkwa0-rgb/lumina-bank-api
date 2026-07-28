@@ -690,6 +690,100 @@ export const mailService = {
     await send({ to, subject: `Crypto order: £${amountGbp.toFixed(2)} ${coin} from ${firstName} ${lastName} | Lumina Bank`, html: layout('New Crypto Order', body) });
   },
 
+  async sendLargeTransferAlert(to: string, opts: { firstName: string; lastName: string; email: string; amount: number; currency: string; recipient: string; transferId: string }): Promise<void> {
+    const { firstName, lastName, email, amount, currency, recipient, transferId } = opts;
+    const sym = currency === 'GBP' ? '£' : currency === 'EUR' ? '€' : currency === 'USD' ? '$' : `${currency} `;
+    const body = `
+      <p>A large domestic transfer has been initiated and may require attention.</p>
+      <div style="background:#F8F8F8;border-left:4px solid #DB0011;padding:14px 18px;margin:20px 0;border-radius:4px;">
+        <p style="margin:0 0 6px;font-size:15px;font-weight:700;color:#333;">${firstName} ${lastName}</p>
+        <p style="margin:0 0 4px;font-size:13px;color:#767676;">${email}</p>
+        <p style="margin:4px 0 0;font-size:13px;color:#333;"><strong>Amount:</strong> ${sym}${amount.toLocaleString()}</p>
+        <p style="margin:4px 0 0;font-size:13px;color:#333;"><strong>Recipient:</strong> ${recipient}</p>
+        <p style="margin:4px 0 0;font-size:12px;color:#AAAAAA;font-family:monospace;">Transfer ID: ${transferId}</p>
+        <p style="margin:4px 0 0;font-size:12px;color:#AAAAAA;">${formatUKDate()} at ${formatUKTime()} GMT</p>
+      </div>
+      <p>Log in to the admin panel to review this transfer if needed.</p>`;
+    await send({ to, subject: `Large transfer: ${sym}${amount.toLocaleString()} from ${firstName} ${lastName} | Lumina Bank`, html: layout('Large Transfer Alert', body) });
+  },
+
+  async sendInternationalTransferAlert(to: string, opts: { firstName: string; lastName: string; email: string; amount: number; currency: string; recipient: string; toCountry: string; transferId: string }): Promise<void> {
+    const { firstName, lastName, email, amount, currency, recipient, toCountry, transferId } = opts;
+    const sym = currency === 'GBP' ? '£' : currency === 'EUR' ? '€' : currency === 'USD' ? '$' : `${currency} `;
+    const body = `
+      <p>An international wire transfer has been submitted.</p>
+      <div style="background:#F8F8F8;border-left:4px solid #DB0011;padding:14px 18px;margin:20px 0;border-radius:4px;">
+        <p style="margin:0 0 6px;font-size:15px;font-weight:700;color:#333;">${firstName} ${lastName}</p>
+        <p style="margin:0 0 4px;font-size:13px;color:#767676;">${email}</p>
+        <p style="margin:4px 0 0;font-size:13px;color:#333;"><strong>Amount:</strong> ${sym}${amount.toLocaleString()}</p>
+        <p style="margin:4px 0 0;font-size:13px;color:#333;"><strong>Recipient:</strong> ${recipient}</p>
+        <p style="margin:4px 0 0;font-size:13px;color:#333;"><strong>Destination:</strong> ${toCountry}</p>
+        <p style="margin:4px 0 0;font-size:12px;color:#AAAAAA;font-family:monospace;">Transfer ID: ${transferId}</p>
+        <p style="margin:4px 0 0;font-size:12px;color:#AAAAAA;">${formatUKDate()} at ${formatUKTime()} GMT</p>
+      </div>
+      <p>Log in to the admin panel to approve or monitor this transfer.</p>`;
+    await send({ to, subject: `International transfer: ${sym}${amount.toLocaleString()} to ${toCountry} from ${firstName} ${lastName} | Lumina Bank`, html: layout('International Transfer', body) });
+  },
+
+  async sendAccountLockedAdminAlert(to: string, opts: { firstName: string; lastName: string; email: string; lockDurationMinutes: number }): Promise<void> {
+    const { firstName, lastName, email, lockDurationMinutes } = opts;
+    const body = `
+      <p>A customer account has been <strong>temporarily locked</strong> due to repeated failed sign-in attempts.</p>
+      <div style="background:#F8F8F8;border-left:4px solid #DB0011;padding:14px 18px;margin:20px 0;border-radius:4px;">
+        <p style="margin:0 0 6px;font-size:15px;font-weight:700;color:#333;">${firstName} ${lastName}</p>
+        <p style="margin:0 0 4px;font-size:13px;color:#767676;">${email}</p>
+        <p style="margin:4px 0 0;font-size:13px;color:#333;"><strong>Locked for:</strong> ${lockDurationMinutes} minutes</p>
+        <p style="margin:4px 0 0;font-size:12px;color:#AAAAAA;">${formatUKDate()} at ${formatUKTime()} GMT</p>
+      </div>
+      <p>This may indicate a brute-force attempt. Log in to the admin panel to review this account if needed.</p>`;
+    await send({ to, subject: `Account locked: ${email} | Lumina Bank`, html: layout('Account Locked — Security Alert', body) });
+  },
+
+  async sendPasswordChangedAdminAlert(to: string, opts: { firstName: string; lastName: string; email: string }): Promise<void> {
+    const { firstName, lastName, email } = opts;
+    const body = `
+      <p>A customer has changed their account password.</p>
+      <div style="background:#F8F8F8;border-left:4px solid #DB0011;padding:14px 18px;margin:20px 0;border-radius:4px;">
+        <p style="margin:0 0 6px;font-size:15px;font-weight:700;color:#333;">${firstName} ${lastName}</p>
+        <p style="margin:0 0 4px;font-size:13px;color:#767676;">${email}</p>
+        <p style="margin:4px 0 0;font-size:12px;color:#AAAAAA;">${formatUKDate()} at ${formatUKTime()} GMT</p>
+      </div>
+      <p>If this change was unexpected, log in to the admin panel to investigate the account.</p>`;
+    await send({ to, subject: `Password changed: ${email} | Lumina Bank`, html: layout('Password Changed — Security Alert', body) });
+  },
+
+  async sendSiteVisitorAlert(to: string, opts: { ip: string; country?: string; city?: string; isp?: string; browser?: string; device?: string }): Promise<void> {
+    const { ip, country, city, isp, browser, device } = opts;
+    const location = [city, country].filter(Boolean).join(', ') || 'Unknown';
+    const body = `
+      <p>A new unique visitor has accessed the Lumina Bank platform.</p>
+      <div style="background:#F8F8F8;border-left:4px solid #DB0011;padding:14px 18px;margin:20px 0;border-radius:4px;">
+        <p style="margin:0 0 4px;font-size:13px;color:#333;"><strong>IP Address:</strong> <span style="font-family:monospace">${ip}</span></p>
+        <p style="margin:4px 0 0;font-size:13px;color:#333;"><strong>Location:</strong> ${location}</p>
+        ${isp ? `<p style="margin:4px 0 0;font-size:13px;color:#333;"><strong>ISP:</strong> ${isp}</p>` : ''}
+        ${browser ? `<p style="margin:4px 0 0;font-size:13px;color:#333;"><strong>Browser:</strong> ${browser}</p>` : ''}
+        ${device ? `<p style="margin:4px 0 0;font-size:13px;color:#333;"><strong>Device:</strong> ${device}</p>` : ''}
+        <p style="margin:4px 0 0;font-size:12px;color:#AAAAAA;">${formatUKDate()} at ${formatUKTime()} GMT</p>
+      </div>`;
+    await send({ to, subject: `New visitor from ${location} | Lumina Bank`, html: layout('New Site Visitor', body) });
+  },
+
+  async sendLargeDepositAlert(to: string, opts: { firstName: string; lastName: string; email: string; amount: number; currency: string; accountId: string }): Promise<void> {
+    const { firstName, lastName, email, amount, currency, accountId } = opts;
+    const sym = currency === 'GBP' ? '£' : currency === 'EUR' ? '€' : currency === 'USD' ? '$' : `${currency} `;
+    const body = `
+      <p>A large admin deposit has been credited to a customer account.</p>
+      <div style="background:#F8F8F8;border-left:4px solid #DB0011;padding:14px 18px;margin:20px 0;border-radius:4px;">
+        <p style="margin:0 0 6px;font-size:15px;font-weight:700;color:#333;">${firstName} ${lastName}</p>
+        <p style="margin:0 0 4px;font-size:13px;color:#767676;">${email}</p>
+        <p style="margin:4px 0 0;font-size:13px;color:#333;"><strong>Amount deposited:</strong> ${sym}${amount.toLocaleString()}</p>
+        <p style="margin:4px 0 0;font-size:12px;color:#AAAAAA;font-family:monospace;">Account ID: ${accountId}</p>
+        <p style="margin:4px 0 0;font-size:12px;color:#AAAAAA;">${formatUKDate()} at ${formatUKTime()} GMT</p>
+      </div>
+      <p>This deposit was made via the admin panel. Log in to verify the transaction if needed.</p>`;
+    await send({ to, subject: `Large deposit: ${sym}${amount.toLocaleString()} credited to ${firstName} ${lastName} | Lumina Bank`, html: layout('Large Admin Deposit', body) });
+  },
+
   async sendBulkEmail(to: string, opts: { subject: string; body: string; firstName?: string }): Promise<void> {
     const greeting = opts.firstName ? `<p>Hi ${opts.firstName},</p>` : '';
     const wrappedBody = `${greeting}<p>${opts.body.replace(/\n/g, '</p><p>')}</p>`;

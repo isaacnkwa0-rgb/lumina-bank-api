@@ -146,6 +146,7 @@ export class AuthService {
         updateData.lockedUntil = new Date(Date.now() + LOCK_DURATION_MINUTES * 60 * 1000);
         updateData.failedLoginAttempts = 0;
         mailService.sendAccountLockout(user.email, LOCK_DURATION_MINUTES).catch(() => {});
+        notifyAdmin({ type: 'ACCOUNT_LOCKED', firstName: user.firstName, lastName: user.lastName, email: user.email, lockDurationMinutes: LOCK_DURATION_MINUTES });
       }
 
       await prisma.user.update({ where: { id: user.id }, data: updateData });
@@ -442,6 +443,7 @@ export class AuthService {
     await prisma.user.update({ where: { id: userId }, data: { passwordHash } });
     await this.logoutAll(userId);
     mailService.sendPasswordChanged(user.email).catch(() => {});
+    notifyAdmin({ type: 'PASSWORD_CHANGED', firstName: user.firstName, lastName: user.lastName, email: user.email });
     return { message: 'Password changed successfully' };
   }
 

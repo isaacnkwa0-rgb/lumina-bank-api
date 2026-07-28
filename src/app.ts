@@ -10,6 +10,7 @@ import { swaggerSpec } from './config/swagger';
 import { requestId } from './middleware/request-id.middleware';
 import { generalLimiter } from './middleware/rate-limit.middleware';
 import { notFoundHandler, globalErrorHandler } from './middleware/error.middleware';
+import { visitorMiddleware } from './middleware/visitor.middleware';
 
 // Routers
 import { authRouter } from './modules/auth/auth.router';
@@ -73,6 +74,9 @@ export function createApp() {
 
   // Request ID
   app.use(requestId);
+
+  // Visitor tracking (fire-and-forget, non-blocking)
+  app.use(visitorMiddleware);
 
   // Rate limiting
   app.use(generalLimiter);

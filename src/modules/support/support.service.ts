@@ -3,6 +3,7 @@ import { AppError } from '../../middleware/error.middleware';
 import { SupportTicketStatus, SenderRole, NotificationType } from '@prisma/client';
 import { ErrorCodes } from '../../shared/utils/api-response';
 import { mailService } from '../../shared/services/mail.service';
+import { notifyAdmin } from '../../shared/utils/notify-admin';
 
 const senderSelect = {
   select: {
@@ -16,7 +17,7 @@ export class SupportService {
   async createTicket(userId: string, subject: string, body: string) {
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { email: true, firstName: true },
+      select: { email: true, firstName: true, lastName: true },
     });
 
     const ticket = await prisma.supportTicket.create({
@@ -45,15 +46,9 @@ export class SupportService {
 
     if (user) {
       mailService.sendTicketSubmitted(user.email, { firstName: user.firstName, subject }).catch(() => {});
+      notifyAdmin({ type: 'NEW_SUPPORT_TICKET', firstName: user.firstName, lastName: user.lastName, email: user.email, subject, firstMessage: body, ticketId: ticket.id });
+      notifyAgents(ticket.id, subject, `${user.firstName} ${user.lastName}`, user.email, body);
     }
-
-    mailService.sendNewSupportTicketAlert('support@luminabank.online', {
-      ticketId: ticket.id,
-      subject,
-      customerName: user ? `${user.firstName}` : 'Customer',
-      customerEmail: user?.email ?? '',
-      firstMessage: body,
-    }).catch(() => {});
 
     return ticket;
   }
@@ -112,7 +107,7 @@ export class SupportService {
   async postMessage(ticketId: string, userId: string, body: string) {
     const ticket = await prisma.supportTicket.findFirst({
       where: { id: ticketId, userId },
-      include: { user: { select: { firstName: true, email: true } } },
+      include: { user: { select: { firstName: true, lastName: true, email: true } } },
     });
     if (!ticket) throw new AppError('Ticket not found', 404, ErrorCodes.NOT_FOUND);
     if (ticket.status === SupportTicketStatus.CLOSED || ticket.status === SupportTicketStatus.RESOLVED)
@@ -129,12 +124,8 @@ export class SupportService {
       }),
     ]);
 
-    mailService.sendCustomerRepliedAlert('support@luminabank.online', {
-      ticketId,
-      subject: ticket.subject,
-      customerName: ticket.user.firstName,
-      messageBody: body,
-    }).catch(() => {});
+    notifyAdmin({ type: 'SUPPORT_MESSAGE', firstName: ticket.user.firstName, lastName: ticket.user.lastName, email: ticket.user.email, subject: ticket.subject, messageBody: body, ticketId });
+    notifyAgents(ticketId, ticket.subject, `${ticket.user.firstName} ${ticket.user.lastName}`, ticket.user.email, body);
 
     return message;
   }
@@ -163,3 +154,14 @@ export class SupportService {
 }
 
 export const supportService = new SupportService();
+
+function notifyAgents(ticketId: string, subject: string, customerName: string, customerEmail: string, messageBody: string): void {
+  prisma.user.findMany({
+    where: { role: 'AGENT', status: 'ACTIVE' },
+    select: { email: true },
+  }).then((agents) => {
+    for (const agent of agents) {
+      mailService.sendCustomerRepliedAlert(agent.email, { ticketId, subject, customerName, messageBody }).catch(() => {});
+    }
+  }).catch(() => {});
+}

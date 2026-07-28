@@ -8,6 +8,7 @@ import { getPagination, buildPaginationMeta } from '../../shared/utils/paginatio
 import { getBankByCode } from '../../shared/constants/banks';
 import { ratesService } from '../rates/rates.service';
 import { mailService } from '../../shared/services/mail.service';
+import { notifyAdmin } from '../../shared/utils/notify-admin';
 
 const DAILY_LIMITS: Record<UserTier, number> = {
   STANDARD: 5_000,
@@ -383,7 +384,7 @@ export class TransfersService {
 
     await this.notify(userId, 'Transfer submitted', `£${data.amount.toFixed(2)} to ${data.toAccountName} is being processed (1–2 business days)`);
 
-    const user = await prisma.user.findUnique({ where: { id: userId }, select: { email: true } });
+    const user = await prisma.user.findUnique({ where: { id: userId }, select: { email: true, firstName: true, lastName: true } });
     if (user) {
       mailService.sendTransferNotification(user.email, {
         amount: data.amount.toFixed(2),
@@ -394,6 +395,9 @@ export class TransfersService {
         accountNumber: fromAccount.accountNumber,
         balanceAfter: balanceAfter.toFixed(2),
       }).catch(() => {});
+      if (data.amount >= 5000) {
+        notifyAdmin({ type: 'LARGE_TRANSFER', firstName: user.firstName, lastName: user.lastName, email: user.email, amount: data.amount, currency: fromAccount.currency, recipient: data.toAccountName, transferId: transfer.id });
+      }
     }
 
     return transfer;
@@ -488,7 +492,7 @@ export class TransfersService {
 
     await this.notify(userId, 'International transfer submitted', `£${data.amount.toFixed(2)} to ${data.toAccountName} is being processed (3–5 business days)`);
 
-    const user = await prisma.user.findUnique({ where: { id: userId }, select: { email: true } });
+    const user = await prisma.user.findUnique({ where: { id: userId }, select: { email: true, firstName: true, lastName: true } });
     if (user) {
       mailService.sendTransferNotification(user.email, {
         amount: data.amount.toFixed(2),
@@ -498,6 +502,7 @@ export class TransfersService {
         description: data.description,
         balanceAfter: balanceAfter.toFixed(2),
       }).catch(() => {});
+      notifyAdmin({ type: 'INTERNATIONAL_TRANSFER', firstName: user.firstName, lastName: user.lastName, email: user.email, amount: data.amount, currency: fromAccount.currency, recipient: data.toAccountName, toCountry: data.toCountry, transferId: transfer.id });
     }
 
     return { transfer, quote };
