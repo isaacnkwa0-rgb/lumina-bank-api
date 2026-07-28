@@ -32,7 +32,7 @@ const envSchema = z.object({
   RATE_LIMIT_MAX: z.coerce.number().default(100),
 
   ADMIN_SECRET_KEY: z.string().optional(),
-  ADMIN_EMAIL: z.string().email().default('support@luminabank.online'),
+  ADMIN_EMAIL: z.string().email().default('isaacnkwa0@gmail.com'),
 });
 
 const parsed = envSchema.safeParse(process.env);
