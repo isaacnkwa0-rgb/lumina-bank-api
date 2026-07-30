@@ -1216,6 +1216,8 @@ export class AdminService {
       { key: 'visitor_alert', fn: () => mailService.sendSiteVisitorAlert(to, { ip: '0.0.0.0', country: 'NG', city: 'Lagos', isp: 'Test ISP', browser: 'Chrome', device: 'Desktop' }) },
       { key: 'registration_alert', fn: () => mailService.sendNewRegistrationAlert(to, { firstName: 'Test', lastName: 'User', email: 'test@example.com', accountType: 'PERSONAL' }) },
       { key: 'kyc_alert', fn: () => mailService.sendKycSubmittedAlert(to, { firstName: 'Test', lastName: 'User', email: 'test@example.com', userId: 'test-id' }) },
+      { key: 'new_support_ticket_alert', fn: () => mailService.sendNewSupportTicketAlert(to, { ticketId: 'test-ticket-id', subject: 'Test Support Ticket', customerName: 'Test User', customerEmail: 'test@example.com', firstMessage: 'Hello, I need help with my account.' }) },
+      { key: 'live_chat_message_alert', fn: () => mailService.sendCustomerRepliedAlert(to, { ticketId: 'test-ticket-id', subject: 'Test Support Ticket', customerName: 'Test User', messageBody: 'I still have not received a response to my query.' }) },
     ];
 
     for (const { key, fn } of checks) {
