@@ -63,11 +63,12 @@ router.get('/investments', requireAdmin, adminController.getAdminInvestments.bin
 // Savings Goals
 router.get('/goals', requireAdmin, adminController.getAdminGoals.bind(adminController));
 
-// User tier / delete / lockout / email
+// User tier / delete / lockout / email / profile
 router.patch('/users/:id/tier', requireAdmin, adminController.changeUserTier.bind(adminController));
 router.delete('/users/:id', requireAdmin, adminController.deleteUser.bind(adminController));
 router.patch('/users/:id/reset-lockout', requireAdmin, adminController.resetLockout.bind(adminController));
 router.patch('/users/:id/verify-email', requireAdmin, adminController.verifyUserEmail.bind(adminController));
+router.patch('/users/:id/profile', requireAdmin, adminController.updateUserProfile.bind(adminController));
 
 // Crypto orders
 router.get('/crypto/orders', requireAdmin, adminController.getAdminCryptoOrders.bind(adminController));

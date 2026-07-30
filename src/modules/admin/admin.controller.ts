@@ -303,6 +303,23 @@ export class AdminController {
     } catch (err) { next(err); }
   }
 
+  async updateUserProfile(req: Request, res: Response, next: NextFunction) {
+    try {
+      const ALLOWED = [
+        'firstName', 'lastName', 'phone', 'gender', 'dateOfBirth',
+        'nationality', 'countryOfResidence', 'address', 'taxResidency', 'accountType',
+        'occupation', 'employer', 'annualIncome', 'preferredCurrency',
+      ];
+      const hasField = ALLOWED.some((k) => k in (req.body as Record<string, unknown>));
+      if (!hasField) {
+        res.status(400).json({ success: false, error: { message: 'At least one updatable field must be provided' } });
+        return;
+      }
+      const data = await adminService.updateUserProfile(req.params.id as string, req.body);
+      sendSuccess(res, data, 'User profile updated');
+    } catch (err) { next(err); }
+  }
+
   // ── Crypto Orders ─────────────────────────────────────────────────────────────
 
   async getAdminCryptoOrders(req: Request, res: Response, next: NextFunction) {

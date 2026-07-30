@@ -1204,6 +1204,139 @@ export class AdminService {
     const { count } = await prisma.adminNotification.deleteMany({});
     return { deleted: count };
   }
+
+  // ── User profile editing ──────────────────────────────────────────────────────
+
+  async updateUserProfile(id: string, input: {
+    firstName?: string;
+    lastName?: string;
+    phone?: string;
+    gender?: string;
+    dateOfBirth?: string;
+    nationality?: string;
+    countryOfResidence?: string;
+    address?: Record<string, string>;
+    taxResidency?: Record<string, unknown>;
+    accountType?: string;
+    occupation?: string;
+    employer?: string;
+    annualIncome?: number;
+    preferredCurrency?: string;
+  }) {
+    const user = await prisma.user.findUnique({ where: { id }, include: { profile: true } });
+    if (!user) throw new AppError('User not found', 404, ErrorCodes.NOT_FOUND);
+    if (user.role === 'ADMIN') throw new AppError('Cannot modify admin accounts', 403, ErrorCodes.FORBIDDEN);
+
+    const {
+      occupation, employer, annualIncome, preferredCurrency,
+      dateOfBirth, address, taxResidency,
+      ...primitiveFields
+    } = input;
+
+    if (primitiveFields.phone && primitiveFields.phone !== user.phone) {
+      const conflict = await prisma.user.findUnique({ where: { phone: primitiveFields.phone } });
+      if (conflict) throw new AppError('Phone number is already in use by another account', 409, ErrorCodes.CONFLICT);
+    }
+
+    const fieldLabels: Record<string, string> = {
+      firstName: 'First name', lastName: 'Last name', phone: 'Phone number',
+      gender: 'Gender', dateOfBirth: 'Date of birth', nationality: 'Nationality',
+      countryOfResidence: 'Country of residence', address: 'Address',
+      taxResidency: 'Tax residency', accountType: 'Account type',
+      occupation: 'Occupation', employer: 'Employer',
+      annualIncome: 'Annual income', preferredCurrency: 'Preferred currency',
+    };
+
+    const stringify = (v: unknown): string => {
+      if (v === null || v === undefined) return '—';
+      if (v instanceof Date) return v.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+      if (typeof v === 'object') return Object.values(v as Record<string, string>).filter(Boolean).join(', ');
+      return String(v);
+    };
+
+    const changes: { label: string; from: string; to: string }[] = [];
+
+    for (const [key, newVal] of Object.entries(primitiveFields)) {
+      if (newVal === undefined) continue;
+      const oldStr = stringify((user as Record<string, unknown>)[key]);
+      const newStr = stringify(newVal);
+      if (oldStr !== newStr) changes.push({ label: fieldLabels[key] ?? key, from: oldStr, to: newStr });
+    }
+
+    if (dateOfBirth !== undefined) {
+      const newDate = new Date(dateOfBirth);
+      const oldStr = stringify(user.dateOfBirth);
+      const newStr = newDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+      if (oldStr !== newStr) changes.push({ label: 'Date of birth', from: oldStr, to: newStr });
+    }
+    if (address !== undefined) {
+      const oldStr = stringify(user.address);
+      const newStr = stringify(address);
+      if (oldStr !== newStr) changes.push({ label: 'Address', from: oldStr, to: newStr });
+    }
+    if (taxResidency !== undefined) {
+      const oldStr = stringify(user.taxResidency);
+      const newStr = stringify(taxResidency);
+      if (oldStr !== newStr) changes.push({ label: 'Tax residency', from: oldStr, to: newStr });
+    }
+
+    const profileInputs: Record<string, unknown> = { occupation, employer, annualIncome, preferredCurrency };
+    for (const [key, newVal] of Object.entries(profileInputs)) {
+      if (newVal === undefined) continue;
+      const oldStr = stringify((user.profile as Record<string, unknown> | null)?.[key]);
+      const newStr = stringify(newVal);
+      if (oldStr !== newStr) changes.push({ label: fieldLabels[key] ?? key, from: oldStr, to: newStr });
+    }
+
+    const userUpdateData: Prisma.UserUpdateInput = {};
+    if (primitiveFields.firstName !== undefined) userUpdateData.firstName = primitiveFields.firstName;
+    if (primitiveFields.lastName !== undefined) userUpdateData.lastName = primitiveFields.lastName;
+    if (primitiveFields.phone !== undefined) userUpdateData.phone = primitiveFields.phone;
+    if (primitiveFields.gender !== undefined) userUpdateData.gender = primitiveFields.gender;
+    if (primitiveFields.nationality !== undefined) userUpdateData.nationality = primitiveFields.nationality;
+    if (primitiveFields.countryOfResidence !== undefined) userUpdateData.countryOfResidence = primitiveFields.countryOfResidence;
+    if (primitiveFields.accountType !== undefined) userUpdateData.accountType = primitiveFields.accountType;
+    if (dateOfBirth !== undefined) userUpdateData.dateOfBirth = new Date(dateOfBirth);
+    if (address !== undefined) userUpdateData.address = address as Prisma.InputJsonValue;
+    if (taxResidency !== undefined) userUpdateData.taxResidency = taxResidency as Prisma.InputJsonValue;
+
+    const profileData: { occupation?: string; employer?: string; annualIncome?: number; preferredCurrency?: string } = {};
+    if (occupation !== undefined) profileData.occupation = occupation;
+    if (employer !== undefined) profileData.employer = employer;
+    if (annualIncome !== undefined) profileData.annualIncome = annualIncome;
+    if (preferredCurrency !== undefined) profileData.preferredCurrency = preferredCurrency;
+
+    await prisma.$transaction(async (tx) => {
+      if (Object.keys(userUpdateData).length > 0) {
+        await tx.user.update({ where: { id }, data: userUpdateData });
+      }
+      if (Object.keys(profileData).length > 0) {
+        if (user.profile) {
+          await tx.profile.update({ where: { userId: id }, data: profileData });
+        } else {
+          await tx.profile.create({ data: { userId: id, ...profileData } });
+        }
+      }
+    });
+
+    if (changes.length > 0) {
+      await prisma.notification.create({
+        data: {
+          userId: id,
+          type: NotificationType.SYSTEM,
+          title: 'Account details updated',
+          body: 'Your account information has been reviewed and updated by our team. Please log in to verify your details.',
+        },
+      }).catch(() => {});
+
+      mailService.sendProfileUpdatedByAdmin(user.email, {
+        firstName: primitiveFields.firstName ?? user.firstName,
+        changes,
+      }).catch(() => {});
+    }
+
+    return this.getUser(id);
+  }
 }
 
 export const adminService = new AdminService();

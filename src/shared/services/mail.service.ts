@@ -807,4 +807,35 @@ export const mailService = {
       html: layout('Ticket Closed', body),
     });
   },
+
+  async sendProfileUpdatedByAdmin(to: string, opts: { firstName: string; changes: { label: string; from: string; to: string }[] }): Promise<void> {
+    const { firstName, changes } = opts;
+    const rowsHtml = changes.map(c => `
+      <tr>
+        <td style="padding:11px 0;border-bottom:1px solid #f0f0f0;color:#666;font-size:13px;width:32%;vertical-align:top">${c.label}</td>
+        <td style="padding:11px 0;border-bottom:1px solid #f0f0f0;color:#999;font-size:13px;text-decoration:line-through;padding-right:12px;vertical-align:top">${c.from}</td>
+        <td style="padding:11px 0;border-bottom:1px solid #f0f0f0;color:#1a7a3f;font-size:13px;font-weight:600;vertical-align:top">${c.to}</td>
+      </tr>`).join('');
+    const body = `
+      <p>Hi ${firstName},</p>
+      <p>We are writing to inform you that one or more details on your Lumina Bank account have been updated by our team. Please review the changes below.</p>
+      <table width="100%" cellpadding="0" cellspacing="0" style="margin:20px 0">
+        <thead>
+          <tr>
+            <th style="padding:8px 0;border-bottom:2px solid #DB0011;color:#999;font-size:11px;font-weight:600;text-align:left;text-transform:uppercase;letter-spacing:1px;width:32%">Field</th>
+            <th style="padding:8px 0;border-bottom:2px solid #DB0011;color:#999;font-size:11px;font-weight:600;text-align:left;text-transform:uppercase;letter-spacing:1px;padding-right:12px">Previous</th>
+            <th style="padding:8px 0;border-bottom:2px solid #DB0011;color:#999;font-size:11px;font-weight:600;text-align:left;text-transform:uppercase;letter-spacing:1px">Updated to</th>
+          </tr>
+        </thead>
+        <tbody>${rowsHtml}</tbody>
+      </table>
+      <p>If these changes are correct and were made with your knowledge, no action is required.</p>
+      <p>If you did not authorise these changes or believe this is an error, please contact us immediately — your security is our priority.</p>
+      <p class="note">For assistance, email <a href="mailto:support@luminabank.online" style="color:#DB0011">support@luminabank.online</a> or call <strong>+44 800 123 4567</strong> (free, 24/7).</p>`;
+    await send({
+      to,
+      subject: 'Your account details have been updated | Lumina Bank',
+      html: layout('Account Details Updated', body),
+    });
+  },
 };
