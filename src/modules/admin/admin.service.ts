@@ -1220,16 +1220,18 @@ export class AdminService {
       { key: 'live_chat_message_alert', fn: () => mailService.sendCustomerRepliedAlert(to, { ticketId: 'test-ticket-id', subject: 'Test Support Ticket', customerName: 'Test User', messageBody: 'I still have not received a response to my query.' }) },
     ];
 
-    for (const { key, fn } of checks) {
-      try {
-        await fn();
-        results[key] = 'ok';
-      } catch (e: unknown) {
-        results[key] = String(e);
-      }
-    }
+    await Promise.all(
+      checks.map(async ({ key, fn }) => {
+        try {
+          await fn();
+          results[key] = 'ok';
+        } catch (e: unknown) {
+          results[key] = String(e);
+        }
+      })
+    );
 
-    // Also test the full notifyAdmin chain
+    // Also test the full notifyAdmin chain (fire-and-forget, always fast)
     try {
       notifyAdmin({ type: 'SITE_VISITOR', ip: '0.0.0.1', country: 'NG', city: 'Test', isp: 'Test ISP', browser: 'Chrome', device: 'Desktop' });
       results['notify_admin_chain'] = 'dispatched';
