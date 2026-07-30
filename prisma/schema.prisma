@@ -2,6 +2,306 @@ generator client {
   provider = "prisma-client-js"
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+ 
+
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -12,17 +312,8 @@ datasource db {
 enum UserTier {
   STANDARD
   PREMIUM
-  ELITE
   PRIVATE
   BUSINESS
-}
-
-enum Language {
-  EN
-  ES
-  FR
-  PT
-  DE
 }
 
 enum UserStatus {
@@ -39,7 +330,6 @@ enum KycStatus {
 
 enum Role {
   USER
-  AGENT
   ADMIN
 }
 
@@ -176,41 +466,6 @@ enum GoalStatus {
   CANCELLED
 }
 
-enum DisputeStatus {
-  OPEN
-  UNDER_REVIEW
-  RESOLVED
-  REJECTED
-}
-
-enum SupportTicketStatus {
-  OPEN
-  IN_PROGRESS
-  RESOLVED
-  CLOSED
-}
-
-enum SenderRole {
-  CUSTOMER
-  AGENT
-}
-
-enum InsuranceType {
-  LIFE
-  HOME
-  CAR
-  TRAVEL
-  HEALTH
-  BUSINESS
-}
-
-enum InsuranceStatus {
-  REQUESTED
-  QUOTED
-  ACCEPTED
-  DECLINED
-}
-
 enum FxRateSource {
   MOCK
   EXTERNAL_API
@@ -225,7 +480,6 @@ model User {
   passwordHash        String
   firstName           String
   lastName            String
-  gender              String?
   dateOfBirth         DateTime?
   nationality         String?
   address             Json?
@@ -237,26 +491,11 @@ model User {
   isPhoneVerified     Boolean    @default(false)
   twoFactorEnabled    Boolean    @default(false)
   twoFactorSecret     String?
-  twoFactorRecoveryCodes Json?
-  transferPinHash     String?
   status              UserStatus @default(ACTIVE)
   failedLoginAttempts Int        @default(0)
   lockedUntil         DateTime?
   createdAt           DateTime   @default(now())
   updatedAt           DateTime   @updatedAt
-
-  // Onboarding & Consent
-  onboardingStep              Int       @default(0)
-  termsAcceptedAt             DateTime?
-  marketingConsent            Boolean   @default(false)
-  electronicStatementsConsent Boolean   @default(false)
-  dataProcessingConsent       Boolean   @default(false)
-
-  // Regulatory
-  countryOfResidence          String?
-  taxResidency                Json?
-  accountType                 String?
-  ssnEncrypted                String?
 
   profile       Profile?
   accounts      Account[]
@@ -270,13 +509,6 @@ model User {
   refreshTokens RefreshToken[]
   auditLogs     AuditLog[]
   otpCodes      OtpCode[]
-  disputes         Dispute[]
-  supportTickets   SupportTicket[]
-  supportMessages  SupportMessage[]
-  insuranceQuotes  InsuranceQuote[]
-  standingOrders   StandingOrder[]
-  directDebits     DirectDebit[]
-  cryptoOrders     CryptoOrder[]
 
   @@index([email])
   @@index([status])
@@ -289,13 +521,7 @@ model Profile {
   occupation              String?
   employer                String?
   annualIncome            Decimal? @db.Decimal(18, 4)
-  employmentStatus      String?
-  industry              String?
-  sourceOfFunds         Json?
-  annualIncomeRange     String?
-  expectedMonthlyVolume String?
   preferredCurrency       String   @default("USD")
-  preferredLanguage       Language @default(EN)
   notificationPreferences Json     @default("{\"email\":true,\"sms\":true,\"push\":true,\"marketing\":false}")
   updatedAt               DateTime @updatedAt
 
@@ -325,10 +551,6 @@ model Account {
   toTransfers   Transfer[]    @relation("ToAccount")
   cards         Card[]
   goals         SavingsGoal[]
-  loans         Loan[]
-  standingOrders StandingOrder[]
-  directDebits   DirectDebit[]
-  cryptoOrders   CryptoOrder[]
 
   @@index([userId])
   @@index([accountNumber])
@@ -499,7 +721,6 @@ model Watchlist {
 model Loan {
   id                 String     @id @default(uuid())
   userId             String
-  accountId          String?
   type               LoanType
   principalAmount    Decimal    @db.Decimal(18, 4)
   outstandingBalance Decimal    @db.Decimal(18, 4)
@@ -514,7 +735,6 @@ model Loan {
   updatedAt          DateTime   @updatedAt
 
   user     User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  account  Account?      @relation(fields: [accountId], references: [id])
   payments LoanPayment[]
 
   @@index([userId])
@@ -649,209 +869,4 @@ model ExchangeRate {
 
   @@unique([baseCurrency, quoteCurrency])
   @@index([baseCurrency, quoteCurrency])
-}
-
-model Dispute {
-  id            String        @id @default(uuid())
-  userId        String
-  transactionId String?
-  subject       String
-  description   String
-  status        DisputeStatus @default(OPEN)
-  resolution    String?
-  resolvedAt    DateTime?
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([status])
-  @@index([createdAt])
-}
-
-model SupportTicket {
-  id         String              @id @default(uuid())
-  userId     String
-  subject    String
-  status     SupportTicketStatus @default(OPEN)
-  createdAt  DateTime            @default(now())
-  updatedAt  DateTime            @updatedAt
-  resolvedAt DateTime?
-
-  user     User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  messages SupportMessage[]
-
-  @@index([userId])
-  @@index([status])
-  @@index([createdAt])
-}
-
-model SupportMessage {
-  id         String     @id @default(uuid())
-  ticketId   String
-  senderId   String
-  senderRole SenderRole
-  body       String
-  isRead     Boolean    @default(false)
-  createdAt  DateTime   @default(now())
-
-  ticket SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
-  sender User          @relation(fields: [senderId], references: [id])
-
-  @@index([ticketId])
-  @@index([senderId])
-  @@index([createdAt])
-}
-
-model InsuranceQuote {
-  id        String          @id @default(uuid())
-  userId    String
-  type      InsuranceType
-  status    InsuranceStatus @default(REQUESTED)
-  details   Json
-  premium   Decimal?        @db.Decimal(18, 4)
-  notes     String?
-  createdAt DateTime        @default(now())
-  updatedAt DateTime        @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([status])
-  @@index([createdAt])
-}
-
-enum StandingOrderFreq {
-  WEEKLY
-  BIWEEKLY
-  MONTHLY
-  QUARTERLY
-}
-
-enum StandingOrderStatus {
-  ACTIVE
-  PAUSED
-  CANCELLED
-}
-
-model StandingOrder {
-  id                String              @id @default(uuid())
-  userId            String
-  fromAccountId     String
-  toAccountNumber   String
-  toBankCode        String
-  toAccountName     String
-  amount            Decimal             @db.Decimal(18, 4)
-  currency          String              @default("GBP")
-  description       String
-  frequency         StandingOrderFreq
-  nextExecutionDate DateTime
-  endDate           DateTime?
-  status            StandingOrderStatus @default(ACTIVE)
-  lastExecutedAt    DateTime?
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @updatedAt
-
-  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  fromAccount Account @relation(fields: [fromAccountId], references: [id])
-
-  @@index([userId])
-  @@index([status])
-  @@index([nextExecutionDate])
-}
-
-enum DirectDebitStatus {
-  ACTIVE
-  SUSPENDED
-  CANCELLED
-}
-
-model DirectDebit {
-  id                 String             @id @default(uuid())
-  userId             String
-  accountId          String
-  originatorName     String
-  originatorRef      String
-  userRef            String
-  amount             Decimal?           @db.Decimal(18, 4)
-  currency           String             @default("GBP")
-  frequency          StandingOrderFreq
-  nextCollectionDate DateTime
-  lastCollectedAt    DateTime?
-  status             DirectDebitStatus  @default(ACTIVE)
-  createdAt          DateTime           @default(now())
-  updatedAt          DateTime           @updatedAt
-
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  account Account @relation(fields: [accountId], references: [id])
-
-  @@index([userId])
-  @@index([status])
-  @@index([nextCollectionDate])
-}
-
-enum CryptoOrderStatus {
-  PENDING
-  APPROVED
-  REJECTED
-  COMPLETED
-}
-
-model CryptoOrder {
-  id            String            @id @default(uuid())
-  userId        String
-  accountId     String
-  coin          String
-  coinId        String
-  network       String
-  walletAddress String
-  amountGbp     Decimal           @db.Decimal(18, 4)
-  fee           Decimal           @db.Decimal(18, 4) @default(1.50)
-  priceGbp      Decimal           @db.Decimal(18, 4)
-  quantity      Decimal           @db.Decimal(18, 8)
-  status        CryptoOrderStatus @default(PENDING)
-  reference     String            @unique
-  adminNotes    String?
-  processedAt   DateTime?
-  createdAt     DateTime          @default(now())
-  updatedAt     DateTime          @updatedAt
-
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  account Account @relation(fields: [accountId], references: [id])
-
-  @@index([userId])
-  @@index([status])
-  @@index([createdAt])
-}
-
-enum AdminNotificationType {
-  NEW_REGISTRATION
-  KYC_SUBMITTED
-  LOAN_APPLICATION
-  DISPUTE_FILED
-  INSURANCE_QUOTE
-  CRYPTO_ORDER
-  LARGE_TRANSFER
-  INTERNATIONAL_TRANSFER
-  ACCOUNT_LOCKED
-  PASSWORD_CHANGED
-  SITE_VISITOR
-  NEW_SUPPORT_TICKET
-  SUPPORT_MESSAGE
-  LARGE_DEPOSIT
-}
-
-model AdminNotification {
-  id        String                @id @default(uuid())
-  type      AdminNotificationType
-  title     String
-  message   String
-  metadata  Json?
-  isRead    Boolean               @default(false)
-  createdAt DateTime              @default(now())
-
-  @@index([isRead])
-  @@index([type])
-  @@index([createdAt])
 }
