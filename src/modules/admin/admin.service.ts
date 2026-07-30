@@ -1220,10 +1220,13 @@ export class AdminService {
       { key: 'live_chat_message_alert', fn: () => mailService.sendCustomerRepliedAlert(to, { ticketId: 'test-ticket-id', subject: 'Test Support Ticket', customerName: 'Test User', messageBody: 'I still have not received a response to my query.' }) },
     ];
 
+    const withTimeout = (fn: () => Promise<void>, ms: number) =>
+      Promise.race([fn(), new Promise<never>((_, rej) => setTimeout(() => rej(new Error(`timeout after ${ms}ms`)), ms))]);
+
     await Promise.all(
       checks.map(async ({ key, fn }) => {
         try {
-          await fn();
+          await withTimeout(fn, 10_000);
           results[key] = 'ok';
         } catch (e: unknown) {
           results[key] = String(e);
