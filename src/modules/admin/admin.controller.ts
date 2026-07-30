@@ -538,6 +538,13 @@ export class AdminController {
       sendSuccess(res, data, `${data.deleted} notification(s) deleted`);
     } catch (err) { next(err); }
   }
+
+  async testNotifications(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = await adminService.testNotifications();
+      sendSuccess(res, data, 'Notification test complete — check results and your inbox');
+    } catch (err) { next(err); }
+  }
 }
 
 export default new AdminController();

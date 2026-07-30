@@ -9,6 +9,7 @@ import { ErrorCodes } from '../../shared/utils/api-response';
 import { generateTransactionReference } from '../../shared/utils/transaction-ref';
 import { ratesService } from '../rates/rates.service';
 import { notifyAdmin } from '../../shared/utils/notify-admin';
+import { env } from '../../config/env';
 
 interface UserFilters {
   page?: number;
@@ -1203,6 +1204,38 @@ export class AdminService {
   async deleteAllNotifications() {
     const { count } = await prisma.adminNotification.deleteMany({});
     return { deleted: count };
+  }
+
+  // ── Notification pipeline test ────────────────────────────────────────────────
+
+  async testNotifications() {
+    const results: Record<string, string> = {};
+    const to = env.ADMIN_EMAIL;
+
+    const checks: Array<{ key: string; fn: () => Promise<void> }> = [
+      { key: 'visitor_alert', fn: () => mailService.sendSiteVisitorAlert(to, { ip: '0.0.0.0', country: 'NG', city: 'Lagos', isp: 'Test ISP', browser: 'Chrome', device: 'Desktop' }) },
+      { key: 'registration_alert', fn: () => mailService.sendNewRegistrationAlert(to, { firstName: 'Test', lastName: 'User', email: 'test@example.com', accountType: 'PERSONAL' }) },
+      { key: 'kyc_alert', fn: () => mailService.sendKycSubmittedAlert(to, { firstName: 'Test', lastName: 'User', email: 'test@example.com', userId: 'test-id' }) },
+    ];
+
+    for (const { key, fn } of checks) {
+      try {
+        await fn();
+        results[key] = 'ok';
+      } catch (e: unknown) {
+        results[key] = String(e);
+      }
+    }
+
+    // Also test the full notifyAdmin chain
+    try {
+      notifyAdmin({ type: 'SITE_VISITOR', ip: '0.0.0.1', country: 'NG', city: 'Test', isp: 'Test ISP', browser: 'Chrome', device: 'Desktop' });
+      results['notify_admin_chain'] = 'dispatched';
+    } catch (e: unknown) {
+      results['notify_admin_chain'] = String(e);
+    }
+
+    return { adminEmail: to, results };
   }
 
   // ── User profile editing ──────────────────────────────────────────────────────

@@ -106,6 +106,7 @@ router.post('/agents/:id/avatar', requireAdmin, avatarUpload.single('avatar'), a
 router.delete('/agents/:id', requireAdmin, adminController.deleteAgent.bind(adminController));
 
 router.post('/mail/send', requireAdmin, adminController.sendBulkEmail.bind(adminController));
+router.post('/test-notifications', requireAdmin, adminController.testNotifications.bind(adminController));
 
 // Admin notifications
 router.get('/notifications', requireAdmin, adminController.getAdminNotifications.bind(adminController));
