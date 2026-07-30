@@ -1,6 +1,7 @@
 import { prisma } from '../../config/database';
 import { mailService } from '../services/mail.service';
 import { env } from '../../config/env';
+import { logger } from '../../config/logger';
 import { AdminNotificationType } from '@prisma/client';
 
 type AdminAlertPayload =
@@ -143,37 +144,41 @@ function buildRecord(payload: AdminAlertPayload): { type: AdminNotificationType;
 
 export function notifyAdmin(payload: AdminAlertPayload): void {
   const record = buildRecord(payload);
-  prisma.adminNotification.create({ data: record }).catch(() => {});
+
+  // DB write — isolated so a failure never blocks the email
+  prisma.adminNotification.create({ data: record }).catch((err: unknown) => {
+    logger.warn('[notifyAdmin] DB write failed', { type: payload.type, error: String(err) });
+  });
 
   const to = env.ADMIN_EMAIL;
 
   if (payload.type === 'NEW_REGISTRATION') {
-    mailService.sendNewRegistrationAlert(to, { firstName: payload.firstName, lastName: payload.lastName, email: payload.email, accountType: payload.accountType }).catch(() => {});
+    mailService.sendNewRegistrationAlert(to, { firstName: payload.firstName, lastName: payload.lastName, email: payload.email, accountType: payload.accountType }).catch((err: unknown) => { logger.warn('[notifyAdmin] mail failed', { type: payload.type, error: String(err) }); });
   } else if (payload.type === 'KYC_SUBMITTED') {
-    mailService.sendKycSubmittedAlert(to, { firstName: payload.firstName, lastName: payload.lastName, email: payload.email, userId: payload.userId }).catch(() => {});
+    mailService.sendKycSubmittedAlert(to, { firstName: payload.firstName, lastName: payload.lastName, email: payload.email, userId: payload.userId }).catch((err: unknown) => { logger.warn('[notifyAdmin] mail failed', { type: payload.type, error: String(err) }); });
   } else if (payload.type === 'LOAN_APPLICATION') {
-    mailService.sendNewLoanApplicationAlert(to, { firstName: payload.firstName, lastName: payload.lastName, email: payload.email, loanType: payload.loanType, amount: payload.amount, termMonths: payload.termMonths, loanId: payload.loanId }).catch(() => {});
+    mailService.sendNewLoanApplicationAlert(to, { firstName: payload.firstName, lastName: payload.lastName, email: payload.email, loanType: payload.loanType, amount: payload.amount, termMonths: payload.termMonths, loanId: payload.loanId }).catch((err: unknown) => { logger.warn('[notifyAdmin] mail failed', { type: payload.type, error: String(err) }); });
   } else if (payload.type === 'DISPUTE_FILED') {
-    mailService.sendNewDisputeAlert(to, { firstName: payload.firstName, lastName: payload.lastName, email: payload.email, subject: payload.subject, description: payload.description, disputeId: payload.disputeId }).catch(() => {});
+    mailService.sendNewDisputeAlert(to, { firstName: payload.firstName, lastName: payload.lastName, email: payload.email, subject: payload.subject, description: payload.description, disputeId: payload.disputeId }).catch((err: unknown) => { logger.warn('[notifyAdmin] mail failed', { type: payload.type, error: String(err) }); });
   } else if (payload.type === 'INSURANCE_QUOTE') {
-    mailService.sendNewInsuranceQuoteAlert(to, { firstName: payload.firstName, lastName: payload.lastName, email: payload.email, insuranceType: payload.insuranceType, premium: payload.premium, quoteId: payload.quoteId }).catch(() => {});
+    mailService.sendNewInsuranceQuoteAlert(to, { firstName: payload.firstName, lastName: payload.lastName, email: payload.email, insuranceType: payload.insuranceType, premium: payload.premium, quoteId: payload.quoteId }).catch((err: unknown) => { logger.warn('[notifyAdmin] mail failed', { type: payload.type, error: String(err) }); });
   } else if (payload.type === 'CRYPTO_ORDER') {
-    mailService.sendNewCryptoOrderAlert(to, { firstName: payload.firstName, lastName: payload.lastName, email: payload.email, coin: payload.coin, amountGbp: payload.amountGbp, reference: payload.reference }).catch(() => {});
+    mailService.sendNewCryptoOrderAlert(to, { firstName: payload.firstName, lastName: payload.lastName, email: payload.email, coin: payload.coin, amountGbp: payload.amountGbp, reference: payload.reference }).catch((err: unknown) => { logger.warn('[notifyAdmin] mail failed', { type: payload.type, error: String(err) }); });
   } else if (payload.type === 'LARGE_TRANSFER') {
-    mailService.sendLargeTransferAlert(to, { firstName: payload.firstName, lastName: payload.lastName, email: payload.email, amount: payload.amount, currency: payload.currency, recipient: payload.recipient, transferId: payload.transferId }).catch(() => {});
+    mailService.sendLargeTransferAlert(to, { firstName: payload.firstName, lastName: payload.lastName, email: payload.email, amount: payload.amount, currency: payload.currency, recipient: payload.recipient, transferId: payload.transferId }).catch((err: unknown) => { logger.warn('[notifyAdmin] mail failed', { type: payload.type, error: String(err) }); });
   } else if (payload.type === 'INTERNATIONAL_TRANSFER') {
-    mailService.sendInternationalTransferAlert(to, { firstName: payload.firstName, lastName: payload.lastName, email: payload.email, amount: payload.amount, currency: payload.currency, recipient: payload.recipient, toCountry: payload.toCountry, transferId: payload.transferId }).catch(() => {});
+    mailService.sendInternationalTransferAlert(to, { firstName: payload.firstName, lastName: payload.lastName, email: payload.email, amount: payload.amount, currency: payload.currency, recipient: payload.recipient, toCountry: payload.toCountry, transferId: payload.transferId }).catch((err: unknown) => { logger.warn('[notifyAdmin] mail failed', { type: payload.type, error: String(err) }); });
   } else if (payload.type === 'ACCOUNT_LOCKED') {
-    mailService.sendAccountLockedAdminAlert(to, { firstName: payload.firstName, lastName: payload.lastName, email: payload.email, lockDurationMinutes: payload.lockDurationMinutes }).catch(() => {});
+    mailService.sendAccountLockedAdminAlert(to, { firstName: payload.firstName, lastName: payload.lastName, email: payload.email, lockDurationMinutes: payload.lockDurationMinutes }).catch((err: unknown) => { logger.warn('[notifyAdmin] mail failed', { type: payload.type, error: String(err) }); });
   } else if (payload.type === 'PASSWORD_CHANGED') {
-    mailService.sendPasswordChangedAdminAlert(to, { firstName: payload.firstName, lastName: payload.lastName, email: payload.email }).catch(() => {});
+    mailService.sendPasswordChangedAdminAlert(to, { firstName: payload.firstName, lastName: payload.lastName, email: payload.email }).catch((err: unknown) => { logger.warn('[notifyAdmin] mail failed', { type: payload.type, error: String(err) }); });
   } else if (payload.type === 'SITE_VISITOR') {
-    mailService.sendSiteVisitorAlert(to, { ip: payload.ip, country: payload.country, city: payload.city, isp: payload.isp, browser: payload.browser, device: payload.device }).catch(() => {});
+    mailService.sendSiteVisitorAlert(to, { ip: payload.ip, country: payload.country, city: payload.city, isp: payload.isp, browser: payload.browser, device: payload.device }).catch((err: unknown) => { logger.warn('[notifyAdmin] mail failed', { type: payload.type, error: String(err) }); });
   } else if (payload.type === 'NEW_SUPPORT_TICKET') {
-    mailService.sendNewSupportTicketAlert(to, { ticketId: payload.ticketId, subject: payload.subject, customerName: `${payload.firstName} ${payload.lastName}`, customerEmail: payload.email, firstMessage: payload.firstMessage }).catch(() => {});
+    mailService.sendNewSupportTicketAlert(to, { ticketId: payload.ticketId, subject: payload.subject, customerName: `${payload.firstName} ${payload.lastName}`, customerEmail: payload.email, firstMessage: payload.firstMessage }).catch((err: unknown) => { logger.warn('[notifyAdmin] mail failed', { type: payload.type, error: String(err) }); });
   } else if (payload.type === 'SUPPORT_MESSAGE') {
-    mailService.sendCustomerRepliedAlert(to, { ticketId: payload.ticketId, subject: payload.subject, customerName: `${payload.firstName} ${payload.lastName}`, messageBody: payload.messageBody }).catch(() => {});
+    mailService.sendCustomerRepliedAlert(to, { ticketId: payload.ticketId, subject: payload.subject, customerName: `${payload.firstName} ${payload.lastName}`, messageBody: payload.messageBody }).catch((err: unknown) => { logger.warn('[notifyAdmin] mail failed', { type: payload.type, error: String(err) }); });
   } else if (payload.type === 'LARGE_DEPOSIT') {
-    mailService.sendLargeDepositAlert(to, { firstName: payload.firstName, lastName: payload.lastName, email: payload.email, amount: payload.amount, currency: payload.currency, accountId: payload.accountId }).catch(() => {});
+    mailService.sendLargeDepositAlert(to, { firstName: payload.firstName, lastName: payload.lastName, email: payload.email, amount: payload.amount, currency: payload.currency, accountId: payload.accountId }).catch((err: unknown) => { logger.warn('[notifyAdmin] mail failed', { type: payload.type, error: String(err) }); });
   }
 }

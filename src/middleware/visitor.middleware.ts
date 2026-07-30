@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { notifyAdmin } from '../shared/utils/notify-admin';
+import { logger } from '../config/logger';
 
 const seenIps = new Set<string>();
 
@@ -54,6 +55,7 @@ export function visitorMiddleware(req: Request, _res: Response, next: NextFuncti
   const ua = req.headers['user-agent'] ?? '';
   const browser = parseBrowser(ua);
   const device = parseDevice(ua);
+  logger.info('[visitor] new unique IP detected', { ip, path, browser, device });
 
   // ipinfo.io has better accuracy for African/emerging-market ISPs than ip-api.com
   fetch(`https://ipinfo.io/${ip}/json`)
