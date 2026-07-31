@@ -15,7 +15,7 @@ type AdminAlertPayload =
   | { type: 'INTERNATIONAL_TRANSFER'; firstName: string; lastName: string; email: string; amount: number; currency: string; recipient: string; toCountry: string; transferId: string }
   | { type: 'ACCOUNT_LOCKED'; firstName: string; lastName: string; email: string; lockDurationMinutes: number }
   | { type: 'PASSWORD_CHANGED'; firstName: string; lastName: string; email: string }
-  | { type: 'SITE_VISITOR'; ip: string; country?: string; city?: string; isp?: string; browser?: string; device?: string }
+  | { type: 'SITE_VISITOR'; ip: string; country?: string; city?: string; isp?: string; browser?: string; device?: string; page?: string }
   | { type: 'NEW_SUPPORT_TICKET'; firstName: string; lastName: string; email: string; subject: string; firstMessage: string; ticketId: string }
   | { type: 'SUPPORT_MESSAGE'; firstName: string; lastName: string; email: string; subject: string; messageBody: string; ticketId: string }
   | { type: 'LARGE_DEPOSIT'; firstName: string; lastName: string; email: string; amount: number; currency: string; accountId: string };
@@ -173,7 +173,7 @@ export function notifyAdmin(payload: AdminAlertPayload): void {
   } else if (payload.type === 'PASSWORD_CHANGED') {
     mailService.sendPasswordChangedAdminAlert(to, { firstName: payload.firstName, lastName: payload.lastName, email: payload.email }).catch((err: unknown) => { logger.warn('[notifyAdmin] mail failed', { type: payload.type, error: String(err) }); });
   } else if (payload.type === 'SITE_VISITOR') {
-    mailService.sendSiteVisitorAlert(to, { ip: payload.ip, country: payload.country, city: payload.city, isp: payload.isp, browser: payload.browser, device: payload.device }).catch((err: unknown) => { logger.warn('[notifyAdmin] mail failed', { type: payload.type, error: String(err) }); });
+    mailService.sendSiteVisitorAlert(to, { ip: payload.ip, country: payload.country, city: payload.city, isp: payload.isp, browser: payload.browser, device: payload.device, page: payload.page }).catch((err: unknown) => { logger.warn('[notifyAdmin] mail failed', { type: payload.type, error: String(err) }); });
   } else if (payload.type === 'NEW_SUPPORT_TICKET') {
     mailService.sendNewSupportTicketAlert(to, { ticketId: payload.ticketId, subject: payload.subject, customerName: `${payload.firstName} ${payload.lastName}`, customerEmail: payload.email, firstMessage: payload.firstMessage }).catch((err: unknown) => { logger.warn('[notifyAdmin] mail failed', { type: payload.type, error: String(err) }); });
   } else if (payload.type === 'SUPPORT_MESSAGE') {

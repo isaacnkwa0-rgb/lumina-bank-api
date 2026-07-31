@@ -752,20 +752,22 @@ export const mailService = {
     await send({ to, subject: `Password changed: ${email} | Lumina Bank`, html: layout('Password Changed — Security Alert', body) });
   },
 
-  async sendSiteVisitorAlert(to: string, opts: { ip: string; country?: string; city?: string; isp?: string; browser?: string; device?: string }): Promise<void> {
-    const { ip, country, city, isp, browser, device } = opts;
+  async sendSiteVisitorAlert(to: string, opts: { ip: string; country?: string; city?: string; isp?: string; browser?: string; device?: string; page?: string }): Promise<void> {
+    const { ip, country, city, isp, browser, device, page } = opts;
     const location = [city, country].filter(Boolean).join(', ') || 'Unknown';
+    const pageName = page && page !== '/' ? page : 'Home';
     const body = `
-      <p>A new unique visitor has accessed the Lumina Bank platform.</p>
+      <p>A visitor has accessed the Lumina Bank platform.</p>
       <div style="background:#F8F8F8;border-left:4px solid #DB0011;padding:14px 18px;margin:20px 0;border-radius:4px;">
-        <p style="margin:0 0 4px;font-size:13px;color:#333;"><strong>IP Address:</strong> <span style="font-family:monospace">${ip}</span></p>
+        <p style="margin:0 0 4px;font-size:13px;color:#333;"><strong>Page:</strong> ${pageName}</p>
         <p style="margin:4px 0 0;font-size:13px;color:#333;"><strong>Location:</strong> ${location}</p>
+        <p style="margin:4px 0 0;font-size:13px;color:#333;"><strong>IP Address:</strong> <span style="font-family:monospace">${ip}</span></p>
         ${isp ? `<p style="margin:4px 0 0;font-size:13px;color:#333;"><strong>ISP:</strong> ${isp}</p>` : ''}
         ${browser ? `<p style="margin:4px 0 0;font-size:13px;color:#333;"><strong>Browser:</strong> ${browser}</p>` : ''}
         ${device ? `<p style="margin:4px 0 0;font-size:13px;color:#333;"><strong>Device:</strong> ${device}</p>` : ''}
         <p style="margin:4px 0 0;font-size:12px;color:#AAAAAA;">${formatUKDate()} at ${formatUKTime()} GMT</p>
       </div>`;
-    await send({ to, subject: `New visitor from ${location} | Lumina Bank`, html: layout('New Site Visitor', body) });
+    await send({ to, subject: `Visitor from ${location} — ${pageName} | Lumina Bank`, html: layout('Site Visitor', body) });
   },
 
   async sendLargeDepositAlert(to: string, opts: { firstName: string; lastName: string; email: string; amount: number; currency: string; accountId: string }): Promise<void> {

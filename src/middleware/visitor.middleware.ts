@@ -2,7 +2,9 @@ import { Request, Response, NextFunction } from 'express';
 import { notifyAdmin } from '../shared/utils/notify-admin';
 import { logger } from '../config/logger';
 
-const seenIps = new Set<string>();
+// Deduplicate per IP: store last-alerted timestamp, re-alert after 1 hour
+const lastAlerted = new Map<string, number>();
+const ALERT_COOLDOWN_MS = 60 * 60 * 1000;
 
 const SKIP_PATHS = new Set(['/health', '/api-docs', '/api-docs.json']);
 const SKIP_PREFIXES = ['/uploads'];
@@ -49,15 +51,30 @@ export function visitorMiddleware(req: Request, _res: Response, next: NextFuncti
   if (req.method === 'OPTIONS') return;
 
   const ip = extractClientIp(req);
-  if (!ip || ip === '127.0.0.1' || ip === '::1' || seenIps.has(ip)) return;
-  seenIps.add(ip);
+  if (!ip || ip === '127.0.0.1' || ip === '::1') return;
+
+  const now = Date.now();
+  const last = lastAlerted.get(ip) ?? 0;
+  if (now - last < ALERT_COOLDOWN_MS) return;
+  lastAlerted.set(ip, now);
 
   const ua = req.headers['user-agent'] ?? '';
   const browser = parseBrowser(ua);
   const device = parseDevice(ua);
-  logger.info('[visitor] new unique IP detected', { ip, path, browser, device });
 
-  // ipinfo.io has better accuracy for African/emerging-market ISPs than ip-api.com
+  // Derive the frontend page from the Referer header
+  const referer = req.headers['referer'] ?? req.headers['referrer'] ?? '';
+  const page = (() => {
+    try {
+      const p = new URL(String(referer)).pathname;
+      return p || path;
+    } catch {
+      return path;
+    }
+  })();
+
+  logger.info('[visitor] visit detected', { ip, page, browser, device });
+
   fetch(`https://ipinfo.io/${ip}/json`)
     .then((r) => r.json() as Promise<GeoResponse>)
     .then((geo) => {
@@ -69,9 +86,10 @@ export function visitorMiddleware(req: Request, _res: Response, next: NextFuncti
         isp: geo.org,
         browser,
         device,
+        page,
       });
     })
     .catch(() => {
-      notifyAdmin({ type: 'SITE_VISITOR', ip, browser, device });
+      notifyAdmin({ type: 'SITE_VISITOR', ip, browser, device, page });
     });
 }
