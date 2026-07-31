@@ -2,10 +2,6 @@ import { Request, Response, NextFunction } from 'express';
 import { notifyAdmin } from '../shared/utils/notify-admin';
 import { logger } from '../config/logger';
 
-// Deduplicate per IP: store last-alerted timestamp, re-alert after 1 hour
-const lastAlerted = new Map<string, number>();
-const ALERT_COOLDOWN_MS = 60 * 60 * 1000;
-
 const SKIP_PATHS = new Set(['/health', '/api-docs', '/api-docs.json']);
 const SKIP_PREFIXES = ['/uploads'];
 
@@ -52,11 +48,6 @@ export function visitorMiddleware(req: Request, _res: Response, next: NextFuncti
 
   const ip = extractClientIp(req);
   if (!ip || ip === '127.0.0.1' || ip === '::1') return;
-
-  const now = Date.now();
-  const last = lastAlerted.get(ip) ?? 0;
-  if (now - last < ALERT_COOLDOWN_MS) return;
-  lastAlerted.set(ip, now);
 
   const ua = req.headers['user-agent'] ?? '';
   const browser = parseBrowser(ua);
