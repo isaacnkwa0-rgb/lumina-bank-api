@@ -75,14 +75,11 @@ export function createApp() {
   // Request ID
   app.use(requestId);
 
-  // Visitor tracking (fire-and-forget, non-blocking)
-  app.use(visitorMiddleware);
-
   // Rate limiting
   app.use(generalLimiter);
 
-  // Visitor ping — called by the frontend on every page load to guarantee visitor tracking
-  app.get('/ping', (_req, res) => { res.status(204).end(); });
+  // Visitor ping — frontend calls this once per page load; triggers the visitor alert
+  app.get('/ping', (req, res, next) => { visitorMiddleware(req, res, next); }, (_req, res) => { res.status(204).end(); });
 
   // Health check
   app.get('/health', async (_req, res) => {
