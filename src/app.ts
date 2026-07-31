@@ -81,6 +81,9 @@ export function createApp() {
   // Rate limiting
   app.use(generalLimiter);
 
+  // Visitor ping — called by the frontend on every page load to guarantee visitor tracking
+  app.get('/ping', (_req, res) => { res.status(204).end(); });
+
   // Health check
   app.get('/health', async (_req, res) => {
     const { prisma } = await import('./config/database');
