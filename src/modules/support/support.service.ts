@@ -13,7 +13,20 @@ const senderSelect = {
   },
 } as const;
 
+// In-memory typing state: ticketId → timestamp of last agent keystroke
+const agentTypingMap = new Map<string, number>();
+const TYPING_TTL_MS = 5000;
+
 export class SupportService {
+  setAgentTyping(ticketId: string): void {
+    agentTypingMap.set(ticketId, Date.now());
+  }
+
+  isAgentTyping(ticketId: string): boolean {
+    const ts = agentTypingMap.get(ticketId);
+    return !!ts && Date.now() - ts < TYPING_TTL_MS;
+  }
+
   async createTicket(userId: string, subject: string, body: string) {
     const user = await prisma.user.findUnique({
       where: { id: userId },

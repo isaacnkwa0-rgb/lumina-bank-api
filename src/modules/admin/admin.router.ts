@@ -2,6 +2,7 @@ import { Router } from 'express';
 import multer from 'multer';
 import { adminService } from './admin.service';
 import adminController from './admin.controller';
+import supportController from '../support/support.controller';
 import { authenticate, requireAdmin, requireAgentOrAdmin } from '../../middleware/auth.middleware';
 import { uploadBuffer } from '../../config/cloudinary';
 
@@ -90,6 +91,7 @@ router.get('/support/tickets', requireAgentOrAdmin, adminController.getSupportTi
 router.get('/support/tickets/:id', requireAgentOrAdmin, adminController.getSupportTicket.bind(adminController));
 router.post('/support/tickets/:id/reply', requireAgentOrAdmin, adminController.replyToTicket.bind(adminController));
 router.patch('/support/tickets/:id/resolve', requireAgentOrAdmin, adminController.resolveSupportTicket.bind(adminController));
+router.post('/support/tickets/:id/typing', requireAgentOrAdmin, supportController.setTyping.bind(supportController));
 
 // ── Support Agents management (admin-only) ────────────────────────────────────
 router.get('/agents', requireAdmin, adminController.getAgents.bind(adminController));

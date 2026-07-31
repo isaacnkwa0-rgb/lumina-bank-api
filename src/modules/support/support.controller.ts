@@ -49,6 +49,17 @@ export class SupportController {
       next(err);
     }
   }
+
+  // Called by agent/admin while typing — sets a short-lived timestamp
+  setTyping(req: Request, res: Response, _next: NextFunction): void {
+    supportService.setAgentTyping(req.params.id as string);
+    res.status(204).end();
+  }
+
+  // Called by user — returns whether an agent typed within the last 5 s
+  getTyping(req: Request, res: Response, _next: NextFunction): void {
+    sendSuccess(res, { typing: supportService.isAgentTyping(req.params.id as string) });
+  }
 }
 
 export default new SupportController();

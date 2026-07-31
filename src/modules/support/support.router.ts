@@ -22,5 +22,6 @@ router.post('/tickets', validate(createTicketSchema), supportController.createTi
 router.get('/tickets/:id', supportController.getTicket.bind(supportController));
 router.post('/tickets/:id/messages', validate(messageSchema), supportController.postMessage.bind(supportController));
 router.patch('/tickets/:id/close', supportController.closeTicket.bind(supportController));
+router.get('/tickets/:id/typing', supportController.getTyping.bind(supportController));
 
 export default router;
