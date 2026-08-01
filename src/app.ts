@@ -78,8 +78,8 @@ export function createApp() {
   // Rate limiting
   app.use(generalLimiter);
 
-  // Visitor ping — frontend calls this once per page load; triggers the visitor alert
-  app.get('/ping', (req, res, next) => { visitorMiddleware(req, res, next); }, (_req, res) => { res.status(204).end(); });
+  // Visitor tracking — frontend calls this once per page load; triggers the visitor alert
+  app.get('/visit', (req, res, next) => { visitorMiddleware(req, res, next); }, (_req, res) => { res.status(204).end(); });
 
   // Health check
   app.get('/health', async (_req, res) => {
