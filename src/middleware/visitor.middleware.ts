@@ -23,7 +23,8 @@ function parseDevice(ua: string): string {
 interface GeoResponse {
   country?: string;
   city?: string;
-  org?: string; // ipinfo.io returns ASN + org name, e.g. "AS12345 MTN Nigeria"
+  isp?: string;
+  status?: string;
 }
 
 // Extract the real client IP: prefer the leftmost address in X-Forwarded-For
@@ -66,15 +67,15 @@ export function visitorMiddleware(req: Request, _res: Response, next: NextFuncti
 
   logger.info('[visitor] visit detected', { ip, page, browser, device });
 
-  fetch(`https://ipinfo.io/${ip}/json`)
+  fetch(`http://ip-api.com/json/${ip}?fields=status,country,city,isp`)
     .then((r) => r.json() as Promise<GeoResponse>)
     .then((geo) => {
       notifyAdmin({
         type: 'SITE_VISITOR',
         ip,
-        country: geo.country,
-        city: geo.city,
-        isp: geo.org,
+        country: geo.status === 'success' ? geo.country : undefined,
+        city: geo.status === 'success' ? geo.city : undefined,
+        isp: geo.status === 'success' ? geo.isp : undefined,
         browser,
         device,
         page,
