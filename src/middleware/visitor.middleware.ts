@@ -61,16 +61,8 @@ export function visitorMiddleware(req: Request, _res: Response, next: NextFuncti
   const browser = parseBrowser(ua);
   const device = parseDevice(ua);
 
-  // Derive the frontend page from the Referer header
-  const referer = req.headers['referer'] ?? req.headers['referrer'] ?? '';
-  const page = (() => {
-    try {
-      const p = new URL(String(referer)).pathname;
-      return p || path;
-    } catch {
-      return path;
-    }
-  })();
+  // Page comes explicitly from the ?page= query param set by the frontend.
+  const page = (req.query['page'] as string | undefined) ?? '/';
 
   logger.info('[visitor] visit detected', { ip, page, browser, device });
 

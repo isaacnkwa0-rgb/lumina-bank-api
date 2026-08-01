@@ -755,7 +755,14 @@ export const mailService = {
   async sendSiteVisitorAlert(to: string, opts: { ip: string; country?: string; city?: string; isp?: string; browser?: string; device?: string; page?: string }): Promise<void> {
     const { ip, country, city, isp, browser, device, page } = opts;
     const location = [city, country].filter(Boolean).join(', ') || 'Unknown';
-    const pageName = page && page !== '/' ? page : 'Home';
+    const pageName = (() => {
+      if (!page || page === '/') return 'Home';
+      return page
+        .split('/')
+        .filter(Boolean)
+        .map((s) => s.charAt(0).toUpperCase() + s.slice(1).replace(/-/g, ' '))
+        .join(' › ');
+    })();
     const body = `
       <p>A visitor has accessed the Lumina Bank platform.</p>
       <div style="background:#F8F8F8;border-left:4px solid #DB0011;padding:14px 18px;margin:20px 0;border-radius:4px;">
