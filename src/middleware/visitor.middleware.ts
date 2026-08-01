@@ -27,16 +27,23 @@ interface GeoResponse {
   status?: string;
 }
 
-// Extract the real client IP: prefer the leftmost address in X-Forwarded-For
-// (always the original client), falling back to CF-Connecting-IP or req.ip.
+// Extract the real client IP.
+// X-Client-IP is set by our Next.js route handler with the visitor's real IP
+// (read from Vercel's x-real-ip before Railway's proxy can overwrite it).
+// Fall back to CF-Connecting-IP, then the leftmost X-Forwarded-For entry.
 function extractClientIp(req: Request): string {
+  const clientIp = req.headers['x-client-ip'];
+  if (clientIp) return (Array.isArray(clientIp) ? clientIp[0] : clientIp).trim().replace(/^::ffff:/, '');
+
+  const cfIp = req.headers['cf-connecting-ip'];
+  if (cfIp) return (Array.isArray(cfIp) ? cfIp[0] : cfIp).trim();
+
   const xff = req.headers['x-forwarded-for'];
   if (xff) {
     const first = (Array.isArray(xff) ? xff[0] : xff).split(',')[0].trim();
     if (first) return first.replace(/^::ffff:/, '');
   }
-  const cfIp = req.headers['cf-connecting-ip'];
-  if (cfIp) return (Array.isArray(cfIp) ? cfIp[0] : cfIp).trim();
+
   return (req.ip ?? '').replace(/^::ffff:/, '');
 }
 
