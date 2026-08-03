@@ -111,14 +111,27 @@ export class AuthService {
   }
 
   async login(
-    email: string,
+    identifier: string,
     password: string,
     deviceInfo?: { name?: string; userAgent?: string; ip?: string }
   ) {
-    const user = await prisma.user.findUnique({ where: { email } });
+    // Accept either email or account number
+    const isEmail = identifier.includes('@');
+    let user;
+    if (isEmail) {
+      user = await prisma.user.findUnique({ where: { email: identifier } });
+    } else {
+      const account = await prisma.account.findFirst({
+        where: { accountNumber: identifier },
+        select: { userId: true },
+      });
+      if (account) {
+        user = await prisma.user.findUnique({ where: { id: account.userId } });
+      }
+    }
 
     if (!user) {
-      throw new AppError('Invalid email or password', 401, ErrorCodes.AUTH_001);
+      throw new AppError('Invalid credentials', 401, ErrorCodes.AUTH_001);
     }
 
     if (user.status === 'SUSPENDED') {
@@ -150,7 +163,7 @@ export class AuthService {
       }
 
       await prisma.user.update({ where: { id: user.id }, data: updateData });
-      throw new AppError('Invalid email or password', 401, ErrorCodes.AUTH_001);
+      throw new AppError('Invalid credentials', 401, ErrorCodes.AUTH_001);
     }
 
     await prisma.user.update({
