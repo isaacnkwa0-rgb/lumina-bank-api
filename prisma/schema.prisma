@@ -277,6 +277,7 @@ model User {
   standingOrders   StandingOrder[]
   directDebits     DirectDebit[]
   cryptoOrders     CryptoOrder[]
+  deposits         Deposit[]
 
   @@index([email])
   @@index([status])
@@ -329,6 +330,7 @@ model Account {
   standingOrders StandingOrder[]
   directDebits   DirectDebit[]
   cryptoOrders   CryptoOrder[]
+  deposits       Deposit[]
 
   @@index([userId])
   @@index([accountNumber])
@@ -360,6 +362,7 @@ model Transaction {
   account      Account   @relation(fields: [accountId], references: [id], onDelete: Cascade)
   fromTransfer Transfer? @relation("FromTransaction")
   toTransfer   Transfer? @relation("ToTransaction")
+  deposit      Deposit?
 
   @@index([accountId])
   @@index([createdAt])
@@ -825,6 +828,18 @@ model CryptoOrder {
   @@index([createdAt])
 }
 
+enum DepositMethod {
+  BANK_TRANSFER
+  CRYPTO
+}
+
+enum DepositStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  COMPLETED
+}
+
 enum AdminNotificationType {
   NEW_REGISTRATION
   KYC_SUBMITTED
@@ -840,6 +855,43 @@ enum AdminNotificationType {
   NEW_SUPPORT_TICKET
   SUPPORT_MESSAGE
   LARGE_DEPOSIT
+  DEPOSIT_REQUEST
+}
+
+model Deposit {
+  id            String        @id @default(uuid())
+  userId        String
+  accountId     String
+  method        DepositMethod
+  amount        Decimal       @db.Decimal(18, 4)
+  currency      String        @default("GBP")
+  reference     String        @unique
+  status        DepositStatus @default(PENDING)
+
+  // Crypto-specific
+  coin          String?
+  network       String?
+  coinAmount    Decimal?      @db.Decimal(18, 8)
+  priceGbp      Decimal?      @db.Decimal(18, 4)
+
+  // Bank transfer — sender info supplied by user
+  senderName    String?
+  senderBank    String?
+
+  adminNotes    String?
+  processedAt   DateTime?
+  transactionId String?       @unique
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  account     Account     @relation(fields: [accountId], references: [id])
+  transaction Transaction? @relation(fields: [transactionId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
 }
 
 model AdminNotification {

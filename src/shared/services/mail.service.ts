@@ -847,4 +847,49 @@ export const mailService = {
       html: layout('Account Details Updated', body),
     });
   },
+
+  // ── Deposit emails ────────────────────────────────────────────────────────────
+
+  async sendDepositDecision(to: string, opts: { approved: boolean; method: string; amount: number; currency: string; reference: string; coin?: string; reason?: string }): Promise<void> {
+    const { approved, method, amount, currency, reference, coin, reason } = opts;
+    const sym = currency === 'GBP' ? '£' : currency === 'EUR' ? '€' : currency === 'USD' ? '$' : `${currency} `;
+    const methodLabel = method === 'CRYPTO' ? `${coin ?? 'Crypto'} deposit` : 'Bank transfer deposit';
+    const body = approved
+      ? `<p>Great news! Your ${methodLabel} of <strong>${sym}${amount.toLocaleString()}</strong> has been <strong style="color:#1a7a3f">approved</strong> and credited to your account.</p>
+         <div style="background:#F8F8F8;border-left:4px solid #1a7a3f;padding:14px 18px;margin:20px 0;border-radius:4px;">
+           <p style="margin:0 0 4px;font-size:13px;color:#333;"><strong>Method:</strong> ${methodLabel}</p>
+           <p style="margin:4px 0 0;font-size:13px;color:#333;"><strong>Amount:</strong> ${sym}${amount.toLocaleString()}</p>
+           <p style="margin:4px 0 0;font-size:13px;color:#333;"><strong>Reference:</strong> <span style="font-family:monospace">${reference}</span></p>
+           <p style="margin:4px 0 0;font-size:12px;color:#AAAAAA;">${formatUKDate()} at ${formatUKTime()} GMT</p>
+         </div>
+         <p>The funds are now available in your account. Thank you for banking with Lumina Bank.</p>`
+      : `<p>Unfortunately, your ${methodLabel} of <strong>${sym}${amount.toLocaleString()}</strong> has been <strong style="color:#DB0011">rejected</strong>.</p>
+         <div style="background:#F8F8F8;border-left:4px solid #DB0011;padding:14px 18px;margin:20px 0;border-radius:4px;">
+           <p style="margin:0 0 4px;font-size:13px;color:#333;"><strong>Method:</strong> ${methodLabel}</p>
+           <p style="margin:4px 0 0;font-size:13px;color:#333;"><strong>Amount:</strong> ${sym}${amount.toLocaleString()}</p>
+           <p style="margin:4px 0 0;font-size:13px;color:#333;"><strong>Reference:</strong> <span style="font-family:monospace">${reference}</span></p>
+           ${reason ? `<p style="margin:4px 0 0;font-size:13px;color:#333;"><strong>Reason:</strong> ${reason}</p>` : ''}
+           <p style="margin:4px 0 0;font-size:12px;color:#AAAAAA;">${formatUKDate()} at ${formatUKTime()} GMT</p>
+         </div>
+         <p>If you believe this is an error, please contact our support team.</p>`;
+    await send({ to, subject: `Deposit ${approved ? 'approved' : 'rejected'}: ${sym}${amount.toLocaleString()} | Lumina Bank`, html: layout(`Deposit ${approved ? 'Approved' : 'Rejected'}`, body) });
+  },
+
+  async sendDepositRequestAlert(to: string, opts: { firstName: string; lastName: string; email: string; method: string; amount: number; currency: string; reference: string; depositId: string }): Promise<void> {
+    const { firstName, lastName, email, method, amount, currency, reference, depositId } = opts;
+    const sym = currency === 'GBP' ? '£' : currency === 'EUR' ? '€' : currency === 'USD' ? '$' : `${currency} `;
+    const body = `
+      <p>A customer has submitted a new deposit request.</p>
+      <div style="background:#F8F8F8;border-left:4px solid #DB0011;padding:14px 18px;margin:20px 0;border-radius:4px;">
+        <p style="margin:0 0 6px;font-size:15px;font-weight:700;color:#333;">${firstName} ${lastName}</p>
+        <p style="margin:0 0 4px;font-size:13px;color:#767676;">${email}</p>
+        <p style="margin:4px 0 0;font-size:13px;color:#333;"><strong>Method:</strong> ${method}</p>
+        <p style="margin:4px 0 0;font-size:13px;color:#333;"><strong>Amount:</strong> ${sym}${amount.toLocaleString()}</p>
+        <p style="margin:4px 0 0;font-size:13px;color:#333;"><strong>Reference:</strong> <span style="font-family:monospace">${reference}</span></p>
+        <p style="margin:4px 0 0;font-size:12px;color:#AAAAAA;font-family:monospace;">Deposit ID: ${depositId}</p>
+        <p style="margin:4px 0 0;font-size:12px;color:#AAAAAA;">${formatUKDate()} at ${formatUKTime()} GMT</p>
+      </div>
+      <p>Log in to the admin panel to approve or reject this deposit request.</p>`;
+    await send({ to, subject: `New deposit request: ${sym}${amount.toLocaleString()} via ${method} | Lumina Bank`, html: layout('New Deposit Request', body) });
+  },
 };

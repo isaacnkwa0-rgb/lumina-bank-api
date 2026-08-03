@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
 import { prisma } from '../../config/database';
 import { AppError } from '../../middleware/error.middleware';
-import { KycStatus, UserStatus, NotificationType, Prisma, TransferStatus, TransactionType, TransactionCategory, LoanStatus, LoanPaymentStatus, DisputeStatus, InsuranceStatus, CardStatus, LoanType, GoalStatus, CryptoOrderStatus } from '@prisma/client';
+import { KycStatus, UserStatus, NotificationType, Prisma, TransferStatus, TransactionType, TransactionCategory, LoanStatus, LoanPaymentStatus, DisputeStatus, InsuranceStatus, CardStatus, LoanType, GoalStatus, CryptoOrderStatus, DepositStatus } from '@prisma/client';
 import { mailService } from '../../shared/services/mail.service';
 import { Decimal } from '@prisma/client/runtime/library';
 import { getPagination, buildPaginationMeta } from '../../shared/utils/pagination';
@@ -1376,6 +1376,121 @@ export class AdminService {
     }
 
     return this.getUser(id);
+  }
+
+  // ── Deposits ─────────────────────────────────────────────────────────────────
+
+  async getDeposits(filters: { page?: number; limit?: number; status?: string }) {
+    const { page = 1, limit = 20, status } = filters;
+    const { skip, take } = getPagination({ page, limit });
+    const where: Prisma.DepositWhereInput = status ? { status: status as DepositStatus } : {};
+
+    const [deposits, total] = await Promise.all([
+      prisma.deposit.findMany({
+        where,
+        skip,
+        take,
+        orderBy: { createdAt: 'desc' },
+        include: { user: { select: { firstName: true, lastName: true, email: true } }, account: { select: { accountNumber: true, currency: true } } },
+      }),
+      prisma.deposit.count({ where }),
+    ]);
+
+    return { deposits, meta: buildPaginationMeta(total, page, limit) };
+  }
+
+  async approveDeposit(id: string, notes?: string) {
+    const deposit = await prisma.deposit.findUnique({ where: { id }, include: { account: true, user: true } });
+    if (!deposit) throw new AppError('Deposit not found', 404, ErrorCodes.NOT_FOUND);
+    if (deposit.status !== 'PENDING') throw new AppError('Deposit is not pending', 400, ErrorCodes.CONFLICT);
+
+    const amount = deposit.amount;
+    const account = deposit.account;
+    const reference = generateTransactionReference();
+    const balanceBefore = account.balance;
+    const balanceAfter = account.balance.plus(amount);
+
+    await prisma.$transaction(async (tx) => {
+      await tx.account.update({
+        where: { id: account.id },
+        data: { balance: { increment: amount }, availableBalance: { increment: amount } },
+      });
+
+      const txRecord = await tx.transaction.create({
+        data: {
+          reference,
+          accountId: account.id,
+          type: TransactionType.CREDIT,
+          category: TransactionCategory.DEPOSIT,
+          amount,
+          currency: account.currency,
+          balanceBefore,
+          balanceAfter,
+          description: deposit.method === 'CRYPTO'
+            ? `Crypto deposit: ${deposit.coin} (Ref: ${deposit.reference})`
+            : `Bank transfer deposit (Ref: ${deposit.reference})`,
+          status: 'COMPLETED',
+          valueDate: new Date(),
+        },
+      });
+
+      await tx.deposit.update({
+        where: { id },
+        data: { status: 'COMPLETED', processedAt: new Date(), adminNotes: notes ?? null, transactionId: txRecord.id },
+      });
+
+      await tx.notification.create({
+        data: {
+          userId: deposit.userId,
+          type: NotificationType.TRANSACTION,
+          title: 'Deposit Approved',
+          body: `Your ${deposit.method === 'CRYPTO' ? deposit.coin + ' crypto' : 'bank transfer'} deposit of ${account.currency} ${amount.toFixed(2)} has been approved and credited to your account. Ref: ${deposit.reference}`,
+        },
+      });
+    });
+
+    mailService.sendDepositDecision(deposit.user.email, {
+      approved: true,
+      method: deposit.method,
+      amount: amount.toNumber(),
+      currency: account.currency,
+      reference: deposit.reference,
+      coin: deposit.coin ?? undefined,
+    }).catch(() => {});
+
+    return { id, status: 'COMPLETED' };
+  }
+
+  async rejectDeposit(id: string, reason: string) {
+    const deposit = await prisma.deposit.findUnique({ where: { id }, include: { user: true, account: true } });
+    if (!deposit) throw new AppError('Deposit not found', 404, ErrorCodes.NOT_FOUND);
+    if (deposit.status !== 'PENDING') throw new AppError('Deposit is not pending', 400, ErrorCodes.CONFLICT);
+
+    await prisma.deposit.update({
+      where: { id },
+      data: { status: 'REJECTED', processedAt: new Date(), adminNotes: reason },
+    });
+
+    await prisma.notification.create({
+      data: {
+        userId: deposit.userId,
+        type: NotificationType.TRANSACTION,
+        title: 'Deposit Rejected',
+        body: `Your deposit request (Ref: ${deposit.reference}) was rejected. Reason: ${reason}`,
+      },
+    });
+
+    mailService.sendDepositDecision(deposit.user.email, {
+      approved: false,
+      method: deposit.method,
+      amount: deposit.amount.toNumber(),
+      currency: deposit.account.currency,
+      reference: deposit.reference,
+      coin: deposit.coin ?? undefined,
+      reason,
+    }).catch(() => {});
+
+    return { id, status: 'REJECTED', reason };
   }
 }
 

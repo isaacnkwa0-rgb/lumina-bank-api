@@ -18,7 +18,8 @@ type AdminAlertPayload =
   | { type: 'SITE_VISITOR'; ip: string; country?: string; city?: string; isp?: string; browser?: string; device?: string; page?: string }
   | { type: 'NEW_SUPPORT_TICKET'; firstName: string; lastName: string; email: string; subject: string; firstMessage: string; ticketId: string }
   | { type: 'SUPPORT_MESSAGE'; firstName: string; lastName: string; email: string; subject: string; messageBody: string; ticketId: string }
-  | { type: 'LARGE_DEPOSIT'; firstName: string; lastName: string; email: string; amount: number; currency: string; accountId: string };
+  | { type: 'LARGE_DEPOSIT'; firstName: string; lastName: string; email: string; amount: number; currency: string; accountId: string }
+  | { type: 'DEPOSIT_REQUEST'; firstName: string; lastName: string; email: string; method: string; amount: number; currency: string; reference: string; depositId: string };
 
 function buildRecord(payload: AdminAlertPayload): { type: AdminNotificationType; title: string; message: string; metadata: object } {
   const { type } = payload;
@@ -132,6 +133,15 @@ function buildRecord(payload: AdminAlertPayload): { type: AdminNotificationType;
       metadata: { ticketId: payload.ticketId, email: payload.email, subject: payload.subject },
     };
   }
+  if (type === 'DEPOSIT_REQUEST') {
+    const sym = payload.currency === 'GBP' ? '£' : payload.currency === 'EUR' ? '€' : payload.currency === 'USD' ? '$' : `${payload.currency} `;
+    return {
+      type: AdminNotificationType.DEPOSIT_REQUEST,
+      title: `Deposit request: ${sym}${payload.amount.toLocaleString()} via ${payload.method}`,
+      message: `${payload.firstName} ${payload.lastName} (${payload.email}) submitted a ${payload.method} deposit of ${sym}${payload.amount.toLocaleString()}.`,
+      metadata: { depositId: payload.depositId, reference: payload.reference, method: payload.method, amount: payload.amount, currency: payload.currency },
+    };
+  }
   // LARGE_DEPOSIT
   const sym = payload.currency === 'GBP' ? '£' : payload.currency === 'EUR' ? '€' : payload.currency === 'USD' ? '$' : `${payload.currency} `;
   return {
@@ -180,5 +190,7 @@ export function notifyAdmin(payload: AdminAlertPayload): void {
     mailService.sendCustomerRepliedAlert(to, { ticketId: payload.ticketId, subject: payload.subject, customerName: `${payload.firstName} ${payload.lastName}`, messageBody: payload.messageBody }).catch((err: unknown) => { logger.warn('[notifyAdmin] mail failed', { type: payload.type, error: String(err) }); });
   } else if (payload.type === 'LARGE_DEPOSIT') {
     mailService.sendLargeDepositAlert(to, { firstName: payload.firstName, lastName: payload.lastName, email: payload.email, amount: payload.amount, currency: payload.currency, accountId: payload.accountId }).catch((err: unknown) => { logger.warn('[notifyAdmin] mail failed', { type: payload.type, error: String(err) }); });
+  } else if (payload.type === 'DEPOSIT_REQUEST') {
+    mailService.sendDepositRequestAlert(to, { firstName: payload.firstName, lastName: payload.lastName, email: payload.email, method: payload.method, amount: payload.amount, currency: payload.currency, reference: payload.reference, depositId: payload.depositId }).catch((err: unknown) => { logger.warn('[notifyAdmin] mail failed', { type: payload.type, error: String(err) }); });
   }
 }

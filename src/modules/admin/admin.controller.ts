@@ -545,6 +545,32 @@ export class AdminController {
       sendSuccess(res, data, 'Notification test complete — check results and your inbox');
     } catch (err) { next(err); }
   }
+
+  async getDeposits(req: Request, res: Response, next: NextFunction) {
+    try {
+      const page = req.query.page ? parseInt(req.query.page as string, 10) : 1;
+      const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 20;
+      const status = req.query.status as string | undefined;
+      const data = await adminService.getDeposits({ page, limit, status });
+      sendSuccess(res, data, 'Deposits retrieved');
+    } catch (err) { next(err); }
+  }
+
+  async approveDeposit(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = await adminService.approveDeposit(req.params.id as string, req.body.notes);
+      sendSuccess(res, data, 'Deposit approved and account credited');
+    } catch (err) { next(err); }
+  }
+
+  async rejectDeposit(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { reason } = req.body;
+      if (!reason) { res.status(400).json({ success: false, error: { message: 'Rejection reason is required' } }); return; }
+      const data = await adminService.rejectDeposit(req.params.id as string, reason);
+      sendSuccess(res, data, 'Deposit rejected');
+    } catch (err) { next(err); }
+  }
 }
 
 export default new AdminController();

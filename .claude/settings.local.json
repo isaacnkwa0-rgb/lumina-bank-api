@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(railway add *)",
-      "mcp__playwright__browser_navigate"
+      "mcp__playwright__browser_navigate",
+      "Bash(railway variables)"
     ]
   }
 }
