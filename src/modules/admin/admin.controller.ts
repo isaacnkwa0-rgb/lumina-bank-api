@@ -571,6 +571,21 @@ export class AdminController {
       sendSuccess(res, data, 'Deposit rejected');
     } catch (err) { next(err); }
   }
+
+  async getDepositSettings(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = await adminService.getDepositSettings();
+      sendSuccess(res, data);
+    } catch (err) { next(err); }
+  }
+
+  async updateDepositSettings(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { bankAccountName, bankSortCode, bankAccountNumber, bankIban, cryptoWallets } = req.body;
+      const data = await adminService.updateDepositSettings({ bankAccountName, bankSortCode, bankAccountNumber, bankIban, cryptoWallets });
+      sendSuccess(res, data, 'Deposit settings updated');
+    } catch (err) { next(err); }
+  }
 }
 
 export default new AdminController();

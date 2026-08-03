@@ -13,8 +13,8 @@ export class DepositsController {
 
   async initiateCryptoDeposit(req: Request, res: Response, next: NextFunction) {
     try {
-      const { accountId, coin, network, coinAmount, priceGbp } = req.body;
-      const data = await depositsService.initiateCryptoDeposit(req.user!.id, { accountId, coin, network, coinAmount, priceGbp });
+      const { accountId, coin, amountGbp, priceGbp } = req.body;
+      const data = await depositsService.initiateCryptoDeposit(req.user!.id, { accountId, coin, amountGbp, priceGbp });
       sendSuccess(res, data, 'Crypto deposit initiated. Please send the crypto to the provided wallet address.', 201);
     } catch (err) { next(err); }
   }

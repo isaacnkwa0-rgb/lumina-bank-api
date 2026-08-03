@@ -907,3 +907,15 @@ model AdminNotification {
   @@index([type])
   @@index([createdAt])
 }
+
+// Single-row settings table (id is always "default")
+model DepositSettings {
+  id                String   @id @default("default")
+  bankAccountName   String   @default("Lumina Bank Client Accounts")
+  bankSortCode      String   @default("20-45-78")
+  bankAccountNumber String   @default("12345678")
+  bankIban          String   @default("GB29NWBK60161331926819")
+  // JSON: { BTC: { address, network }, ETH: { address, network }, ... }
+  cryptoWallets     Json     @default("{}")
+  updatedAt         DateTime @updatedAt
+}

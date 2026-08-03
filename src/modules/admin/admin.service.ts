@@ -1492,6 +1492,39 @@ export class AdminService {
 
     return { id, status: 'REJECTED', reason };
   }
+
+  // ── Deposit Settings ──────────────────────────────────────────────────────────
+
+  async getDepositSettings() {
+    const s = await prisma.depositSettings.findUnique({ where: { id: 'default' } });
+    if (s) return s;
+    return prisma.depositSettings.create({
+      data: {
+        id: 'default',
+        cryptoWallets: {
+          BTC:  { address: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh', network: 'Bitcoin' },
+          ETH:  { address: '0x71C7656EC7ab88b098defB751B7401B5f6d8976F', network: 'Ethereum (ERC-20)' },
+          USDT: { address: '0x71C7656EC7ab88b098defB751B7401B5f6d8976F', network: 'Ethereum (ERC-20)' },
+          BNB:  { address: 'bnb1grpf0955h0ykzq3ar5nmum7y6gdfl6lxfn46h2', network: 'BNB Chain' },
+          SOL:  { address: 'So11111111111111111111111111111111111111112', network: 'Solana' },
+        },
+      },
+    });
+  }
+
+  async updateDepositSettings(data: {
+    bankAccountName?: string;
+    bankSortCode?: string;
+    bankAccountNumber?: string;
+    bankIban?: string;
+    cryptoWallets?: Record<string, { address: string; network: string }>;
+  }) {
+    return prisma.depositSettings.upsert({
+      where: { id: 'default' },
+      update: data,
+      create: { id: 'default', ...data },
+    });
+  }
 }
 
 export const adminService = new AdminService();

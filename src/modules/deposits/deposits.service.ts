@@ -1,27 +1,30 @@
 import { Decimal } from '@prisma/client/runtime/library';
-import { DepositMethod, DepositStatus, NotificationType, TransactionType, TransactionCategory } from '@prisma/client';
+import { DepositMethod, DepositStatus, NotificationType } from '@prisma/client';
 import { prisma } from '../../config/database';
 import { AppError } from '../../middleware/error.middleware';
 import { ErrorCodes } from '../../shared/utils/api-response';
 import { generateTransactionReference } from '../../shared/utils/transaction-ref';
 import { notifyAdmin } from '../../shared/utils/notify-admin';
 
-// Bank's own receiving details shown to users doing bank transfers
-const BANK_RECEIVING = {
-  accountName: 'Lumina Bank Client Accounts',
-  sortCode: '20-45-78',
-  accountNumber: '12345678',
-  iban: 'GB29NWBK60161331926819',
-};
+type CryptoWallets = Record<string, { address: string; network: string }>;
 
-// Bank's crypto wallet addresses per coin (configure more as needed)
-const CRYPTO_WALLETS: Record<string, { address: string; network: string }> = {
-  BTC:  { address: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh', network: 'Bitcoin' },
-  ETH:  { address: '0x71C7656EC7ab88b098defB751B7401B5f6d8976F', network: 'Ethereum (ERC-20)' },
-  USDT: { address: '0x71C7656EC7ab88b098defB751B7401B5f6d8976F', network: 'Ethereum (ERC-20)' },
-  BNB:  { address: 'bnb1grpf0955h0ykzq3ar5nmum7y6gdfl6lxfn46h2', network: 'BNB Chain' },
-  SOL:  { address: 'So11111111111111111111111111111111111111112',  network: 'Solana' },
-};
+async function getSettings() {
+  const s = await prisma.depositSettings.findUnique({ where: { id: 'default' } });
+  if (s) return s;
+  // Auto-create with defaults if missing
+  return prisma.depositSettings.create({
+    data: {
+      id: 'default',
+      cryptoWallets: {
+        BTC:  { address: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh', network: 'Bitcoin' },
+        ETH:  { address: '0x71C7656EC7ab88b098defB751B7401B5f6d8976F', network: 'Ethereum (ERC-20)' },
+        USDT: { address: '0x71C7656EC7ab88b098defB751B7401B5f6d8976F', network: 'Ethereum (ERC-20)' },
+        BNB:  { address: 'bnb1grpf0955h0ykzq3ar5nmum7y6gdfl6lxfn46h2', network: 'BNB Chain' },
+        SOL:  { address: 'So11111111111111111111111111111111111111112', network: 'Solana' },
+      },
+    },
+  });
+}
 
 interface InitiateBankTransferInput {
   accountId: string;
@@ -33,8 +36,7 @@ interface InitiateBankTransferInput {
 interface InitiateCryptoDepositInput {
   accountId: string;
   coin: string;
-  network: string;
-  coinAmount: number;
+  amountGbp: number;
   priceGbp: number;
 }
 
@@ -50,6 +52,7 @@ export class DepositsService {
     if (account.status === 'FROZEN') throw new AppError('Account is frozen', 403, ErrorCodes.ACCT_002);
     if (account.status === 'CLOSED') throw new AppError('Account is closed', 403);
 
+    const settings = await getSettings();
     const reference = generateTransactionReference();
 
     const deposit = await prisma.deposit.create({
@@ -80,25 +83,37 @@ export class DepositsService {
       notifyAdmin({ type: 'DEPOSIT_REQUEST', firstName: user.firstName, lastName: user.lastName, email: user.email, method: 'Bank Transfer', amount, currency: account.currency, reference, depositId: deposit.id });
     }
 
-    return { deposit, bankDetails: BANK_RECEIVING };
+    return {
+      deposit,
+      bankDetails: {
+        accountName: settings.bankAccountName,
+        sortCode: settings.bankSortCode,
+        accountNumber: settings.bankAccountNumber,
+        iban: settings.bankIban,
+      },
+    };
   }
 
   async initiateCryptoDeposit(userId: string, data: InitiateCryptoDepositInput) {
-    const { accountId, coin, network, coinAmount, priceGbp } = data;
+    const { accountId, coin, amountGbp, priceGbp } = data;
 
-    if (coinAmount <= 0) throw new AppError('Coin amount must be greater than 0', 400);
+    if (amountGbp <= 0) throw new AppError('Amount must be greater than 0', 400);
     if (priceGbp <= 0) throw new AppError('Invalid coin price', 400);
 
     const upperCoin = coin.toUpperCase();
-    const walletInfo = CRYPTO_WALLETS[upperCoin];
-    if (!walletInfo) throw new AppError(`Unsupported coin: ${coin}. Supported: ${Object.keys(CRYPTO_WALLETS).join(', ')}`, 400);
+    const settings = await getSettings();
+    const wallets = settings.cryptoWallets as CryptoWallets;
+    const walletInfo = wallets[upperCoin];
+    if (!walletInfo) {
+      throw new AppError(`Unsupported coin: ${coin}. Supported: ${Object.keys(wallets).join(', ')}`, 400);
+    }
 
     const account = await prisma.account.findFirst({ where: { id: accountId, userId } });
     if (!account) throw new AppError('Account not found', 404, ErrorCodes.ACCT_001);
     if (account.status === 'FROZEN') throw new AppError('Account is frozen', 403, ErrorCodes.ACCT_002);
     if (account.status === 'CLOSED') throw new AppError('Account is closed', 403);
 
-    const amountGbp = new Decimal(coinAmount).times(new Decimal(priceGbp));
+    const coinAmount = new Decimal(amountGbp).dividedBy(new Decimal(priceGbp));
     const reference = generateTransactionReference();
 
     const deposit = await prisma.deposit.create({
@@ -106,12 +121,12 @@ export class DepositsService {
         userId,
         accountId,
         method: DepositMethod.CRYPTO,
-        amount: amountGbp,
+        amount: new Decimal(amountGbp),
         currency: account.currency,
         reference,
         coin: upperCoin,
-        network,
-        coinAmount: new Decimal(coinAmount),
+        network: walletInfo.network,
+        coinAmount,
         priceGbp: new Decimal(priceGbp),
         status: DepositStatus.PENDING,
       },
@@ -122,13 +137,13 @@ export class DepositsService {
         userId,
         type: NotificationType.TRANSACTION,
         title: 'Crypto Deposit Initiated',
-        body: `Send ${coinAmount} ${upperCoin} to the address below. Your account will be credited once confirmed. Reference: ${reference}`,
+        body: `Send ${coinAmount.toFixed(8)} ${upperCoin} to the address below. Your account will be credited £${amountGbp.toFixed(2)} once confirmed. Reference: ${reference}`,
       },
     });
 
     const user = await prisma.user.findUnique({ where: { id: userId }, select: { firstName: true, lastName: true, email: true } });
     if (user) {
-      notifyAdmin({ type: 'DEPOSIT_REQUEST', firstName: user.firstName, lastName: user.lastName, email: user.email, method: `Crypto (${upperCoin})`, amount: amountGbp.toNumber(), currency: account.currency, reference, depositId: deposit.id });
+      notifyAdmin({ type: 'DEPOSIT_REQUEST', firstName: user.firstName, lastName: user.lastName, email: user.email, method: `Crypto (${upperCoin})`, amount: amountGbp, currency: account.currency, reference, depositId: deposit.id });
     }
 
     return {
@@ -136,8 +151,8 @@ export class DepositsService {
       walletAddress: walletInfo.address,
       network: walletInfo.network,
       coin: upperCoin,
-      coinAmount,
-      estimatedGbp: amountGbp.toNumber(),
+      coinAmount: coinAmount.toFixed(8),
+      amountGbp,
     };
   }
 
@@ -154,8 +169,10 @@ export class DepositsService {
     return deposit;
   }
 
-  getSupportedCoins() {
-    return Object.entries(CRYPTO_WALLETS).map(([coin, info]) => ({ coin, network: info.network }));
+  async getSupportedCoins() {
+    const settings = await getSettings();
+    const wallets = settings.cryptoWallets as CryptoWallets;
+    return Object.entries(wallets).map(([coin, info]) => ({ coin, network: info.network }));
   }
 }
 
