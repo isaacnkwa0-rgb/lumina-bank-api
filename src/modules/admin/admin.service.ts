@@ -1391,7 +1391,7 @@ export class AdminService {
         skip,
         take,
         orderBy: { createdAt: 'desc' },
-        include: { user: { select: { firstName: true, lastName: true, email: true } }, account: { select: { accountNumber: true, currency: true } } },
+        include: { user: { select: { id: true, firstName: true, lastName: true, email: true } }, account: { select: { id: true, accountNumber: true, type: true, currency: true } } },
       }),
       prisma.deposit.count({ where }),
     ]);
