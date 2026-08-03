@@ -20,9 +20,14 @@ export const registerSchema = z.object({
 });
 
 export const loginSchema = z.object({
-  email: z.string().email().toLowerCase().trim(),
+  // Accept either email or account number via identifier; also keep email for backwards compat
+  identifier: z.string().min(1).trim().optional(),
+  email: z.string().trim().optional(),
   password: z.string().min(1),
   deviceName: z.string().optional(),
+}).refine((d) => d.identifier || d.email, {
+  message: 'Email or account number is required',
+  path: ['identifier'],
 });
 
 export const verifyEmailSchema = z.object({
