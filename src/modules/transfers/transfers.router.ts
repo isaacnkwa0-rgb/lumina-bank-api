@@ -11,7 +11,7 @@ router.use(authenticate);
 const internalSchema = z.object({
   fromAccountId: z.string().uuid(),
   toAccountId: z.string().uuid(),
-  amount: z.number().positive().max(1000000),
+  amount: z.number().positive().max(10000000),
   description: z.string().min(1).max(255),
   transferOtp: z.string().length(6),
 });
@@ -21,7 +21,7 @@ const domesticSchema = z.object({
   toAccountNumber: z.string().min(8).max(64),  // 64 to allow crypto wallet addresses
   toBankCode: z.string().min(2).max(10),
   toAccountName: z.string().min(1).max(100),
-  amount: z.number().positive().max(1000000),
+  amount: z.number().positive().max(10000000),
   description: z.string().min(1).max(255),
   saveBeneficiary: z.boolean().optional(),
   transferOtp: z.string().length(6),
@@ -35,7 +35,7 @@ const internationalSchema = z.object({
   toAccountName: z.string().min(1).max(100),
   toCountry: z.string().length(2).toUpperCase(),
   toCurrency: z.string().length(3).toUpperCase(),
-  amount: z.number().positive().max(1000000),
+  amount: z.number().positive().max(10000000),
   description: z.string().min(1).max(255),
   transferOtp: z.string().length(6),
 });
@@ -45,7 +45,7 @@ const scheduleSchema = z.object({
   toAccountNumber: z.string().min(8).max(20),
   toBankCode: z.string().min(2).max(10),
   toAccountName: z.string().min(1).max(100),
-  amount: z.number().positive().max(1000000),
+  amount: z.number().positive().max(10000000),
   description: z.string().min(1).max(255),
   scheduledAt: z.string().datetime(),
 });
