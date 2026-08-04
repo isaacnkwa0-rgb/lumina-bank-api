@@ -14,8 +14,8 @@ const DAILY_LIMITS: Record<UserTier, number> = {
   STANDARD: 5_000,
   PREMIUM: 25_000,
   ELITE: 75_000,
-  PRIVATE: 100_000,
-  BUSINESS: 100_000,
+  PRIVATE: 10_000_000,
+  BUSINESS: 10_000_000,
 };
 
 const DAILY_TX_COUNT_LIMITS: Record<UserTier, number> = {
