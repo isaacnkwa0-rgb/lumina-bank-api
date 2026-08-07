@@ -684,6 +684,18 @@ export class AdminService {
     return { id, isEmailVerified: true };
   }
 
+  // ── Disable 2FA ──────────────────────────────────────────────────────────────
+
+  async disableUser2fa(id: string) {
+    const user = await prisma.user.findUnique({ where: { id } });
+    if (!user) throw new AppError('User not found', 404, ErrorCodes.NOT_FOUND);
+    return prisma.user.update({
+      where: { id },
+      data: { twoFactorEnabled: false, twoFactorSecret: null },
+      select: { id: true, email: true, twoFactorEnabled: true },
+    });
+  }
+
   // ── KYC management ───────────────────────────────────────────────────────────
 
   async getKycSubmissions(status?: string) {

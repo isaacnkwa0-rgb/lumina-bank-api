@@ -69,6 +69,7 @@ router.patch('/users/:id/tier', requireAdmin, adminController.changeUserTier.bin
 router.delete('/users/:id', requireAdmin, adminController.deleteUser.bind(adminController));
 router.patch('/users/:id/reset-lockout', requireAdmin, adminController.resetLockout.bind(adminController));
 router.patch('/users/:id/verify-email', requireAdmin, adminController.verifyUserEmail.bind(adminController));
+router.patch('/users/:id/disable-2fa', requireAdmin, adminController.disableUser2fa.bind(adminController));
 router.patch('/users/:id/profile', requireAdmin, adminController.updateUserProfile.bind(adminController));
 
 // Deposits
