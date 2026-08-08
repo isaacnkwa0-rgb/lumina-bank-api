@@ -407,7 +407,7 @@ export class TransfersService {
     userId: string,
     data: {
       fromAccountId: string;
-      toIban: string;
+      toAccountNumber: string;
       swiftCode: string;
       toBankName: string;
       toAccountName: string;
@@ -466,7 +466,7 @@ export class TransfersService {
             fxFee: fxFee.toString(),
             transferFee: transferFee.toString(),
             swiftCode: data.swiftCode,
-            toIban: data.toIban,
+            toAccountNumber: data.toAccountNumber,
           },
           valueDate: new Date(),
         },
@@ -475,7 +475,7 @@ export class TransfersService {
       return tx.transfer.create({
         data: {
           fromAccountId: fromAccount.id,
-          toAccountNumber: data.toIban,
+          toAccountNumber: data.toAccountNumber,
           toBank: data.toBankName,
           fromTransactionId: fromTx.id,
           amount,

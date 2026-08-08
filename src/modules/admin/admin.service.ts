@@ -299,6 +299,69 @@ export class AdminService {
     return prisma.transfer.findUnique({ where: { id } });
   }
 
+  async reverseTransfer(id: string, reason?: string) {
+    const transfer = await prisma.transfer.findUnique({
+      where: { id },
+      include: { fromAccount: { include: { user: { select: { id: true, email: true } } } } },
+    });
+    if (!transfer) throw new AppError('Transfer not found', 404, ErrorCodes.NOT_FOUND);
+    if (transfer.status !== TransferStatus.COMPLETED) throw new AppError('Only completed transfers can be reversed', 400, ErrorCodes.CONFLICT);
+
+    const transferFee = transfer.transferFee ?? new Decimal(0);
+    const fxFee = transfer.fxFee ?? new Decimal(0);
+    const refundAmount = transfer.amount.plus(transferFee).plus(fxFee);
+
+    await prisma.$transaction(async (tx) => {
+      const account = await tx.account.findUnique({ where: { id: transfer.fromAccountId } });
+      if (!account) return;
+      await tx.account.update({
+        where: { id: transfer.fromAccountId },
+        data: {
+          balance: account.balance.plus(refundAmount),
+          availableBalance: account.availableBalance.plus(refundAmount),
+        },
+      });
+      await tx.transaction.create({
+        data: {
+          reference: generateTransactionReference(),
+          accountId: transfer.fromAccountId,
+          type: TransactionType.CREDIT,
+          category: TransactionCategory.REFUND,
+          amount: refundAmount,
+          currency: transfer.currency,
+          balanceBefore: account.balance,
+          balanceAfter: account.balance.plus(refundAmount),
+          description: `Transfer reversed: ${reason || 'Reversed by bank'}`,
+          status: 'COMPLETED',
+          valueDate: new Date(),
+        },
+      });
+      if (transfer.fromTransactionId) {
+        await tx.transaction.update({ where: { id: transfer.fromTransactionId }, data: { status: 'FAILED' } });
+      }
+      await tx.transfer.update({ where: { id }, data: { status: TransferStatus.FAILED } });
+    });
+
+    const userId = transfer.fromAccount.user.id;
+    const amount = Number(transfer.amount).toFixed(2);
+    await prisma.notification.create({
+      data: {
+        userId,
+        type: 'TRANSFER',
+        title: 'Transfer reversed',
+        body: `Your transfer of £${amount} has been reversed${reason ? ': ' + reason : ''}. Funds have been returned to your account.`,
+      },
+    });
+
+    mailService.sendTransferRejected(transfer.fromAccount.user.email, {
+      amount,
+      currency: transfer.currency,
+      reason: reason || 'Reversed by bank',
+    }).catch(() => {});
+
+    return prisma.transfer.findUnique({ where: { id } });
+  }
+
   // ── Loans ────────────────────────────────────────────────────────────────────
 
   async getLoans(status?: string) {

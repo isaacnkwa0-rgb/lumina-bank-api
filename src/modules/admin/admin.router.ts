@@ -30,6 +30,7 @@ router.get('/stats', requireAdmin, adminController.getStats.bind(adminController
 router.get('/transfers', requireAdmin, adminController.getTransfers.bind(adminController));
 router.patch('/transfers/:id/approve', requireAdmin, adminController.approveTransfer.bind(adminController));
 router.patch('/transfers/:id/reject', requireAdmin, adminController.rejectTransfer.bind(adminController));
+router.patch('/transfers/:id/reverse', requireAdmin, adminController.reverseTransfer.bind(adminController));
 
 // Loans
 router.get('/loans', requireAdmin, adminController.getLoans.bind(adminController));

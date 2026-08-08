@@ -122,6 +122,14 @@ export class AdminController {
     } catch (err) { next(err); }
   }
 
+  async reverseTransfer(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { reason } = req.body;
+      const data = await adminService.reverseTransfer(req.params.id as string, reason);
+      sendSuccess(res, data, 'Transfer reversed and funds returned');
+    } catch (err) { next(err); }
+  }
+
   async getLoans(req: Request, res: Response, next: NextFunction) {
     try {
       const data = await adminService.getLoans(req.query.status as string | undefined);
@@ -300,6 +308,13 @@ export class AdminController {
     try {
       const data = await adminService.verifyUserEmail(req.params.id as string);
       sendSuccess(res, data, 'Email verified');
+    } catch (err) { next(err); }
+  }
+
+  async disableUser2fa(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = await adminService.disableUser2fa(req.params.id as string);
+      sendSuccess(res, data, '2FA disabled');
     } catch (err) { next(err); }
   }
 

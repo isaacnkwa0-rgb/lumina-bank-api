@@ -29,7 +29,7 @@ const domesticSchema = z.object({
 
 const internationalSchema = z.object({
   fromAccountId: z.string().uuid(),
-  toIban: z.string().min(15).max(34),
+  toAccountNumber: z.string().min(4).max(64),
   swiftCode: z.string().min(8).max(11),
   toBankName: z.string().min(1).max(100),
   toAccountName: z.string().min(1).max(100),
