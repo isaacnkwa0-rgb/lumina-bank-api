@@ -367,6 +367,20 @@ export const mailService = {
     await send({ to, subject: 'Transfer rejected | Lumina Bank', html: layout('Transfer Rejected', body) });
   },
 
+  async sendTransferReversed(to: string, opts: { amount: string; currency: string; reason?: string }): Promise<void> {
+    const { amount, currency, reason } = opts;
+    const body = `
+      <p>Your transfer of <strong>${currency} ${amount}</strong> has been <strong>reversed</strong> by our team.</p>
+      <div style="background:#F8F8F8;border:1px solid #E8E8E8;border-radius:4px;padding:14px 18px;margin:20px 0;">
+        <p style="margin:0 0 8px;font-size:11px;color:#AAAAAA;text-transform:uppercase;letter-spacing:1px">Reversal details</p>
+        <p style="margin:0 0 4px;font-size:15px;font-weight:700;color:#333;">${currency} ${amount} returned</p>
+        ${reason ? `<p style="margin:4px 0 0;font-size:13px;color:#767676;"><strong>Reason:</strong> ${reason}</p>` : ''}
+      </div>
+      <p>The full amount including any fees has been <strong>credited back to your account</strong> and is available immediately.</p>
+      <p class="note">If you have any questions about this reversal, please contact our support team.</p>`;
+    await send({ to, subject: `Transfer reversed: ${currency} ${amount} | Lumina Bank`, html: layout('Transfer Reversed', body) });
+  },
+
   async sendDisputeOutcome(to: string, opts: { resolved: boolean; subject: string; resolution: string }): Promise<void> {
     const { resolved, subject: disputeSubject, resolution } = opts;
     const body = resolved

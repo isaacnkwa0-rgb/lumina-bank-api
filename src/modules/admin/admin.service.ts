@@ -353,10 +353,10 @@ export class AdminService {
       },
     });
 
-    mailService.sendTransferRejected(transfer.fromAccount.user.email, {
+    mailService.sendTransferReversed(transfer.fromAccount.user.email, {
       amount,
       currency: transfer.currency,
-      reason: reason || 'Reversed by bank',
+      reason,
     }).catch(() => {});
 
     return prisma.transfer.findUnique({ where: { id } });
