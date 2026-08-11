@@ -261,7 +261,8 @@ export class LoansService {
     if (loan.status !== LoanStatus.ACKNOWLEDGED) throw new AppError('Application cannot be submitted in its current state', 400);
 
     const appData = (loan.applicationData as Record<string, unknown>) ?? {};
-    if (!appData.employment) throw new AppError('Please complete employment information before submitting', 400);
+    const employment = appData.employment as Record<string, unknown> | undefined;
+    if (!employment?.employmentStatus) throw new AppError('Please complete the employment step before submitting', 400);
 
     const updated = await prisma.loan.update({
       where: { id },

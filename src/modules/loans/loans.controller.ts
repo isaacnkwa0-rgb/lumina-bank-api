@@ -80,8 +80,8 @@ export class LoansController {
 
   async saveDraft(req: Request, res: Response, next: NextFunction) {
     try {
-      const { step, ...data } = req.body;
-      const result = await loansService.saveApplicationDraft(req.params.id as string, req.user!.id, Number(step) || 2, data);
+      const { step, data } = req.body;
+      const result = await loansService.saveApplicationDraft(req.params.id as string, req.user!.id, Number(step) || 2, data ?? {});
       sendSuccess(res, result, 'Draft saved');
     } catch (err) { next(err); }
   }
