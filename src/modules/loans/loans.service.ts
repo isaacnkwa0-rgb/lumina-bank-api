@@ -3,6 +3,7 @@ import { AppError } from '../../middleware/error.middleware';
 import { TransactionType, TransactionStatus, LoanStatus, LoanType, LoanPaymentStatus, TransactionCategory } from '@prisma/client';
 import { generateTransactionReference } from '../../shared/utils/transaction-ref';
 import { notifyAdmin } from '../../shared/utils/notify-admin';
+import { uploadBuffer } from '../../config/cloudinary';
 
 const LOAN_LIMITS: Record<string, number> = {
   PERSONAL: 50000,
@@ -286,6 +287,29 @@ export class LoansService {
     });
     if (!loan) throw new AppError('Loan application not found', 404);
     return { loan, applicationData: (loan.applicationData as Record<string, unknown>) ?? {} };
+  }
+
+  async uploadLoanDocument(id: string, userId: string, buffer: Buffer, mimeType: string, docType: string) {
+    const loan = await prisma.loan.findFirst({ where: { id, userId } });
+    if (!loan) throw new AppError('Loan not found', 404);
+
+    const resourceType = mimeType === 'application/pdf' ? 'raw' : 'image';
+    const url = await uploadBuffer(buffer, 'lumina-bank/loan-docs', resourceType);
+
+    const existing = (loan.applicationData as Record<string, unknown>) ?? {};
+    const existingDocs = (existing.documents as Record<string, unknown>) ?? {};
+
+    await prisma.loan.update({
+      where: { id },
+      data: {
+        applicationData: {
+          ...existing,
+          documents: { ...existingDocs, [`${docType}Url`]: url },
+        } as any,
+      },
+    });
+
+    return { url };
   }
 }
 

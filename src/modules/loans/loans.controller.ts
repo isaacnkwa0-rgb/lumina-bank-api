@@ -99,6 +99,26 @@ export class LoansController {
       sendSuccess(res, result, 'Application data retrieved');
     } catch (err) { next(err); }
   }
+
+  async uploadDocument(req: Request, res: Response, next: NextFunction) {
+    try {
+      const file = req.file;
+      if (!file) {
+        res.status(400).json({ success: false, error: { message: 'No file provided' } });
+        return;
+      }
+      const { docType } = req.body;
+      const allowed = ['idDocument', 'addressProof', 'incomeProof'];
+      if (!allowed.includes(docType)) {
+        res.status(400).json({ success: false, error: { message: 'Invalid document type' } });
+        return;
+      }
+      const result = await loansService.uploadLoanDocument(
+        req.params.id, req.user!.id, file.buffer, file.mimetype, docType,
+      );
+      sendSuccess(res, result, 'Document uploaded');
+    } catch (err) { next(err); }
+  }
 }
 
 export default new LoansController();
