@@ -325,6 +325,31 @@ export const mailService = {
     await send({ to, subject: 'Your password has been changed | Lumina Bank', html: layout('Password Changed', body) });
   },
 
+  async sendLoanAcknowledged(to: string, opts: { firstName: string; loanType: string; amount: string; referenceNumber: string }): Promise<void> {
+    const { firstName, loanType, amount, referenceNumber } = opts;
+    const type = loanType.charAt(0).toUpperCase() + loanType.slice(1).toLowerCase();
+    const body = `
+    <p>Dear ${firstName},</p>
+    <p>We have received your <strong>${type} Loan</strong> application and it has been <strong>acknowledged</strong> by our team.</p>
+    <div style="background:#F8F8F8;border:1px solid #E8E8E8;border-radius:4px;padding:14px 18px;margin:20px 0;">
+      <p style="margin:0 0 8px;font-size:11px;color:#AAAAAA;text-transform:uppercase;letter-spacing:1px">Application Details</p>
+      <p style="margin:0 0 4px;font-size:15px;font-weight:700;color:#333;">£${amount}</p>
+      <p style="margin:0;font-size:13px;color:#767676;">${type} Loan</p>
+      <p style="margin:4px 0 0;font-size:12px;color:#AAAAAA;font-family:monospace;">Ref: ${referenceNumber}</p>
+    </div>
+    <p><strong>Action required:</strong> To proceed with your application, please log in to your Lumina Bank account and complete the remaining sections of your loan application.</p>
+    <p>You will need to provide:</p>
+    <ul style="color:#767676;font-size:13px;line-height:1.8;">
+      <li>Personal information</li>
+      <li>Employment &amp; income details</li>
+      <li>Financial information</li>
+      <li>Supporting documents</li>
+    </ul>
+    <p>Our team will review your complete application and provide a decision within <strong>3–5 business days</strong> of receiving all required information.</p>
+    <p class="note">If you did not submit this application, please contact our support team immediately.</p>`;
+    await send({ to, subject: `Loan application acknowledged — Action required | Lumina Bank`, html: layout('Loan Application Acknowledged', body) });
+  },
+
   async sendLoanDecision(to: string, opts: { approved: boolean; loanType: string; amount?: number; reason?: string }): Promise<void> {
     const { approved, loanType, amount, reason } = opts;
     const type = loanType.charAt(0).toUpperCase() + loanType.slice(1).toLowerCase();

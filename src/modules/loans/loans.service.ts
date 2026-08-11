@@ -30,7 +30,7 @@ function calcMonthlyPayment(principal: number, annualRate: number, termMonths: n
 export class LoansService {
   async getLoans(userId: string) {
     return prisma.loan.findMany({
-      where: { userId, status: { not: LoanStatus.REJECTED } },
+      where: { userId, status: { notIn: [LoanStatus.REJECTED, LoanStatus.WITHDRAWN] } },
       include: { payments: { take: 5, orderBy: { paymentDate: 'desc' } } },
       orderBy: { createdAt: 'desc' },
     });
@@ -88,22 +88,14 @@ export class LoansService {
 
   async applyForLoan(
     userId: string,
-    data: { type: string; amount: number; termMonths: number; accountId?: string },
+    data: { type: string; amount: number; termMonths: number; accountId?: string; purpose?: string; purposeDetails?: string; repaymentFrequency?: string },
   ) {
-    const { type, amount, termMonths, accountId } = data;
+    const { type, amount, termMonths, accountId, purpose, purposeDetails, repaymentFrequency } = data;
     const limit = LOAN_LIMITS[type] ?? 10000;
 
-    if (amount > limit) {
-      throw new AppError(
-        `Maximum loan amount for ${type} is $${limit.toLocaleString()}`,
-        400,
-      );
-    }
-    if (termMonths < 1 || termMonths > 360) {
-      throw new AppError('Term must be between 1 and 360 months', 400);
-    }
+    if (amount > limit) throw new AppError(`Maximum loan amount for ${type} is £${limit.toLocaleString()}`, 400);
+    if (termMonths < 1 || termMonths > 360) throw new AppError('Term must be between 1 and 360 months', 400);
 
-    // Validate disbursement account belongs to user
     if (accountId) {
       const account = await prisma.account.findFirst({ where: { id: accountId, userId, status: 'ACTIVE' } });
       if (!account) throw new AppError('Invalid disbursement account', 400);
@@ -111,6 +103,7 @@ export class LoansService {
 
     const annualRate = ANNUAL_RATES[type] ?? 0.1;
     const monthlyPayment = calcMonthlyPayment(amount, annualRate, termMonths);
+    const referenceNumber = `LN-${Date.now()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
 
     const [loan, userRecord] = await Promise.all([
       prisma.loan.create({
@@ -124,6 +117,11 @@ export class LoansService {
           monthlyPayment,
           interestRate: annualRate,
           status: LoanStatus.PENDING,
+          purpose: purpose ?? null,
+          purposeDetails: purposeDetails ?? null,
+          repaymentFrequency: repaymentFrequency ?? 'MONTHLY',
+          referenceNumber,
+          applicationStep: 1,
         },
       }),
       prisma.user.findUnique({ where: { id: userId }, select: { firstName: true, lastName: true, email: true } }),
@@ -134,7 +132,7 @@ export class LoansService {
         userId,
         type: 'LOAN' as any,
         title: 'Loan Application Received',
-        body: `Your ${type.toLowerCase()} loan application for £${amount.toLocaleString()} is under review. We'll notify you within 1–2 business days.`,
+        body: `Your ${type.toLowerCase()} loan application (Ref: ${referenceNumber}) for £${amount.toLocaleString()} is under review.`,
       },
     });
 
@@ -240,6 +238,54 @@ export class LoansService {
     }
 
     return { tier, eligibility, annualRates: ANNUAL_RATES };
+  }
+
+  async saveApplicationDraft(id: string, userId: string, step: number, data: Record<string, unknown>) {
+    const loan = await prisma.loan.findFirst({ where: { id, userId } });
+    if (!loan) throw new AppError('Loan application not found', 404);
+    if (loan.status !== LoanStatus.ACKNOWLEDGED) throw new AppError('Application is not in the right state to update', 400);
+
+    const existing = (loan.applicationData as Record<string, unknown>) ?? {};
+    const merged = { ...existing, ...data } as Record<string, unknown>;
+
+    return prisma.loan.update({
+      where: { id },
+      data: { applicationData: merged as any, applicationStep: Math.max(loan.applicationStep, step) },
+    });
+  }
+
+  async submitApplication(id: string, userId: string) {
+    const loan = await prisma.loan.findFirst({ where: { id, userId } });
+    if (!loan) throw new AppError('Loan application not found', 404);
+    if (loan.status !== LoanStatus.ACKNOWLEDGED) throw new AppError('Application cannot be submitted in its current state', 400);
+
+    const appData = (loan.applicationData as Record<string, unknown>) ?? {};
+    if (!appData.employment) throw new AppError('Please complete employment information before submitting', 400);
+
+    const updated = await prisma.loan.update({
+      where: { id },
+      data: { status: LoanStatus.UNDER_REVIEW, applicationStep: 9 },
+    });
+
+    await prisma.notification.create({
+      data: {
+        userId,
+        type: 'LOAN' as any,
+        title: 'Application Submitted for Review',
+        body: `Your complete loan application (Ref: ${loan.referenceNumber}) has been submitted and is now under review.`,
+      },
+    });
+
+    return updated;
+  }
+
+  async getApplicationData(id: string, userId: string) {
+    const loan = await prisma.loan.findFirst({
+      where: { id, userId },
+      include: { payments: { take: 5, orderBy: { paymentDate: 'desc' } } },
+    });
+    if (!loan) throw new AppError('Loan application not found', 404);
+    return loan;
   }
 }
 

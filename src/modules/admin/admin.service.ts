@@ -376,7 +376,7 @@ export class AdminService {
   async approveLoan(id: string) {
     const loan = await prisma.loan.findUnique({ where: { id }, include: { user: true } });
     if (!loan) throw new AppError('Loan not found', 404, ErrorCodes.NOT_FOUND);
-    if (loan.status !== LoanStatus.PENDING) throw new AppError('Loan is not pending', 400, ErrorCodes.CONFLICT);
+    if (loan.status !== LoanStatus.PENDING && loan.status !== LoanStatus.UNDER_REVIEW) throw new AppError('Loan must be in PENDING or UNDER_REVIEW status to approve', 400, ErrorCodes.CONFLICT);
 
     // Find disbursement account: use stored accountId or fall back to user's default account
     const account = loan.accountId
@@ -449,7 +449,7 @@ export class AdminService {
   async rejectLoan(id: string, reason?: string) {
     const loan = await prisma.loan.findUnique({ where: { id }, include: { user: true } });
     if (!loan) throw new AppError('Loan not found', 404, ErrorCodes.NOT_FOUND);
-    if (loan.status !== LoanStatus.PENDING) throw new AppError('Loan is not pending', 400, ErrorCodes.CONFLICT);
+    if (loan.status !== LoanStatus.PENDING && loan.status !== LoanStatus.UNDER_REVIEW) throw new AppError('Loan must be in PENDING or UNDER_REVIEW status to reject', 400, ErrorCodes.CONFLICT);
 
     await prisma.$transaction([
       prisma.loan.update({ where: { id }, data: { status: LoanStatus.REJECTED } }),
@@ -463,6 +463,39 @@ export class AdminService {
     }).catch(() => {});
 
     return { id, status: LoanStatus.REJECTED, reason };
+  }
+
+  async acknowledgeLoan(id: string) {
+    const loan = await prisma.loan.findUnique({
+      where: { id },
+      include: { user: { select: { id: true, firstName: true, email: true } } },
+    });
+    if (!loan) throw new AppError('Loan not found', 404, ErrorCodes.NOT_FOUND);
+    if (loan.status !== LoanStatus.PENDING) throw new AppError('Loan is not in PENDING status', 400, ErrorCodes.CONFLICT);
+
+    await prisma.loan.update({ where: { id }, data: { status: LoanStatus.ACKNOWLEDGED, acknowledgedAt: new Date() } });
+
+    const userId = loan.user.id;
+    const amount = Number(loan.principalAmount).toFixed(2);
+    const loanType = loan.type.charAt(0) + loan.type.slice(1).toLowerCase();
+
+    await prisma.notification.create({
+      data: {
+        userId,
+        type: 'LOAN' as any,
+        title: 'Application Acknowledged — Action Required',
+        body: `Your ${loanType} loan application has been acknowledged. Please log in and complete your application to proceed.`,
+      },
+    });
+
+    mailService.sendLoanAcknowledged(loan.user.email, {
+      firstName: loan.user.firstName,
+      loanType: loan.type,
+      amount,
+      referenceNumber: loan.referenceNumber ?? id,
+    }).catch(() => {});
+
+    return { id, status: LoanStatus.ACKNOWLEDGED };
   }
 
   // ── Disputes ─────────────────────────────────────────────────────────────────

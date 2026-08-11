@@ -152,6 +152,13 @@ export class AdminController {
     } catch (err) { next(err); }
   }
 
+  async acknowledgeLoan(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = await adminService.acknowledgeLoan(req.params.id as string);
+      sendSuccess(res, data, 'Loan application acknowledged');
+    } catch (err) { next(err); }
+  }
+
   async getDisputes(req: Request, res: Response, next: NextFunction) {
     try {
       const data = await adminService.getDisputes(req.query.status as string | undefined);

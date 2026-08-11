@@ -137,14 +137,18 @@ enum LoanType {
   AUTO
   BUSINESS
   OVERDRAFT
+  STUDENT
 }
 
 enum LoanStatus {
   PENDING
+  ACKNOWLEDGED
+  UNDER_REVIEW
   ACTIVE
   PAID_OFF
   DEFAULTED
   REJECTED
+  WITHDRAWN
 }
 
 enum LoanPaymentStatus {
@@ -512,6 +516,14 @@ model Loan {
   nextPaymentDate    DateTime?
   nextPaymentAmount  Decimal?   @db.Decimal(18, 4)
   status             LoanStatus @default(PENDING)
+  purpose              String?
+  purposeDetails       String?
+  repaymentFrequency   String?   @default("MONTHLY")
+  applicationStep      Int       @default(1)
+  applicationData      Json?
+  acknowledgedAt       DateTime?
+  adminNotes           String?
+  referenceNumber      String?   @unique
   disbursedAt        DateTime?
   createdAt          DateTime   @default(now())
   updatedAt          DateTime   @updatedAt

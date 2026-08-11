@@ -77,6 +77,28 @@ export class LoansController {
       next(err);
     }
   }
+
+  async saveDraft(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { step, ...data } = req.body;
+      const result = await loansService.saveApplicationDraft(req.params.id as string, req.user!.id, Number(step) || 2, data);
+      sendSuccess(res, result, 'Draft saved');
+    } catch (err) { next(err); }
+  }
+
+  async submitApplication(req: Request, res: Response, next: NextFunction) {
+    try {
+      const result = await loansService.submitApplication(req.params.id as string, req.user!.id);
+      sendSuccess(res, result, 'Application submitted for review');
+    } catch (err) { next(err); }
+  }
+
+  async getApplicationData(req: Request, res: Response, next: NextFunction) {
+    try {
+      const result = await loansService.getApplicationData(req.params.id as string, req.user!.id);
+      sendSuccess(res, result, 'Application data retrieved');
+    } catch (err) { next(err); }
+  }
 }
 
 export default new LoansController();
