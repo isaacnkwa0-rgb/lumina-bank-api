@@ -285,7 +285,7 @@ export class LoansService {
       include: { payments: { take: 5, orderBy: { paymentDate: 'desc' } } },
     });
     if (!loan) throw new AppError('Loan application not found', 404);
-    return loan;
+    return { loan, applicationData: (loan.applicationData as Record<string, unknown>) ?? {} };
   }
 }
 
