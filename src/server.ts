@@ -15,7 +15,9 @@ async function bootstrap() {
 
     // Fetch live rates on startup then every hour
     ratesService.refreshRates();
+    ratesService.refreshCryptoPrices();
     setInterval(() => ratesService.refreshRates(), 60 * 60 * 1000);
+    setInterval(() => ratesService.refreshCryptoPrices(), 5 * 60 * 1000); // crypto every 5 min
 
     // Process due standing orders and direct debits every minute
     const runStandingOrders = () =>

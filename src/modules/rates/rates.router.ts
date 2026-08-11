@@ -5,6 +5,7 @@ const router = Router();
 
 router.get('/', ratesController.getAll);
 router.get('/supported-currencies', ratesController.getSupportedCurrencies);
+router.get('/crypto', ratesController.getCryptoPrices.bind(ratesController));
 router.get('/convert', ratesController.convert);
 router.get('/:base/:quote', ratesController.getRate);
 

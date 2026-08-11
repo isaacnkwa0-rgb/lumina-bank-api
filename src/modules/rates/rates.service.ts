@@ -6,6 +6,13 @@ import { logger } from '../../config/logger';
 const BANK_SPREAD = 0.015;
 const STANDARD_FX_FEE_PCT = 0.005;
 const RATES_API_URL = 'https://open.er-api.com/v6/latest/GBP';
+const COINGECKO_URL = 'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,tether,binancecoin,solana,ripple,cardano,dogecoin&vs_currencies=gbp';
+
+const CRYPTO_ID_MAP: Record<string, string> = {
+  bitcoin: 'BTC', ethereum: 'ETH', tether: 'USDT',
+  binancecoin: 'BNB', solana: 'SOL', ripple: 'XRP',
+  cardano: 'ADA', dogecoin: 'DOGE',
+};
 
 export class RatesService {
   async refreshRates(): Promise<void> {
@@ -31,6 +38,42 @@ export class RatesService {
     } catch (err: unknown) {
       logger.error('Failed to refresh exchange rates', { err: (err as Error).message });
     }
+  }
+
+  async refreshCryptoPrices(): Promise<void> {
+    try {
+      const res = await fetch(COINGECKO_URL);
+      if (!res.ok) throw new Error(`CoinGecko HTTP ${res.status}`);
+      const json = await res.json() as Record<string, { gbp: number }>;
+      const now = new Date();
+      const upserts = Object.entries(json)
+        .filter(([id]) => CRYPTO_ID_MAP[id])
+        .map(([id, prices]) => {
+          const symbol = CRYPTO_ID_MAP[id];
+          const priceGbp = prices.gbp;
+          return prisma.exchangeRate.upsert({
+            where: { baseCurrency_quoteCurrency: { baseCurrency: symbol, quoteCurrency: 'GBP' } },
+            update: { rate: priceGbp, fetchedAt: now },
+            create: { baseCurrency: symbol, quoteCurrency: 'GBP', rate: priceGbp, fetchedAt: now },
+          });
+        });
+      await prisma.$transaction(upserts);
+      logger.info(`Refreshed ${upserts.length} crypto prices from CoinGecko`);
+    } catch (err: unknown) {
+      logger.error('Failed to refresh crypto prices', { err: (err as Error).message });
+    }
+  }
+
+  async getCryptoPricesGbp(): Promise<Record<string, number>> {
+    const coins = Object.values(CRYPTO_ID_MAP);
+    const rows = await prisma.exchangeRate.findMany({
+      where: { quoteCurrency: 'GBP', baseCurrency: { in: coins } },
+    });
+    const result: Record<string, number> = {};
+    for (const row of rows) {
+      result[row.baseCurrency] = Number(row.rate);
+    }
+    return result;
   }
 
   async getRate(baseCurrency: string, quoteCurrency: string) {

@@ -31,6 +31,13 @@ export class RatesController {
   getSupportedCurrencies(_req: Request, res: Response) {
     sendSuccess(res, SUPPORTED_CURRENCIES, 'Supported currencies');
   }
+
+  async getCryptoPrices(_req: Request, res: Response, next: NextFunction) {
+    try {
+      const prices = await ratesService.getCryptoPricesGbp();
+      sendSuccess(res, prices, 'Crypto prices retrieved');
+    } catch (err) { next(err); }
+  }
 }
 
 export const ratesController = new RatesController();
