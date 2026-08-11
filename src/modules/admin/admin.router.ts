@@ -37,6 +37,7 @@ router.get('/loans', requireAdmin, adminController.getLoans.bind(adminController
 router.patch('/loans/:id/approve', requireAdmin, adminController.approveLoan.bind(adminController));
 router.patch('/loans/:id/reject', requireAdmin, adminController.rejectLoan.bind(adminController));
 router.patch('/loans/:id/acknowledge', requireAdmin, adminController.acknowledgeLoan.bind(adminController));
+router.patch('/loans/:id/request-info', requireAdmin, adminController.requestMoreInfo.bind(adminController));
 
 // Disputes
 router.get('/disputes', requireAdmin, adminController.getDisputes.bind(adminController));

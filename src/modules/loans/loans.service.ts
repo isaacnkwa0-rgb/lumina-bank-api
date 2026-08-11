@@ -268,6 +268,9 @@ export class LoansService {
     const employment = appData.employment as Record<string, unknown> | undefined;
     if (!employment?.employmentStatus) throw new AppError('Please complete the employment step before submitting', 400);
 
+    const guarantorData = appData.guarantor as Record<string, unknown> | undefined;
+    if (!guarantorData?.fullName || !guarantorData?.email) throw new AppError('Please complete the guarantor step before submitting', 400);
+
     const updated = await prisma.loan.update({
       where: { id },
       data: { status: LoanStatus.UNDER_REVIEW, applicationStep: 9 },

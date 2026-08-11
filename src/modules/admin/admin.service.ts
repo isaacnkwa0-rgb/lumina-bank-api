@@ -498,6 +498,38 @@ export class AdminService {
     return { id, status: LoanStatus.ACKNOWLEDGED };
   }
 
+  async requestMoreInfo(id: string, message: string) {
+    const loan = await prisma.loan.findUnique({
+      where: { id },
+      include: { user: { select: { id: true, firstName: true, email: true } } },
+    });
+    if (!loan) throw new AppError('Loan not found', 404, ErrorCodes.NOT_FOUND);
+    if (loan.status !== LoanStatus.UNDER_REVIEW) throw new AppError('Loan must be UNDER_REVIEW', 400, ErrorCodes.CONFLICT);
+
+    await prisma.loan.update({
+      where: { id },
+      data: { status: LoanStatus.ACKNOWLEDGED, applicationStep: 5 },
+    });
+
+    await prisma.notification.create({
+      data: {
+        userId: loan.user.id,
+        type: 'LOAN' as any,
+        title: 'Additional Information Required',
+        body: `Your loan application (Ref: ${loan.referenceNumber ?? id}) requires additional information. Please log in to complete your application.`,
+      },
+    });
+
+    mailService.sendRequestMoreInfo(loan.user.email, {
+      firstName: loan.user.firstName,
+      loanType: loan.type,
+      referenceNumber: loan.referenceNumber ?? id,
+      message,
+    }).catch(() => {});
+
+    return { id, status: LoanStatus.ACKNOWLEDGED };
+  }
+
   // ── Disputes ─────────────────────────────────────────────────────────────────
 
   async getDisputes(status?: string) {

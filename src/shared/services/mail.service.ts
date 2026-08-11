@@ -367,6 +367,26 @@ export const mailService = {
     });
   },
 
+  async sendRequestMoreInfo(to: string, opts: {
+    firstName: string;
+    loanType: string;
+    referenceNumber: string;
+    message: string;
+  }): Promise<void> {
+    const { firstName, loanType, referenceNumber, message } = opts;
+    const type = loanType.charAt(0).toUpperCase() + loanType.slice(1).toLowerCase();
+    const body = `
+    <p>Dear ${firstName},</p>
+    <p>Thank you for submitting your <strong>${type} Loan</strong> application (Ref: <span style="font-family:monospace;">${referenceNumber}</span>).</p>
+    <p>Our underwriting team has reviewed your application and requires the following additional information before we can proceed:</p>
+    <div style="background:#FFF8E7;border:1px solid #F5D06E;border-radius:4px;padding:14px 18px;margin:20px 0;color:#7A5500;">
+      <p style="margin:0;font-size:13px;line-height:1.6;">${message}</p>
+    </div>
+    <p>Please <a href="https://app.luminabank.online/loans" style="color:#DB0011;font-weight:bold;">log in to your account</a> and complete the missing sections of your application.</p>
+    <p class="note">If you have any questions, please contact our support team.</p>`;
+    await send({ to, subject: `Action required on your loan application | Lumina Bank`, html: layout('Additional Information Required', body) });
+  },
+
   async sendGuarantorNotification(to: string, opts: {
     guarantorName: string;
     applicantName: string;

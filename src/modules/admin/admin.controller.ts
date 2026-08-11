@@ -159,6 +159,14 @@ export class AdminController {
     } catch (err) { next(err); }
   }
 
+  async requestMoreInfo(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { message } = req.body;
+      const data = await adminService.requestMoreInfo(req.params.id as string, message || 'Please complete all required sections of your application, including guarantor details.');
+      sendSuccess(res, data, 'More information requested');
+    } catch (err) { next(err); }
+  }
+
   async getDisputes(req: Request, res: Response, next: NextFunction) {
     try {
       const data = await adminService.getDisputes(req.query.status as string | undefined);
