@@ -114,7 +114,7 @@ export class LoansController {
         return;
       }
       const result = await loansService.uploadLoanDocument(
-        req.params.id, req.user!.id, file.buffer, file.mimetype, docType,
+        req.params.id as string, req.user!.id, file.buffer, file.mimetype, docType as string,
       );
       sendSuccess(res, result, 'Document uploaded');
     } catch (err) { next(err); }
