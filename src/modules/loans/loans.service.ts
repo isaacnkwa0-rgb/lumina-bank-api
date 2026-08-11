@@ -4,6 +4,7 @@ import { TransactionType, TransactionStatus, LoanStatus, LoanType, LoanPaymentSt
 import { generateTransactionReference } from '../../shared/utils/transaction-ref';
 import { notifyAdmin } from '../../shared/utils/notify-admin';
 import { uploadBuffer } from '../../config/cloudinary';
+import { mailService } from '../../shared/services/mail.service';
 
 const LOAN_LIMITS: Record<string, number> = {
   PERSONAL: 50000,
@@ -256,7 +257,10 @@ export class LoansService {
   }
 
   async submitApplication(id: string, userId: string) {
-    const loan = await prisma.loan.findFirst({ where: { id, userId } });
+    const loan = await prisma.loan.findFirst({
+      where: { id, userId },
+      include: { user: true },
+    });
     if (!loan) throw new AppError('Loan application not found', 404);
     if (loan.status !== LoanStatus.ACKNOWLEDGED) throw new AppError('Application cannot be submitted in its current state', 400);
 
@@ -277,6 +281,21 @@ export class LoansService {
         body: `Your complete loan application (Ref: ${loan.referenceNumber}) has been submitted and is now under review.`,
       },
     });
+
+    // Notify guarantor if one was provided
+    const guarantor = appData.guarantor as Record<string, unknown> | undefined;
+    if (guarantor?.email) {
+      const applicantName = loan.user
+        ? `${(loan.user as any).firstName} ${(loan.user as any).lastName}`.trim()
+        : 'the applicant';
+      mailService.sendGuarantorNotification(String(guarantor.email), {
+        guarantorName: guarantor.fullName ? String(guarantor.fullName) : 'Guarantor',
+        applicantName,
+        loanType: loan.type,
+        amount: `£${Number(loan.principalAmount).toLocaleString()}`,
+        referenceNumber: loan.referenceNumber ?? id,
+      }).catch(() => {});
+    }
 
     return updated;
   }

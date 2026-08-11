@@ -367,6 +367,30 @@ export const mailService = {
     });
   },
 
+  async sendGuarantorNotification(to: string, opts: {
+    guarantorName: string;
+    applicantName: string;
+    loanType: string;
+    amount: string;
+    referenceNumber: string;
+  }): Promise<void> {
+    const { guarantorName, applicantName, loanType, amount, referenceNumber } = opts;
+    const type = loanType.charAt(0).toUpperCase() + loanType.slice(1).toLowerCase();
+    const body = `
+    <p>Dear ${guarantorName},</p>
+    <p>You are receiving this message because <strong>${applicantName}</strong> has listed you as a <strong>guarantor</strong> on their loan application with Lumina Bank.</p>
+    <div style="background:#F8F8F8;border:1px solid #E8E8E8;border-radius:4px;padding:14px 18px;margin:20px 0;">
+      <p style="margin:0 0 8px;font-size:11px;color:#AAAAAA;text-transform:uppercase;letter-spacing:1px">Application Reference</p>
+      <p style="margin:0 0 4px;font-size:15px;font-weight:700;color:#333;">${amount}</p>
+      <p style="margin:0;font-size:13px;color:#767676;">${type} Loan</p>
+      <p style="margin:4px 0 0;font-size:12px;color:#AAAAAA;font-family:monospace;">Ref: ${referenceNumber}</p>
+    </div>
+    <p>As a guarantor, you agree to take responsibility for repayments should the applicant be unable to do so. Our underwriting team will be in touch if they require any information from you directly.</p>
+    <p><strong>You do not need to take any action at this stage.</strong> We will contact you if further information is required.</p>
+    <p class="note">If you were not expecting this notification or do not consent to being a guarantor, please contact us immediately at <a href="mailto:support@luminabank.online" style="color:#DB0011;">support@luminabank.online</a>.</p>`;
+    await send({ to, subject: `You have been named as a guarantor | Lumina Bank`, html: layout('Guarantor Notification', body) });
+  },
+
   async sendAccountSuspended(to: string): Promise<void> {
     const body = `
       <p>Your Lumina Bank account has been <strong>temporarily suspended</strong>.</p>
