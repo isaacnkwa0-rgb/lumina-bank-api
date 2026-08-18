@@ -299,6 +299,41 @@ export class AdminService {
     return prisma.transfer.findUnique({ where: { id } });
   }
 
+  async revertTransferToPending(id: string, reason: string) {
+    const transfer = await prisma.transfer.findUnique({
+      where: { id },
+      include: { fromAccount: { include: { user: { select: { id: true, email: true } } } } },
+    });
+    if (!transfer) throw new AppError('Transfer not found', 404, ErrorCodes.NOT_FOUND);
+    if (transfer.status === TransferStatus.PENDING) throw new AppError('Transfer is already pending', 400, ErrorCodes.CONFLICT);
+
+    await prisma.$transaction(async (tx) => {
+      await tx.transfer.update({ where: { id }, data: { status: TransferStatus.PENDING, executedAt: null } });
+      if (transfer.fromTransactionId) {
+        await tx.transaction.update({ where: { id: transfer.fromTransactionId }, data: { status: 'PENDING' } });
+      }
+    });
+
+    const userId = transfer.fromAccount.user.id;
+    const amount = Number(transfer.amount).toFixed(2);
+    await prisma.notification.create({
+      data: {
+        userId,
+        type: 'TRANSFER',
+        title: 'Transfer under review',
+        body: `Your transfer of £${amount} has been placed back under review: ${reason}`,
+      },
+    });
+
+    mailService.sendTransferRevertedToPending(transfer.fromAccount.user.email, {
+      amount,
+      currency: transfer.currency,
+      reason,
+    }).catch(() => {});
+
+    return prisma.transfer.findUnique({ where: { id } });
+  }
+
   async reverseTransfer(id: string, reason?: string) {
     const transfer = await prisma.transfer.findUnique({
       where: { id },

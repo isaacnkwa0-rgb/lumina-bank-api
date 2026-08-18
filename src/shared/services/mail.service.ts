@@ -626,6 +626,19 @@ export const mailService = {
     await send({ to, subject: `Transfer approved: ${currency} ${amount} | Lumina Bank`, html: layout('Transfer Approved', body) });
   },
 
+  async sendTransferRevertedToPending(to: string, opts: { amount: string; currency: string; reason: string }): Promise<void> {
+    const { amount, currency, reason } = opts;
+    const body = `
+      <p>Your transfer of <strong>${currency} ${amount}</strong> has been placed back under <strong>review</strong> by our compliance team.</p>
+      <div style="background:#F8F8F8;border:1px solid #E8E8E8;border-radius:4px;padding:14px 18px;margin:20px 0;">
+        <p style="margin:0 0 8px;font-size:11px;color:#AAAAAA;text-transform:uppercase;letter-spacing:1px">Reason for review</p>
+        <p style="margin:0;font-size:14px;color:#333;">${reason}</p>
+      </div>
+      <p>No funds have been moved. Our team will review and update you as soon as possible.</p>
+      <p class="note">If you have any questions, please contact our support team.</p>`;
+    await send({ to, subject: `Transfer under review: ${currency} ${amount} | Lumina Bank`, html: layout('Transfer Under Review', body) });
+  },
+
   async sendStandingOrderExecuted(to: string, opts: { amount: string; currency: string; recipientName: string; description: string; balanceAfter: string }): Promise<void> {
     const { amount, currency, recipientName, description, balanceAfter } = opts;
     const body = `

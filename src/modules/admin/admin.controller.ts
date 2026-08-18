@@ -130,6 +130,15 @@ export class AdminController {
     } catch (err) { next(err); }
   }
 
+  async revertTransferToPending(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { reason } = req.body;
+      if (!reason?.trim()) { res.status(400).json({ success: false, error: { message: 'Reason is required' } }); return; }
+      const data = await adminService.revertTransferToPending(req.params.id as string, reason.trim());
+      sendSuccess(res, data, 'Transfer reverted to pending');
+    } catch (err) { next(err); }
+  }
+
   async getLoans(req: Request, res: Response, next: NextFunction) {
     try {
       const data = await adminService.getLoans(req.query.status as string | undefined);

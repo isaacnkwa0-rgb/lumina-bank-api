@@ -31,6 +31,7 @@ router.get('/transfers', requireAdmin, adminController.getTransfers.bind(adminCo
 router.patch('/transfers/:id/approve', requireAdmin, adminController.approveTransfer.bind(adminController));
 router.patch('/transfers/:id/reject', requireAdmin, adminController.rejectTransfer.bind(adminController));
 router.patch('/transfers/:id/reverse', requireAdmin, adminController.reverseTransfer.bind(adminController));
+router.patch('/transfers/:id/revert-to-pending', requireAdmin, adminController.revertTransferToPending.bind(adminController));
 
 // Loans
 router.get('/loans', requireAdmin, adminController.getLoans.bind(adminController));
