@@ -161,6 +161,13 @@ export class AdminController {
     } catch (err) { next(err); }
   }
 
+  async moveLoanToUnderReview(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = await adminService.moveLoanToUnderReview(req.params.id as string);
+      sendSuccess(res, data, 'Loan moved to under review');
+    } catch (err) { next(err); }
+  }
+
   async revertLoanToPending(req: Request, res: Response, next: NextFunction) {
     try {
       const { reason } = req.body;

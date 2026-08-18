@@ -515,6 +515,31 @@ export class AdminService {
     return { id, status: LoanStatus.PENDING };
   }
 
+  async moveLoanToUnderReview(id: string) {
+    const loan = await prisma.loan.findUnique({
+      where: { id },
+      include: { user: { select: { id: true, firstName: true, email: true } } },
+    });
+    if (!loan) throw new AppError('Loan not found', 404, ErrorCodes.NOT_FOUND);
+    if (loan.status === LoanStatus.UNDER_REVIEW) throw new AppError('Loan is already under review', 400, ErrorCodes.CONFLICT);
+    if (loan.status === LoanStatus.ACTIVE || loan.status === LoanStatus.REJECTED || loan.status === LoanStatus.WITHDRAWN) {
+      throw new AppError('Cannot move this loan to under review', 400, ErrorCodes.CONFLICT);
+    }
+
+    await prisma.loan.update({ where: { id }, data: { status: LoanStatus.UNDER_REVIEW } });
+
+    await prisma.notification.create({
+      data: {
+        userId: loan.user.id,
+        type: NotificationType.LOAN as any,
+        title: 'Loan application under review',
+        body: `Your loan application is now being reviewed by our team. We will be in touch shortly.`,
+      },
+    });
+
+    return { id, status: LoanStatus.UNDER_REVIEW };
+  }
+
   async rejectLoan(id: string, reason?: string) {
     const loan = await prisma.loan.findUnique({ where: { id }, include: { user: true } });
     if (!loan) throw new AppError('Loan not found', 404, ErrorCodes.NOT_FOUND);

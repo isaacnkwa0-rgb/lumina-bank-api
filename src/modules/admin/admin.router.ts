@@ -40,6 +40,7 @@ router.patch('/loans/:id/reject', requireAdmin, adminController.rejectLoan.bind(
 router.patch('/loans/:id/acknowledge', requireAdmin, adminController.acknowledgeLoan.bind(adminController));
 router.patch('/loans/:id/request-info', requireAdmin, adminController.requestMoreInfo.bind(adminController));
 router.patch('/loans/:id/revert-to-pending', requireAdmin, adminController.revertLoanToPending.bind(adminController));
+router.patch('/loans/:id/move-to-under-review', requireAdmin, adminController.moveLoanToUnderReview.bind(adminController));
 
 // Disputes
 router.get('/disputes', requireAdmin, adminController.getDisputes.bind(adminController));
