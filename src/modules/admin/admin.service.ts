@@ -481,6 +481,40 @@ export class AdminService {
     return prisma.loan.findUnique({ where: { id } });
   }
 
+  async revertLoanToPending(id: string, reason: string) {
+    const loan = await prisma.loan.findUnique({
+      where: { id },
+      include: { user: { select: { id: true, firstName: true, email: true } } },
+    });
+    if (!loan) throw new AppError('Loan not found', 404, ErrorCodes.NOT_FOUND);
+    if (loan.status === LoanStatus.PENDING) throw new AppError('Loan is already pending', 400, ErrorCodes.CONFLICT);
+    if (loan.status === LoanStatus.ACTIVE) throw new AppError('Cannot revert an active (disbursed) loan', 400, ErrorCodes.CONFLICT);
+    if (loan.status === LoanStatus.REJECTED || loan.status === LoanStatus.WITHDRAWN) {
+      throw new AppError('Cannot revert a rejected or withdrawn loan', 400, ErrorCodes.CONFLICT);
+    }
+
+    await prisma.loan.update({ where: { id }, data: { status: LoanStatus.PENDING, acknowledgedAt: null } });
+
+    await prisma.notification.create({
+      data: {
+        userId: loan.user.id,
+        type: NotificationType.LOAN as any,
+        title: 'Loan application update',
+        body: `Your loan application has been returned to pending review: ${reason}`,
+      },
+    });
+
+    mailService.sendLoanRevertedToPending(loan.user.email, {
+      firstName: loan.user.firstName,
+      loanType: loan.type,
+      amount: Number(loan.principalAmount).toFixed(2),
+      referenceNumber: loan.referenceNumber ?? id,
+      reason,
+    }).catch(() => {});
+
+    return { id, status: LoanStatus.PENDING };
+  }
+
   async rejectLoan(id: string, reason?: string) {
     const loan = await prisma.loan.findUnique({ where: { id }, include: { user: true } });
     if (!loan) throw new AppError('Loan not found', 404, ErrorCodes.NOT_FOUND);

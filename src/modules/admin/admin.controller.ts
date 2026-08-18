@@ -161,6 +161,15 @@ export class AdminController {
     } catch (err) { next(err); }
   }
 
+  async revertLoanToPending(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { reason } = req.body;
+      if (!reason?.trim()) { res.status(400).json({ success: false, error: { message: 'Reason is required' } }); return; }
+      const data = await adminService.revertLoanToPending(req.params.id as string, reason.trim());
+      sendSuccess(res, data, 'Loan reverted to pending');
+    } catch (err) { next(err); }
+  }
+
   async acknowledgeLoan(req: Request, res: Response, next: NextFunction) {
     try {
       const data = await adminService.acknowledgeLoan(req.params.id as string);
