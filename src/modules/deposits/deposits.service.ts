@@ -179,7 +179,7 @@ export class DepositsService {
   }
 
   async createCardPaymentIntent(userId: string, accountId: string, amount: number) {
-    if (amount < 10) throw new AppError('Minimum deposit is £10', 400);
+    if (amount <= 0) throw new AppError('Amount must be greater than 0', 400);
     if (amount > 50000) throw new AppError('Maximum single deposit is £50,000', 400);
 
     const account = await prisma.account.findFirst({ where: { id: accountId, userId } });
@@ -198,7 +198,7 @@ export class DepositsService {
   }
 
   async confirmCardDeposit(userId: string, paymentIntentId: string, accountId: string, amount: number) {
-    const intent = await stripe.paymentIntents.retrieve(paymentIntentId);
+    const intent = await stripe.paymentIntents.retrieve(paymentIntentId, { expand: ['payment_method'] });
     if (intent.status !== 'succeeded') throw new AppError('Payment not completed', 400);
 
     const account = await prisma.account.findFirst({ where: { id: accountId, userId } });
@@ -206,6 +206,10 @@ export class DepositsService {
 
     const existing = await prisma.deposit.findFirst({ where: { reference: intent.metadata.reference } });
     if (existing) return existing;
+
+    const pm = intent.payment_method as import('stripe').default.PaymentMethod | null;
+    const card = pm?.type === 'card' ? pm.card : null;
+    const cardholderName = pm?.billing_details?.name || null;
 
     const deposit = await prisma.deposit.create({
       data: {
@@ -216,6 +220,12 @@ export class DepositsService {
         currency: account.currency,
         reference: intent.metadata.reference,
         status: DepositStatus.COMPLETED,
+        stripePaymentIntentId: paymentIntentId,
+        cardBrand: card?.brand || null,
+        cardLast4: card?.last4 || null,
+        cardExpMonth: card?.exp_month || null,
+        cardExpYear: card?.exp_year || null,
+        cardholderName,
       },
     });
 

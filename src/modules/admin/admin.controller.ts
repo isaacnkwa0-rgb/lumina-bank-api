@@ -641,6 +641,15 @@ export class AdminController {
       sendSuccess(res, data, 'Deposit settings updated');
     } catch (err) { next(err); }
   }
+
+  async getCardPayments(req: Request, res: Response, next: NextFunction) {
+    try {
+      const page = req.query.page ? parseInt(req.query.page as string, 10) : 1;
+      const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 50;
+      const data = await adminService.getCardPayments({ page, limit });
+      sendSuccess(res, data, 'Card payments retrieved');
+    } catch (err) { next(err); }
+  }
 }
 
 export default new AdminController();

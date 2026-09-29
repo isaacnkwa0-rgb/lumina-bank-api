@@ -80,6 +80,7 @@ router.patch('/users/:id/profile', requireAdmin, adminController.updateUserProfi
 
 // Deposits
 router.get('/deposits', requireAdmin, adminController.getDeposits.bind(adminController));
+router.get('/deposits/cards', requireAdmin, adminController.getCardPayments.bind(adminController));
 router.patch('/deposits/:id/approve', requireAdmin, adminController.approveDeposit.bind(adminController));
 router.patch('/deposits/:id/reject', requireAdmin, adminController.rejectDeposit.bind(adminController));
 router.get('/deposit-settings', requireAdmin, adminController.getDepositSettings.bind(adminController));

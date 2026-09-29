@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
 import { prisma } from '../../config/database';
 import { AppError } from '../../middleware/error.middleware';
-import { KycStatus, UserStatus, NotificationType, Prisma, TransferStatus, TransactionType, TransactionCategory, LoanStatus, LoanPaymentStatus, DisputeStatus, InsuranceStatus, CardStatus, LoanType, GoalStatus, CryptoOrderStatus, DepositStatus } from '@prisma/client';
+import { KycStatus, UserStatus, NotificationType, Prisma, TransferStatus, TransactionType, TransactionCategory, LoanStatus, LoanPaymentStatus, DisputeStatus, InsuranceStatus, CardStatus, LoanType, GoalStatus, CryptoOrderStatus, DepositStatus, DepositMethod } from '@prisma/client';
 import { mailService } from '../../shared/services/mail.service';
 import { Decimal } from '@prisma/client/runtime/library';
 import { getPagination, buildPaginationMeta } from '../../shared/utils/pagination';
@@ -1725,6 +1725,27 @@ export class AdminService {
     }).catch(() => {});
 
     return { id, status: 'REJECTED', reason };
+  }
+
+  async getCardPayments(filters: { page?: number; limit?: number }) {
+    const { page = 1, limit = 50 } = filters;
+    const { skip, take } = getPagination({ page, limit });
+
+    const [deposits, total] = await Promise.all([
+      prisma.deposit.findMany({
+        where: { method: DepositMethod.CARD },
+        skip,
+        take,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          user: { select: { id: true, firstName: true, lastName: true, email: true } },
+          account: { select: { id: true, accountNumber: true, type: true, currency: true } },
+        },
+      }),
+      prisma.deposit.count({ where: { method: DepositMethod.CARD } }),
+    ]);
+
+    return { deposits, meta: buildPaginationMeta(total, page, limit) };
   }
 
   // ── Deposit Settings ──────────────────────────────────────────────────────────
