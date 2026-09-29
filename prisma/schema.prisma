@@ -844,6 +844,7 @@ model CryptoOrder {
 enum DepositMethod {
   BANK_TRANSFER
   CRYPTO
+  CARD
 }
 
 enum DepositStatus {
@@ -932,3 +933,21 @@ model DepositSettings {
   cryptoWallets     Json     @default("{}")
   updatedAt         DateTime @updatedAt
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

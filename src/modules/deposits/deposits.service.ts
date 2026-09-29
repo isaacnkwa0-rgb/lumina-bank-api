@@ -1,10 +1,13 @@
+import Stripe from 'stripe';
 import { Decimal } from '@prisma/client/runtime/library';
-import { DepositMethod, DepositStatus, NotificationType } from '@prisma/client';
+import { DepositMethod, DepositStatus, NotificationType, TransactionCategory } from '@prisma/client';
 import { prisma } from '../../config/database';
 import { AppError } from '../../middleware/error.middleware';
 import { ErrorCodes } from '../../shared/utils/api-response';
 import { generateTransactionReference } from '../../shared/utils/transaction-ref';
 import { notifyAdmin } from '../../shared/utils/notify-admin';
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2026-08-26.dahlia' });
 
 type CryptoWallets = Record<string, { address: string; network: string }>;
 
@@ -173,6 +176,87 @@ export class DepositsService {
     const settings = await getSettings();
     const wallets = settings.cryptoWallets as CryptoWallets;
     return Object.entries(wallets).map(([coin, info]) => ({ coin, network: info.network }));
+  }
+
+  async createCardPaymentIntent(userId: string, accountId: string, amount: number) {
+    if (amount < 10) throw new AppError('Minimum deposit is £10', 400);
+    if (amount > 50000) throw new AppError('Maximum single deposit is £50,000', 400);
+
+    const account = await prisma.account.findFirst({ where: { id: accountId, userId } });
+    if (!account) throw new AppError('Account not found', 404, ErrorCodes.NOT_FOUND);
+
+    const reference = generateTransactionReference();
+    const amountPence = Math.round(amount * 100);
+
+    const intent = await stripe.paymentIntents.create({
+      amount: amountPence,
+      currency: account.currency.toLowerCase(),
+      metadata: { userId, accountId, reference },
+    });
+
+    return { clientSecret: intent.client_secret, reference };
+  }
+
+  async confirmCardDeposit(userId: string, paymentIntentId: string, accountId: string, amount: number) {
+    const intent = await stripe.paymentIntents.retrieve(paymentIntentId);
+    if (intent.status !== 'succeeded') throw new AppError('Payment not completed', 400);
+
+    const account = await prisma.account.findFirst({ where: { id: accountId, userId } });
+    if (!account) throw new AppError('Account not found', 404, ErrorCodes.NOT_FOUND);
+
+    const existing = await prisma.deposit.findFirst({ where: { reference: intent.metadata.reference } });
+    if (existing) return existing;
+
+    const deposit = await prisma.deposit.create({
+      data: {
+        userId,
+        accountId,
+        method: DepositMethod.CARD,
+        amount: new Decimal(amount),
+        currency: account.currency,
+        reference: intent.metadata.reference,
+        status: DepositStatus.COMPLETED,
+      },
+    });
+
+    await prisma.account.update({
+      where: { id: accountId },
+      data: {
+        balance:          { increment: new Decimal(amount) },
+        availableBalance: { increment: new Decimal(amount) },
+      },
+    });
+
+    await prisma.transaction.create({
+      data: {
+        accountId,
+        type: 'CREDIT',
+        category: TransactionCategory.DEPOSIT,
+        amount: new Decimal(amount),
+        currency: account.currency,
+        description: 'Card deposit',
+        reference: intent.metadata.reference,
+        status: 'COMPLETED',
+        balanceBefore: new Decimal(Number(account.balance)),
+        balanceAfter: new Decimal(Number(account.balance) + amount),
+      },
+    });
+
+    await prisma.notification.create({
+      data: {
+        userId,
+        type: NotificationType.TRANSACTION,
+        title: 'Card Deposit Successful',
+        body: `£${amount.toLocaleString('en-GB', { minimumFractionDigits: 2 })} has been added to your ${account.type.charAt(0) + account.type.slice(1).toLowerCase()} account.`,
+      },
+    });
+
+    const user = await prisma.user.findUnique({ where: { id: userId }, select: { firstName: true, lastName: true, email: true } });
+    if (user) {
+      notifyAdmin({ type: 'DEPOSIT_REQUEST', firstName: user.firstName, lastName: user.lastName, email: user.email, method: 'Card', amount, currency: account.currency, reference: intent.metadata.reference, depositId: deposit.id });
+    }
+
+    return deposit;
   }
 }
 

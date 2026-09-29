@@ -55,6 +55,7 @@
     "qrcode": "^1.5.4",
     "resend": "^6.17.2",
     "speakeasy": "^2.0.0",
+    "stripe": "^22.6.2",
     "swagger-jsdoc": "^6.3.0",
     "swagger-ui-express": "^5.0.1",
     "winston": "^3.19.0",

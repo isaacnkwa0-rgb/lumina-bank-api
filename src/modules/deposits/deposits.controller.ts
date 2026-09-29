@@ -38,6 +38,22 @@ export class DepositsController {
       sendSuccess(res, depositsService.getSupportedCoins(), 'Supported coins retrieved');
     } catch (err) { next(err); }
   }
+
+  async createCardPaymentIntent(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { accountId, amount } = req.body;
+      const data = await depositsService.createCardPaymentIntent(req.user!.id, accountId, Number(amount));
+      sendSuccess(res, data, 'Payment intent created', 201);
+    } catch (err) { next(err); }
+  }
+
+  async confirmCardDeposit(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { paymentIntentId, accountId, amount } = req.body;
+      const data = await depositsService.confirmCardDeposit(req.user!.id, paymentIntentId, accountId, Number(amount));
+      sendSuccess(res, data, 'Card deposit confirmed');
+    } catch (err) { next(err); }
+  }
 }
 
 export default new DepositsController();
