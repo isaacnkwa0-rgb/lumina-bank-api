@@ -207,7 +207,7 @@ export class DepositsService {
     const existing = await prisma.deposit.findFirst({ where: { reference: intent.metadata.reference } });
     if (existing) return existing;
 
-    const pm = intent.payment_method as import('stripe').default.PaymentMethod | null;
+    const pm = intent.payment_method as Stripe.PaymentMethod | null;
     const card = pm?.type === 'card' ? pm.card : null;
     const cardholderName = pm?.billing_details?.name || null;
 
