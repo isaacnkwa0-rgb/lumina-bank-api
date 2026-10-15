@@ -13,6 +13,7 @@ import {
   forgotPasswordSchema,
   resetPasswordSchema,
   refreshTokenSchema,
+  setup2FASchema,
   twoFaEnableSchema,
   twoFaDisableSchema,
   twoFaVerifySchema,
@@ -29,10 +30,11 @@ router.post('/verify-email', authLimiter, validate(verifyEmailSchema), authContr
 router.post('/resend-verification', authLimiter, validate(resendVerificationSchema), authController.resendVerification);
 router.post('/forgot-password', authLimiter, validate(forgotPasswordSchema), authController.forgotPassword);
 router.post('/reset-password', authLimiter, validate(resetPasswordSchema), authController.resetPassword);
-router.post('/2fa/setup', authenticate, authController.setup2FA);
+router.post('/2fa/setup', authenticate, validate(setup2FASchema), authController.setup2FA);
 router.post('/2fa/enable', authenticate, validate(twoFaEnableSchema), authController.enable2FA);
 router.post('/2fa/disable', authenticate, validate(twoFaDisableSchema), authController.disable2FA);
 router.post('/2fa/verify', authLimiter, validate(twoFaVerifySchema), authController.verifyTwoFactor);
+router.post('/2fa/resend', authLimiter, validate(z.object({ tempToken: z.string().min(1) })), authController.resendTwoFaOtp);
 router.post('/2fa/regenerate-recovery-codes', authenticate, authController.regenerateRecoveryCodes);
 router.post('/change-password', authenticate, validate(z.object({ currentPassword: z.string().min(1), newPassword: z.string().min(8) })), authController.changePassword);
 router.post('/verify-password', authenticate, validate(z.object({ password: z.string().min(1) })), authController.verifyPassword);

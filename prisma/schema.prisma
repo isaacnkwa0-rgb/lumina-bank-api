@@ -58,6 +58,12 @@ enum AccountStatus {
   CLOSED
 }
 
+enum TwoFactorMethod {
+  TOTP
+  EMAIL
+  BOTH
+}
+
 enum TransactionType {
   CREDIT
   DEBIT
@@ -240,7 +246,8 @@ model User {
   role                Role       @default(USER)
   isEmailVerified     Boolean    @default(false)
   isPhoneVerified     Boolean    @default(false)
-  twoFactorEnabled    Boolean    @default(false)
+  twoFactorEnabled    Boolean          @default(false)
+  twoFactorMethod     TwoFactorMethod  @default(TOTP)
   twoFactorSecret     String?
   twoFactorRecoveryCodes Json?
   transferPinHash     String?
@@ -933,6 +940,16 @@ model DepositSettings {
   cryptoWallets     Json     @default("{}")
   updatedAt         DateTime @updatedAt
 }
+
+
+
+
+
+
+
+
+
+
 
 
 

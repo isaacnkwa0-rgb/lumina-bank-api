@@ -177,7 +177,11 @@ export class AuthService {
         env.JWT_ACCESS_SECRET,
         { expiresIn: '5m' }
       );
-      return { requiresTwoFactor: true, tempToken };
+      const method = user.twoFactorMethod ?? 'TOTP';
+      if (method === 'EMAIL' || method === 'BOTH') {
+        this.sendEmailOtp(user.id, user.email, 'TWO_FA').catch(() => {});
+      }
+      return { requiresTwoFactor: true, tempToken, twoFactorMethod: method };
     }
 
     const tokens = await this.issueTokens(user.id, user.email, user.role, user.tier, user.status, deviceInfo);
@@ -235,17 +239,50 @@ export class AuthService {
       return this.issueTokens(user.id, user.email, user.role, user.tier, user.status, deviceInfo);
     }
 
-    if (!user.twoFactorSecret) {
-      throw new AppError('User not found', 404, ErrorCodes.AUTH_004);
-    }
-    const secret = decrypt(user.twoFactorSecret);
-    const valid = speakeasy.totp.verify({ secret, encoding: 'base32', token: totpCode!, window: 1 });
+    if (!totpCode) throw new AppError('Verification code is required', 400, ErrorCodes.AUTH_006);
 
-    if (!valid) {
-      throw new AppError('Invalid 2FA code', 401, ErrorCodes.AUTH_006);
+    const method = user.twoFactorMethod ?? 'TOTP';
+
+    if (method === 'EMAIL') {
+      await this.verifyOtp(user.id, totpCode, 'TWO_FA');
+      return this.issueTokens(user.id, user.email, user.role, user.tier, user.status, deviceInfo);
     }
+
+    if (method === 'BOTH') {
+      // Accept either TOTP or email OTP
+      let valid = false;
+      if (user.twoFactorSecret) {
+        const secret = decrypt(user.twoFactorSecret);
+        valid = speakeasy.totp.verify({ secret, encoding: 'base32', token: totpCode, window: 1 });
+      }
+      if (!valid) {
+        // Try email OTP as fallback
+        await this.verifyOtp(user.id, totpCode, 'TWO_FA');
+      }
+      return this.issueTokens(user.id, user.email, user.role, user.tier, user.status, deviceInfo);
+    }
+
+    // Default: TOTP
+    if (!user.twoFactorSecret) throw new AppError('User not found', 404, ErrorCodes.AUTH_004);
+    const secret = decrypt(user.twoFactorSecret);
+    const valid = speakeasy.totp.verify({ secret, encoding: 'base32', token: totpCode, window: 1 });
+    if (!valid) throw new AppError('Invalid 2FA code', 401, ErrorCodes.AUTH_006);
 
     return this.issueTokens(user.id, user.email, user.role, user.tier, user.status, deviceInfo);
+  }
+
+  async resendTwoFaOtp(tempToken: string) {
+    let payload: any;
+    try {
+      payload = jwt.verify(tempToken, env.JWT_ACCESS_SECRET);
+    } catch {
+      throw new AppError('Invalid or expired session', 401, ErrorCodes.AUTH_004);
+    }
+    if (payload.type !== '2fa_pending') throw new AppError('Invalid token type', 401, ErrorCodes.AUTH_004);
+    const user = await prisma.user.findUnique({ where: { id: payload.sub } });
+    if (!user) throw new AppError('User not found', 404, ErrorCodes.AUTH_004);
+    await this.sendEmailOtp(user.id, user.email, 'TWO_FA');
+    return { sent: true };
   }
 
   async refreshTokens(refreshToken: string) {
@@ -344,35 +381,52 @@ export class AuthService {
     return { message: 'Password reset successfully' };
   }
 
-  async setup2FA(userId: string) {
+  async setup2FA(userId: string, method: string = 'TOTP') {
     const user = await prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new AppError('User not found', 404, ErrorCodes.NOT_FOUND);
     if (user.twoFactorEnabled) throw new AppError('2FA is already enabled', 400, ErrorCodes.CONFLICT);
 
+    if (method === 'EMAIL' || method === 'BOTH') {
+      // Store chosen method, send a setup OTP to confirm email access
+      await prisma.user.update({ where: { id: userId }, data: { twoFactorMethod: method as any } });
+    }
+
+    if (method === 'EMAIL') {
+      await this.sendEmailOtp(userId, user.email, 'TWO_FA_SETUP');
+      const masked = user.email.replace(/^(.{2}).*(@.*)$/, '$1***$2');
+      return { method: 'EMAIL', maskedEmail: masked };
+    }
+
+    // TOTP or BOTH — generate secret + QR
     const secret = speakeasy.generateSecret({ name: `Lumina Bank (${user.email})`, length: 20 });
     const encrypted = encrypt(secret.base32);
-
-    await prisma.user.update({ where: { id: userId }, data: { twoFactorSecret: encrypted } });
+    await prisma.user.update({ where: { id: userId }, data: { twoFactorSecret: encrypted, twoFactorMethod: method as any } });
 
     const qrCodeUrl = await QRCode.toDataURL(secret.otpauth_url!);
-    return { secret: secret.base32, qrCode: qrCodeUrl };
+    return { method, secret: secret.base32, qrCode: qrCodeUrl };
   }
 
-  async enable2FA(userId: string, token: string) {
+  async enable2FA(userId: string, token: string, method?: string) {
     const user = await prisma.user.findUnique({ where: { id: userId } });
-    if (!user?.twoFactorSecret) throw new AppError('2FA setup not initiated', 400, ErrorCodes.AUTH_005);
+    if (!user) throw new AppError('User not found', 404, ErrorCodes.NOT_FOUND);
 
-    const secret = decrypt(user.twoFactorSecret);
-    const valid = speakeasy.totp.verify({ secret, encoding: 'base32', token, window: 1 });
+    const resolvedMethod = method ?? user.twoFactorMethod ?? 'TOTP';
 
-    if (!valid) throw new AppError('Invalid 2FA code', 401, ErrorCodes.AUTH_006);
+    if (resolvedMethod === 'EMAIL') {
+      await this.verifyOtp(userId, token, 'TWO_FA_SETUP');
+    } else {
+      if (!user.twoFactorSecret) throw new AppError('2FA setup not initiated', 400, ErrorCodes.AUTH_005);
+      const secret = decrypt(user.twoFactorSecret);
+      const valid = speakeasy.totp.verify({ secret, encoding: 'base32', token, window: 1 });
+      if (!valid) throw new AppError('Invalid 2FA code', 401, ErrorCodes.AUTH_006);
+    }
 
     const codes = Array.from({ length: 10 }, () => randomBytes(4).toString('hex').toUpperCase());
     const hashedCodes = codes.map(c => createHash('sha256').update(c).digest('hex'));
 
     await prisma.user.update({
       where: { id: userId },
-      data: { twoFactorEnabled: true, twoFactorRecoveryCodes: hashedCodes },
+      data: { twoFactorEnabled: true, twoFactorMethod: resolvedMethod as any, twoFactorRecoveryCodes: hashedCodes },
     });
     mailService.send2FAChanged(user.email, true).catch(() => {});
     return { message: 'Two-factor authentication enabled', recoveryCodes: codes };
@@ -400,7 +454,10 @@ export class AuthService {
     const passwordMatch = await bcrypt.compare(password, user.passwordHash);
     if (!passwordMatch) throw new AppError('Invalid password', 401, ErrorCodes.AUTH_001);
 
-    if (user.twoFactorSecret) {
+    const method = user.twoFactorMethod ?? 'TOTP';
+    if (method === 'EMAIL') {
+      await this.verifyOtp(userId, token, 'TWO_FA_SETUP');
+    } else if (user.twoFactorSecret) {
       const secret = decrypt(user.twoFactorSecret);
       const valid = speakeasy.totp.verify({ secret, encoding: 'base32', token, window: 1 });
       if (!valid) throw new AppError('Invalid 2FA code', 401, ErrorCodes.AUTH_006);
@@ -408,7 +465,7 @@ export class AuthService {
 
     await prisma.user.update({
       where: { id: userId },
-      data: { twoFactorEnabled: false, twoFactorSecret: null },
+      data: { twoFactorEnabled: false, twoFactorSecret: null, twoFactorMethod: 'TOTP' },
     });
     mailService.send2FAChanged(user.email, false).catch(() => {});
     return { message: '2FA disabled successfully' };

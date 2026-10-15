@@ -108,7 +108,7 @@ export class AuthController {
 
   async setup2FA(req: Request, res: Response, next: NextFunction) {
     try {
-      const result = await authService.setup2FA(req.user!.id);
+      const result = await authService.setup2FA(req.user!.id, req.body.method ?? 'TOTP');
       sendSuccess(res, result, '2FA setup initiated');
     } catch (err) {
       next(err);
@@ -117,8 +117,17 @@ export class AuthController {
 
   async enable2FA(req: Request, res: Response, next: NextFunction) {
     try {
-      const result = await authService.enable2FA(req.user!.id, req.body.token);
+      const result = await authService.enable2FA(req.user!.id, req.body.token, req.body.method);
       sendSuccess(res, result, '2FA enabled');
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async resendTwoFaOtp(req: Request, res: Response, next: NextFunction) {
+    try {
+      const result = await authService.resendTwoFaOtp(req.body.tempToken);
+      sendSuccess(res, result, 'Code resent');
     } catch (err) {
       next(err);
     }
@@ -213,6 +222,7 @@ export class AuthController {
           status: true,
           isEmailVerified: true,
           twoFactorEnabled: true,
+          twoFactorMethod: true,
           kycStatus: true,
           createdAt: true,
         },

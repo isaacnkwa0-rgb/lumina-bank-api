@@ -57,7 +57,12 @@ export const refreshTokenSchema = z.object({
   refreshToken: z.string().min(1),
 });
 
+export const setup2FASchema = z.object({
+  method: z.enum(['TOTP', 'EMAIL', 'BOTH']).optional().default('TOTP'),
+});
+
 export const twoFaEnableSchema = z.object({
+  method: z.enum(['TOTP', 'EMAIL', 'BOTH']).optional().default('TOTP'),
   token: z.string().length(6),
 });
 
