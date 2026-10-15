@@ -27,10 +27,12 @@ export class AuthController {
 
   async verifyTwoFactor(req: Request, res: Response, next: NextFunction) {
     try {
-      const result = await authService.verifyTwoFactor(req.body.tempToken, req.body.token, {
-        userAgent: req.get('user-agent'),
-        ip: req.ip,
-      });
+      const result = await authService.verifyTwoFactor(
+        req.body.tempToken,
+        req.body.token || null,
+        req.body.recoveryCode || null,
+        { userAgent: req.get('user-agent'), ip: req.ip },
+      );
       sendSuccess(res, result, 'Two-factor authentication successful');
     } catch (err) {
       next(err);

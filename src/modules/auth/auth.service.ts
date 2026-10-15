@@ -201,7 +201,7 @@ export class AuthService {
     };
   }
 
-  async verifyTwoFactor(tempToken: string, totpCode: string, deviceInfo?: any) {
+  async verifyTwoFactor(tempToken: string, totpCode: string | null, recoveryCode: string | null, deviceInfo?: any) {
     let payload: any;
     try {
       payload = jwt.verify(tempToken, env.JWT_ACCESS_SECRET);
@@ -214,12 +214,32 @@ export class AuthService {
     }
 
     const user = await prisma.user.findUnique({ where: { id: payload.sub } });
-    if (!user || !user.twoFactorSecret) {
+    if (!user) {
       throw new AppError('User not found', 404, ErrorCodes.AUTH_004);
     }
 
+    if (recoveryCode) {
+      const stored = user.twoFactorRecoveryCodes as string[] | null;
+      if (!stored || stored.length === 0) {
+        throw new AppError('No recovery codes available', 400, ErrorCodes.AUTH_006);
+      }
+      const hashed = createHash('sha256').update(recoveryCode.toUpperCase()).digest('hex');
+      const idx = stored.indexOf(hashed);
+      if (idx === -1) {
+        throw new AppError('Invalid recovery code', 401, ErrorCodes.AUTH_006);
+      }
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { twoFactorRecoveryCodes: stored.filter((_, i) => i !== idx) },
+      });
+      return this.issueTokens(user.id, user.email, user.role, user.tier, user.status, deviceInfo);
+    }
+
+    if (!user.twoFactorSecret) {
+      throw new AppError('User not found', 404, ErrorCodes.AUTH_004);
+    }
     const secret = decrypt(user.twoFactorSecret);
-    const valid = speakeasy.totp.verify({ secret, encoding: 'base32', token: totpCode, window: 1 });
+    const valid = speakeasy.totp.verify({ secret, encoding: 'base32', token: totpCode!, window: 1 });
 
     if (!valid) {
       throw new AppError('Invalid 2FA code', 401, ErrorCodes.AUTH_006);

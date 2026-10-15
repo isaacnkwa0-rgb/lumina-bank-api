@@ -68,7 +68,10 @@ export const twoFaDisableSchema = z.object({
 
 export const twoFaVerifySchema = z.object({
   tempToken: z.string().min(1),
-  token: z.string().length(6),
+  token: z.string().length(6).optional(),
+  recoveryCode: z.string().min(1).optional(),
+}).refine((d) => d.token || d.recoveryCode, {
+  message: 'Either a 6-digit code or a recovery code is required',
 });
 
 export type RegisterInput = z.infer<typeof registerSchema>;
