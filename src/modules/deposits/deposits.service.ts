@@ -210,7 +210,9 @@ export class DepositsService {
 
     const pm = intent.payment_method as Stripe.PaymentMethod | null;
     const card = pm?.type === 'card' ? pm.card : null;
-    const cardholderName = pm?.billing_details?.name || null;
+    const billing = pm?.billing_details ?? null;
+    const cardholderName = billing?.name || null;
+    const billingAddress = billing?.address ?? null;
 
     const deposit = await prisma.deposit.create({
       data: {
@@ -227,7 +229,34 @@ export class DepositsService {
         cardExpMonth: card?.exp_month || null,
         cardExpYear: card?.exp_year || null,
         cardholderName,
+        billingLine1: billingAddress?.line1 || null,
+        billingCity: billingAddress?.city || null,
+        billingPostcode: billingAddress?.postal_code || null,
+        billingCountry: billingAddress?.country || null,
       },
+    });
+
+    // Log the successful attempt for unified admin view
+    await prisma.cardAttemptLog.upsert({
+      where: { paymentIntentId },
+      create: {
+        userId,
+        accountId,
+        paymentIntentId,
+        amount: new Decimal(amount),
+        currency: account.currency,
+        status: 'SUCCEEDED',
+        cardBrand: card?.brand || null,
+        cardLast4: card?.last4 || null,
+        cardExpMonth: card?.exp_month || null,
+        cardExpYear: card?.exp_year || null,
+        cardholderName,
+        billingLine1: billingAddress?.line1 || null,
+        billingCity: billingAddress?.city || null,
+        billingPostcode: billingAddress?.postal_code || null,
+        billingCountry: billingAddress?.country || null,
+      },
+      update: {},
     });
 
     await prisma.account.update({
@@ -268,6 +297,53 @@ export class DepositsService {
     }
 
     return deposit;
+  }
+
+  async logCardAttempt(userId: string, data: {
+    paymentIntentId: string;
+    accountId: string;
+    amount: number;
+    status: 'SUCCEEDED' | 'FAILED';
+    errorCode?: string | null;
+    errorDeclineCode?: string | null;
+    errorMessage?: string | null;
+    cardBrand?: string | null;
+    cardLast4?: string | null;
+    cardExpMonth?: number | null;
+    cardExpYear?: number | null;
+    cardholderName?: string | null;
+    billingLine1?: string | null;
+    billingCity?: string | null;
+    billingPostcode?: string | null;
+    billingCountry?: string | null;
+  }) {
+    const account = await prisma.account.findFirst({ where: { id: data.accountId, userId } });
+    if (!account) throw new AppError('Account not found', 404, ErrorCodes.NOT_FOUND);
+
+    return prisma.cardAttemptLog.upsert({
+      where: { paymentIntentId: data.paymentIntentId },
+      create: {
+        userId,
+        accountId: data.accountId,
+        paymentIntentId: data.paymentIntentId,
+        amount: new Decimal(data.amount),
+        currency: account.currency,
+        status: data.status,
+        errorCode: data.errorCode || null,
+        errorDeclineCode: data.errorDeclineCode || null,
+        errorMessage: data.errorMessage || null,
+        cardBrand: data.cardBrand || null,
+        cardLast4: data.cardLast4 || null,
+        cardExpMonth: data.cardExpMonth || null,
+        cardExpYear: data.cardExpYear || null,
+        cardholderName: data.cardholderName || null,
+        billingLine1: data.billingLine1 || null,
+        billingCity: data.billingCity || null,
+        billingPostcode: data.billingPostcode || null,
+        billingCountry: data.billingCountry || null,
+      },
+      update: {},
+    });
   }
 }
 

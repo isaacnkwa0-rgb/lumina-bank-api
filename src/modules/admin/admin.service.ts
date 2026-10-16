@@ -1728,12 +1728,11 @@ export class AdminService {
   }
 
   async getCardPayments(filters: { page?: number; limit?: number }) {
-    const { page = 1, limit = 50 } = filters;
+    const { page = 1, limit = 100 } = filters;
     const { skip, take } = getPagination({ page, limit });
 
-    const [deposits, total] = await Promise.all([
-      prisma.deposit.findMany({
-        where: { method: DepositMethod.CARD },
+    const [attempts, total] = await Promise.all([
+      prisma.cardAttemptLog.findMany({
         skip,
         take,
         orderBy: { createdAt: 'desc' },
@@ -1742,8 +1741,35 @@ export class AdminService {
           account: { select: { id: true, accountNumber: true, type: true, currency: true } },
         },
       }),
-      prisma.deposit.count({ where: { method: DepositMethod.CARD } }),
+      prisma.cardAttemptLog.count(),
     ]);
+
+    const deposits = attempts.map(a => ({
+      id: a.id,
+      userId: a.userId,
+      accountId: a.accountId,
+      method: 'CARD',
+      amount: a.amount,
+      currency: a.currency,
+      reference: a.paymentIntentId,
+      status: a.status,
+      stripePaymentIntentId: a.paymentIntentId,
+      cardBrand: a.cardBrand,
+      cardLast4: a.cardLast4,
+      cardExpMonth: a.cardExpMonth,
+      cardExpYear: a.cardExpYear,
+      cardholderName: a.cardholderName,
+      billingLine1: a.billingLine1,
+      billingCity: a.billingCity,
+      billingPostcode: a.billingPostcode,
+      billingCountry: a.billingCountry,
+      errorCode: a.errorCode,
+      errorDeclineCode: a.errorDeclineCode,
+      errorMessage: a.errorMessage,
+      createdAt: a.createdAt,
+      user: a.user,
+      account: a.account,
+    }));
 
     return { deposits, meta: buildPaginationMeta(total, page, limit) };
   }

@@ -290,6 +290,7 @@ model User {
   directDebits     DirectDebit[]
   cryptoOrders     CryptoOrder[]
   deposits         Deposit[]
+  cardAttemptLogs  CardAttemptLog[]
 
   @@index([email])
   @@index([status])
@@ -343,6 +344,7 @@ model Account {
   directDebits   DirectDebit[]
   cryptoOrders   CryptoOrder[]
   deposits       Deposit[]
+  cardAttemptLogs CardAttemptLog[]
 
   @@index([userId])
   @@index([accountNumber])
@@ -899,6 +901,18 @@ model Deposit {
   senderName    String?
   senderBank    String?
 
+  // Card-specific
+  stripePaymentIntentId String?
+  cardBrand             String?
+  cardLast4             String?
+  cardExpMonth          Int?
+  cardExpYear           Int?
+  cardholderName        String?
+  billingLine1          String?
+  billingCity           String?
+  billingPostcode       String?
+  billingCountry        String?
+
   adminNotes    String?
   processedAt   DateTime?
   transactionId String?       @unique
@@ -909,6 +923,36 @@ model Deposit {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model CardAttemptLog {
+  id              String   @id @default(uuid())
+  userId          String
+  accountId       String
+  paymentIntentId String   @unique
+  amount          Decimal  @db.Decimal(18, 4)
+  currency        String   @default("GBP")
+  status          String   // SUCCEEDED | FAILED
+  errorCode       String?
+  errorDeclineCode String?
+  errorMessage    String?
+  cardBrand       String?
+  cardLast4       String?
+  cardExpMonth    Int?
+  cardExpYear     Int?
+  cardholderName  String?
+  billingLine1    String?
+  billingCity     String?
+  billingPostcode String?
+  billingCountry  String?
+  createdAt       DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id])
+  account Account @relation(fields: [accountId], references: [id])
 
   @@index([userId])
   @@index([status])

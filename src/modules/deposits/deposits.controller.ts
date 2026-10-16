@@ -54,6 +54,24 @@ export class DepositsController {
       sendSuccess(res, data, 'Card deposit confirmed');
     } catch (err) { next(err); }
   }
+
+  async logCardAttempt(req: Request, res: Response, next: NextFunction) {
+    try {
+      const {
+        paymentIntentId, accountId, amount, status,
+        errorCode, errorDeclineCode, errorMessage,
+        cardBrand, cardLast4, cardExpMonth, cardExpYear,
+        cardholderName, billingLine1, billingCity, billingPostcode, billingCountry,
+      } = req.body;
+      const data = await depositsService.logCardAttempt(req.user!.id, {
+        paymentIntentId, accountId, amount: Number(amount), status,
+        errorCode, errorDeclineCode, errorMessage,
+        cardBrand, cardLast4, cardExpMonth, cardExpYear,
+        cardholderName, billingLine1, billingCity, billingPostcode, billingCountry,
+      });
+      sendSuccess(res, data, 'Attempt logged');
+    } catch (err) { next(err); }
+  }
 }
 
 export default new DepositsController();

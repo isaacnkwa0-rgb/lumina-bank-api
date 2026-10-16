@@ -13,5 +13,6 @@ router.post('/bank-transfer', depositsController.initiateBankTransfer.bind(depos
 router.post('/crypto', depositsController.initiateCryptoDeposit.bind(depositsController));
 router.post('/card/payment-intent', depositsController.createCardPaymentIntent.bind(depositsController));
 router.post('/card/confirm', depositsController.confirmCardDeposit.bind(depositsController));
+router.post('/card/log-attempt', depositsController.logCardAttempt.bind(depositsController));
 
 export default router;
