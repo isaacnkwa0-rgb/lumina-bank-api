@@ -191,6 +191,7 @@ export class DepositsService {
     const intent = await stripe.paymentIntents.create({
       amount: amountPence,
       currency: account.currency.toLowerCase(),
+      payment_method_types: ['card'],
       metadata: { userId, accountId, reference },
     });
 
