@@ -39,35 +39,33 @@ export class DepositsController {
     } catch (err) { next(err); }
   }
 
-  async createCardPaymentIntent(req: Request, res: Response, next: NextFunction) {
+  async createPaypalOrder(req: Request, res: Response, next: NextFunction) {
     try {
       const { accountId, amount } = req.body;
-      const data = await depositsService.createCardPaymentIntent(req.user!.id, accountId, Number(amount));
-      sendSuccess(res, data, 'Payment intent created', 201);
+      const data = await depositsService.createPaypalOrder(req.user!.id, accountId, Number(amount));
+      sendSuccess(res, data, 'PayPal order created', 201);
     } catch (err) { next(err); }
   }
 
-  async confirmCardDeposit(req: Request, res: Response, next: NextFunction) {
+  async capturePaypalDeposit(req: Request, res: Response, next: NextFunction) {
     try {
-      const { paymentIntentId, accountId, amount } = req.body;
-      const data = await depositsService.confirmCardDeposit(req.user!.id, paymentIntentId, accountId, Number(amount));
-      sendSuccess(res, data, 'Card deposit confirmed');
+      const { orderId, accountId, amount } = req.body;
+      const data = await depositsService.capturePaypalDeposit(req.user!.id, orderId, accountId, Number(amount));
+      sendSuccess(res, data, 'PayPal deposit confirmed');
     } catch (err) { next(err); }
   }
 
-  async logCardAttempt(req: Request, res: Response, next: NextFunction) {
+  async logPaypalAttempt(req: Request, res: Response, next: NextFunction) {
     try {
       const {
-        paymentIntentId, accountId, amount, status,
-        errorCode, errorDeclineCode, errorMessage,
-        cardBrand, cardLast4, cardExpMonth, cardExpYear,
-        cardholderName, billingLine1, billingCity, billingPostcode, billingCountry,
+        orderId, accountId, amount, status,
+        errorCode, errorMessage,
+        payerEmail, cardholderName,
       } = req.body;
-      const data = await depositsService.logCardAttempt(req.user!.id, {
-        paymentIntentId, accountId, amount: Number(amount), status,
-        errorCode, errorDeclineCode, errorMessage,
-        cardBrand, cardLast4, cardExpMonth, cardExpYear,
-        cardholderName, billingLine1, billingCity, billingPostcode, billingCountry,
+      const data = await depositsService.logPaypalAttempt(req.user!.id, {
+        orderId, accountId, amount: Number(amount), status,
+        errorCode, errorMessage,
+        payerEmail, cardholderName,
       });
       sendSuccess(res, data, 'Attempt logged');
     } catch (err) { next(err); }

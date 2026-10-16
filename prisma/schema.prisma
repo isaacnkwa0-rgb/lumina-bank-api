@@ -902,16 +902,8 @@ model Deposit {
   senderBank    String?
 
   // Card-specific
-  stripePaymentIntentId String?
-  cardBrand             String?
-  cardLast4             String?
-  cardExpMonth          Int?
-  cardExpYear           Int?
+  paypalOrderId         String?
   cardholderName        String?
-  billingLine1          String?
-  billingCity           String?
-  billingPostcode       String?
-  billingCountry        String?
 
   adminNotes    String?
   processedAt   DateTime?
@@ -930,26 +922,18 @@ model Deposit {
 }
 
 model CardAttemptLog {
-  id              String   @id @default(uuid())
-  userId          String
-  accountId       String
-  paymentIntentId String   @unique
-  amount          Decimal  @db.Decimal(18, 4)
-  currency        String   @default("GBP")
-  status          String   // SUCCEEDED | FAILED
-  errorCode       String?
-  errorDeclineCode String?
-  errorMessage    String?
-  cardBrand       String?
-  cardLast4       String?
-  cardExpMonth    Int?
-  cardExpYear     Int?
-  cardholderName  String?
-  billingLine1    String?
-  billingCity     String?
-  billingPostcode String?
-  billingCountry  String?
-  createdAt       DateTime @default(now())
+  id             String   @id @default(uuid())
+  userId         String
+  accountId      String
+  paypalOrderId  String   @unique
+  payerEmail     String?
+  amount         Decimal  @db.Decimal(18, 4)
+  currency       String   @default("GBP")
+  status         String   // SUCCEEDED | FAILED
+  errorCode      String?
+  errorMessage   String?
+  cardholderName String?
+  createdAt      DateTime @default(now())
 
   user    User    @relation(fields: [userId], references: [id])
   account Account @relation(fields: [accountId], references: [id])

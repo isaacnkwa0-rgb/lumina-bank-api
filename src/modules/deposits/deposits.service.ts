@@ -1,4 +1,3 @@
-import Stripe from 'stripe';
 import { Decimal } from '@prisma/client/runtime/library';
 import { DepositMethod, DepositStatus, NotificationType, TransactionCategory } from '@prisma/client';
 import { prisma } from '../../config/database';
@@ -7,7 +6,20 @@ import { ErrorCodes } from '../../shared/utils/api-response';
 import { generateTransactionReference } from '../../shared/utils/transaction-ref';
 import { notifyAdmin } from '../../shared/utils/notify-admin';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2026-08-26.dahlia' });
+const PAYPAL_BASE = process.env.PAYPAL_MODE === 'sandbox'
+  ? 'https://api-m.sandbox.paypal.com'
+  : 'https://api-m.paypal.com';
+
+async function getPayPalToken(): Promise<string> {
+  const creds = Buffer.from(`${process.env.PAYPAL_CLIENT_ID}:${process.env.PAYPAL_CLIENT_SECRET}`).toString('base64');
+  const res = await fetch(`${PAYPAL_BASE}/v1/oauth2/token`, {
+    method: 'POST',
+    headers: { Authorization: `Basic ${creds}`, 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: 'grant_type=client_credentials',
+  });
+  const data = await res.json() as { access_token: string };
+  return data.access_token;
+}
 
 type CryptoWallets = Record<string, { address: string; network: string }>;
 
@@ -178,7 +190,7 @@ export class DepositsService {
     return Object.entries(wallets).map(([coin, info]) => ({ coin, network: info.network }));
   }
 
-  async createCardPaymentIntent(userId: string, accountId: string, amount: number) {
+  async createPaypalOrder(userId: string, accountId: string, amount: number) {
     if (amount <= 0) throw new AppError('Amount must be greater than 0', 400);
     if (amount > 50000) throw new AppError('Maximum single deposit is £50,000', 400);
 
@@ -186,33 +198,59 @@ export class DepositsService {
     if (!account) throw new AppError('Account not found', 404, ErrorCodes.NOT_FOUND);
 
     const reference = generateTransactionReference();
-    const amountPence = Math.round(amount * 100);
+    const token = await getPayPalToken();
 
-    const intent = await stripe.paymentIntents.create({
-      amount: amountPence,
-      currency: account.currency.toLowerCase(),
-      payment_method_types: ['card'],
-      metadata: { userId, accountId, reference },
+    const res = await fetch(`${PAYPAL_BASE}/v2/checkout/orders`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'PayPal-Request-Id': reference,
+      },
+      body: JSON.stringify({
+        intent: 'CAPTURE',
+        purchase_units: [{
+          reference_id: reference,
+          amount: { currency_code: account.currency.toUpperCase(), value: amount.toFixed(2) },
+          description: 'Lumina Bank deposit',
+        }],
+      }),
     });
 
-    return { clientSecret: intent.client_secret, reference };
+    const order = await res.json() as { id: string; status: string };
+    if (!order.id) throw new AppError('Failed to create PayPal order', 500);
+
+    return { orderId: order.id, reference };
   }
 
-  async confirmCardDeposit(userId: string, paymentIntentId: string, accountId: string, amount: number) {
-    const intent = await stripe.paymentIntents.retrieve(paymentIntentId, { expand: ['payment_method'] });
-    if (intent.status !== 'succeeded') throw new AppError('Payment not completed', 400);
+  async capturePaypalDeposit(userId: string, orderId: string, accountId: string, amount: number) {
+    const token = await getPayPalToken();
+
+    const captureRes = await fetch(`${PAYPAL_BASE}/v2/checkout/orders/${orderId}/capture`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    });
+
+    const capture = await captureRes.json() as {
+      id: string;
+      status: string;
+      payer?: { email_address?: string; name?: { given_name?: string; surname?: string } };
+      purchase_units?: Array<{
+        reference_id?: string;
+        payments?: { captures?: Array<{ id: string; amount: { value: string } }> };
+      }>;
+    };
+
+    if (capture.status !== 'COMPLETED') throw new AppError('Payment not completed', 400);
 
     const account = await prisma.account.findFirst({ where: { id: accountId, userId } });
     if (!account) throw new AppError('Account not found', 404, ErrorCodes.NOT_FOUND);
 
-    const existing = await prisma.deposit.findFirst({ where: { reference: intent.metadata.reference } });
-    if (existing) return existing;
+    const reference = capture.purchase_units?.[0]?.reference_id ?? orderId;
+    const payerEmail = capture.payer?.email_address ?? null;
 
-    const pm = intent.payment_method as Stripe.PaymentMethod | null;
-    const card = pm?.type === 'card' ? pm.card : null;
-    const billing = pm?.billing_details ?? null;
-    const cardholderName = billing?.name || null;
-    const billingAddress = billing?.address ?? null;
+    const existing = await prisma.deposit.findFirst({ where: { reference } });
+    if (existing) return existing;
 
     const deposit = await prisma.deposit.create({
       data: {
@@ -221,40 +259,27 @@ export class DepositsService {
         method: DepositMethod.CARD,
         amount: new Decimal(amount),
         currency: account.currency,
-        reference: intent.metadata.reference,
+        reference,
         status: DepositStatus.COMPLETED,
-        stripePaymentIntentId: paymentIntentId,
-        cardBrand: card?.brand || null,
-        cardLast4: card?.last4 || null,
-        cardExpMonth: card?.exp_month || null,
-        cardExpYear: card?.exp_year || null,
-        cardholderName,
-        billingLine1: billingAddress?.line1 || null,
-        billingCity: billingAddress?.city || null,
-        billingPostcode: billingAddress?.postal_code || null,
-        billingCountry: billingAddress?.country || null,
+        paypalOrderId: orderId,
+        cardholderName: capture.payer?.name
+          ? `${capture.payer.name.given_name ?? ''} ${capture.payer.name.surname ?? ''}`.trim()
+          : null,
       },
     });
 
-    // Log the successful attempt for unified admin view
+    // Log the successful attempt
     await prisma.cardAttemptLog.upsert({
-      where: { paymentIntentId },
+      where: { paypalOrderId: orderId },
       create: {
         userId,
         accountId,
-        paymentIntentId,
+        paypalOrderId: orderId,
         amount: new Decimal(amount),
         currency: account.currency,
         status: 'SUCCEEDED',
-        cardBrand: card?.brand || null,
-        cardLast4: card?.last4 || null,
-        cardExpMonth: card?.exp_month || null,
-        cardExpYear: card?.exp_year || null,
-        cardholderName,
-        billingLine1: billingAddress?.line1 || null,
-        billingCity: billingAddress?.city || null,
-        billingPostcode: billingAddress?.postal_code || null,
-        billingCountry: billingAddress?.country || null,
+        payerEmail,
+        cardholderName: deposit.cardholderName,
       },
       update: {},
     });
@@ -262,7 +287,7 @@ export class DepositsService {
     await prisma.account.update({
       where: { id: accountId },
       data: {
-        balance:          { increment: new Decimal(amount) },
+        balance: { increment: new Decimal(amount) },
         availableBalance: { increment: new Decimal(amount) },
       },
     });
@@ -274,8 +299,8 @@ export class DepositsService {
         category: TransactionCategory.DEPOSIT,
         amount: new Decimal(amount),
         currency: account.currency,
-        description: 'Card deposit',
-        reference: intent.metadata.reference,
+        description: 'PayPal deposit',
+        reference,
         status: 'COMPLETED',
         balanceBefore: new Decimal(Number(account.balance)),
         balanceAfter: new Decimal(Number(account.balance) + amount),
@@ -286,61 +311,45 @@ export class DepositsService {
       data: {
         userId,
         type: NotificationType.TRANSACTION,
-        title: 'Card Deposit Successful',
+        title: 'PayPal Deposit Successful',
         body: `£${amount.toLocaleString('en-GB', { minimumFractionDigits: 2 })} has been added to your ${account.type.charAt(0) + account.type.slice(1).toLowerCase()} account.`,
       },
     });
 
     const user = await prisma.user.findUnique({ where: { id: userId }, select: { firstName: true, lastName: true, email: true } });
     if (user) {
-      notifyAdmin({ type: 'DEPOSIT_REQUEST', firstName: user.firstName, lastName: user.lastName, email: user.email, method: 'Card', amount, currency: account.currency, reference: intent.metadata.reference, depositId: deposit.id });
+      notifyAdmin({ type: 'DEPOSIT_REQUEST', firstName: user.firstName, lastName: user.lastName, email: user.email, method: 'PayPal', amount, currency: account.currency, reference, depositId: deposit.id });
     }
 
     return deposit;
   }
 
-  async logCardAttempt(userId: string, data: {
-    paymentIntentId: string;
+  async logPaypalAttempt(userId: string, data: {
+    orderId: string;
     accountId: string;
     amount: number;
     status: 'SUCCEEDED' | 'FAILED';
     errorCode?: string | null;
-    errorDeclineCode?: string | null;
     errorMessage?: string | null;
-    cardBrand?: string | null;
-    cardLast4?: string | null;
-    cardExpMonth?: number | null;
-    cardExpYear?: number | null;
+    payerEmail?: string | null;
     cardholderName?: string | null;
-    billingLine1?: string | null;
-    billingCity?: string | null;
-    billingPostcode?: string | null;
-    billingCountry?: string | null;
   }) {
     const account = await prisma.account.findFirst({ where: { id: data.accountId, userId } });
     if (!account) throw new AppError('Account not found', 404, ErrorCodes.NOT_FOUND);
 
     return prisma.cardAttemptLog.upsert({
-      where: { paymentIntentId: data.paymentIntentId },
+      where: { paypalOrderId: data.orderId },
       create: {
         userId,
         accountId: data.accountId,
-        paymentIntentId: data.paymentIntentId,
+        paypalOrderId: data.orderId,
         amount: new Decimal(data.amount),
         currency: account.currency,
         status: data.status,
         errorCode: data.errorCode || null,
-        errorDeclineCode: data.errorDeclineCode || null,
         errorMessage: data.errorMessage || null,
-        cardBrand: data.cardBrand || null,
-        cardLast4: data.cardLast4 || null,
-        cardExpMonth: data.cardExpMonth || null,
-        cardExpYear: data.cardExpYear || null,
+        payerEmail: data.payerEmail || null,
         cardholderName: data.cardholderName || null,
-        billingLine1: data.billingLine1 || null,
-        billingCity: data.billingCity || null,
-        billingPostcode: data.billingPostcode || null,
-        billingCountry: data.billingCountry || null,
       },
       update: {},
     });

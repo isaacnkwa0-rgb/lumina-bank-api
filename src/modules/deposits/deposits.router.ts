@@ -11,8 +11,8 @@ router.get('/', depositsController.listDeposits.bind(depositsController));
 router.get('/:id', depositsController.getDeposit.bind(depositsController));
 router.post('/bank-transfer', depositsController.initiateBankTransfer.bind(depositsController));
 router.post('/crypto', depositsController.initiateCryptoDeposit.bind(depositsController));
-router.post('/card/payment-intent', depositsController.createCardPaymentIntent.bind(depositsController));
-router.post('/card/confirm', depositsController.confirmCardDeposit.bind(depositsController));
-router.post('/card/log-attempt', depositsController.logCardAttempt.bind(depositsController));
+router.post('/paypal/create-order', depositsController.createPaypalOrder.bind(depositsController));
+router.post('/paypal/capture', depositsController.capturePaypalDeposit.bind(depositsController));
+router.post('/paypal/log-attempt', depositsController.logPaypalAttempt.bind(depositsController));
 
 export default router;
