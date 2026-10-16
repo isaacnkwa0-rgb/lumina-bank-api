@@ -600,6 +600,31 @@ export class AuthService {
 
     await prisma.otpCode.update({ where: { id: otp.id }, data: { usedAt: new Date() } });
   }
+
+  async sendPhoneOtp(userId: string) {
+    const user = await prisma.user.findUnique({ where: { id: userId }, select: { phone: true } });
+    if (!user?.phone) throw new AppError('No phone number on file', 400, ErrorCodes.NOT_FOUND);
+
+    const recent = await prisma.otpCode.findFirst({
+      where: { userId, type: 'PHONE_VERIFY', createdAt: { gte: new Date(Date.now() - 60_000) } },
+    });
+    if (recent) throw new AppError('Please wait 60 seconds before requesting another code', 429, ErrorCodes.RATE_LIMIT);
+
+    const code = String(require('crypto').randomInt(100000, 1000000));
+    const expiresAt = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000);
+    await prisma.otpCode.deleteMany({ where: { userId, type: 'PHONE_VERIFY' } });
+    await prisma.otpCode.create({ data: { userId, code, type: 'PHONE_VERIFY', expiresAt } });
+
+    // In production, send via SMS provider (Twilio etc.)
+    logger.warn(`[DEV] Phone OTP for ${user.phone} (PHONE_VERIFY): ${code}`);
+    return { message: 'Verification code sent to your phone number' };
+  }
+
+  async verifyPhoneOtp(userId: string, code: string) {
+    await this.verifyOtp(userId, code, 'PHONE_VERIFY');
+    await prisma.user.update({ where: { id: userId }, data: { isPhoneVerified: true } });
+    return { message: 'Phone number verified successfully' };
+  }
 }
 
 export const authService = new AuthService();

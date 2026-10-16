@@ -43,6 +43,8 @@ router.post('/transfer-pin/verify', authenticate, validate(z.object({ pin: z.str
 router.get('/transfer-pin/status', authenticate, authController.getTransferPinStatus);
 router.post('/transfer-otp', authenticate, authController.requestTransferOtp);
 router.post('/verify-transfer-otp', authenticate, validate(z.object({ code: z.string().length(6) })), authController.verifyTransferOtp);
+router.post('/send-phone-otp', authenticate, authController.sendPhoneOtp);
+router.post('/verify-phone-otp', authenticate, validate(z.object({ code: z.string().length(6) })), authController.verifyPhoneOtp);
 router.get('/me', authenticate, authController.me);
 
 router.get('/onboarding-status', authenticate, async (req: Request, res: Response, next: NextFunction) => {

@@ -232,6 +232,23 @@ export class AuthController {
       next(err);
     }
   }
+  async sendPhoneOtp(req: Request, res: Response, next: NextFunction) {
+    try {
+      const result = await authService.sendPhoneOtp(req.user!.id);
+      sendSuccess(res, result, result.message);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async verifyPhoneOtp(req: Request, res: Response, next: NextFunction) {
+    try {
+      const result = await authService.verifyPhoneOtp(req.user!.id, req.body.code);
+      sendSuccess(res, result, result.message);
+    } catch (err) {
+      next(err);
+    }
+  }
 }
 
 export const authController = new AuthController();
