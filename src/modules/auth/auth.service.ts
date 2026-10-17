@@ -103,9 +103,19 @@ export class AuthService {
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
+        gender: user.gender,
+        phone: user.phone,
+        dateOfBirth: user.dateOfBirth,
+        nationality: user.nationality,
         role: user.role,
         tier: user.tier,
+        status: user.status,
         isEmailVerified: user.isEmailVerified,
+        isPhoneVerified: user.isPhoneVerified,
+        twoFactorEnabled: user.twoFactorEnabled,
+        onboardingStep: user.onboardingStep,
+        createdAt: user.createdAt,
+        profile: null,
       },
     };
   }
@@ -184,7 +194,17 @@ export class AuthService {
       return { requiresTwoFactor: true, tempToken, twoFactorMethod: method };
     }
 
-    const tokens = await this.issueTokens(user.id, user.email, user.role, user.tier, user.status, deviceInfo);
+    const [tokens, profile] = await Promise.all([
+      this.issueTokens(user.id, user.email, user.role, user.tier, user.status, deviceInfo),
+      prisma.profile.findUnique({
+        where: { userId: user.id },
+        select: {
+          avatarUrl: true, occupation: true, employer: true,
+          annualIncome: true, preferredCurrency: true,
+          preferredLanguage: true, notificationPreferences: true,
+        },
+      }),
+    ]);
 
     logger.info('User logged in', { userId: user.id, email: user.email });
 
@@ -197,10 +217,21 @@ export class AuthService {
         firstName: user.firstName,
         lastName: user.lastName,
         gender: user.gender,
+        phone: user.phone,
+        dateOfBirth: user.dateOfBirth,
+        nationality: user.nationality,
+        address: user.address,
         role: user.role,
         tier: user.tier,
+        status: user.status,
         isEmailVerified: user.isEmailVerified,
+        isPhoneVerified: user.isPhoneVerified,
         twoFactorEnabled: user.twoFactorEnabled,
+        twoFactorMethod: user.twoFactorMethod,
+        kycStatus: user.kycStatus,
+        onboardingStep: user.onboardingStep,
+        createdAt: user.createdAt,
+        profile,
       },
     };
   }
