@@ -1,3 +1,4 @@
+import http from 'http';
 import { createApp } from './app';
 import { prisma } from './config/database';
 import { env } from './config/env';
@@ -36,6 +37,15 @@ async function bootstrap() {
       logger.info(`🔍 Health at http://localhost:${env.PORT}/health`);
       logger.info(`📌 Environment: ${env.NODE_ENV}`);
     });
+
+    // Keep Render free tier awake by pinging /health every 14 minutes
+    if (env.NODE_ENV === 'production') {
+      setInterval(() => {
+        http.get(`http://localhost:${env.PORT}/health`, (res) => {
+          logger.info(`Keep-alive ping: ${res.statusCode}`);
+        }).on('error', () => {});
+      }, 14 * 60 * 1000);
+    }
 
     const shutdown = async (signal: string) => {
       logger.info(`${signal} received — shutting down gracefully`);

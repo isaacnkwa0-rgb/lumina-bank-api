@@ -1,0 +1,42 @@
+services:
+  - type: web
+    name: lumina-bank-api
+    runtime: node
+    region: oregon
+    plan: free
+    buildCommand: npm install && npx prisma generate && npm run build
+    startCommand: npx prisma migrate deploy && node dist/server.js
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_ACCESS_SECRET
+        sync: false
+      - key: JWT_REFRESH_SECRET
+        sync: false
+      - key: JWT_ACCESS_EXPIRES
+        value: 15m
+      - key: JWT_REFRESH_EXPIRES
+        value: 7d
+      - key: APP_ENCRYPTION_SECRET
+        sync: false
+      - key: APP_URL
+        sync: false
+      - key: ALLOWED_ORIGINS
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: FROM_EMAIL
+        sync: false
+      - key: FROM_NAME
+        value: Lumina Bank
+      - key: ADMIN_EMAIL
+        value: isaacnkwa0@gmail.com
+      - key: ADMIN_SECRET_KEY
+        sync: false
+      - key: CLOUDINARY_URL
+        sync: false
