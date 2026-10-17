@@ -64,6 +64,16 @@ export class CardsService {
     const cardType = data.type ?? CardType.DEBIT;
     const cardTier = data.tier ?? CardTier.STANDARD;
 
+    // Cancel any existing active physical cards on this account (one physical card per account)
+    await prisma.card.updateMany({
+      where: {
+        accountId: data.accountId,
+        isVirtual: false,
+        status: { notIn: [CardStatus.CANCELLED, CardStatus.EXPIRED] },
+      },
+      data: { status: CardStatus.CANCELLED },
+    });
+
     // Generate a Visa-like 16-digit PAN and mask it
     const pan = generateVirtualCardPan();
     const maskedPan = maskPan(pan);
