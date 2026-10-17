@@ -56,6 +56,7 @@ router.patch('/insurance/:id/process', requireAdmin, adminController.processInsu
 router.get('/cards', requireAdmin, adminController.getAdminCards.bind(adminController));
 router.patch('/cards/:id/block', requireAdmin, adminController.blockCard.bind(adminController));
 router.patch('/cards/:id/unblock', requireAdmin, adminController.unblockCard.bind(adminController));
+router.patch('/cards/:id/status', requireAdmin, adminController.updateCardStatus.bind(adminController));
 
 // Transactions
 router.get('/transactions', requireAdmin, adminController.getAdminTransactions.bind(adminController));

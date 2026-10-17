@@ -94,6 +94,7 @@ export class CardsService {
         cardholderName: `${user.firstName} ${user.lastName}`.toUpperCase(),
         currency: account.currency,
         isVirtual: false,
+        status: CardStatus.PENDING,
       },
     });
   }

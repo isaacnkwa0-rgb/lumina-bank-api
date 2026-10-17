@@ -122,6 +122,9 @@ enum CardTier {
 }
 
 enum CardStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
   ACTIVE
   FROZEN
   BLOCKED

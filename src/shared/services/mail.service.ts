@@ -622,6 +622,30 @@ export const mailService = {
     await send({ to, subject: `Card ending ${last4} unblocked | Lumina Bank`, html: layout('Card Unblocked', body) });
   },
 
+  async sendCardProcessing(to: string, last4: string): Promise<void> {
+    const body = `
+      <p>Great news! Your Lumina Bank card ending in <strong>${last4}</strong> is now being <strong>prepared and personalised</strong>.</p>
+      <p>We'll notify you again once your card has been dispatched for delivery.</p>
+      <p class="note">Typical delivery takes 3–5 working days after dispatch.</p>`;
+    await send({ to, subject: `Your card is being processed | Lumina Bank`, html: layout('Card Processing', body) });
+  },
+
+  async sendCardShipped(to: string, last4: string): Promise<void> {
+    const body = `
+      <p>Your Lumina Bank card ending in <strong>${last4}</strong> is on its way! 🚀</p>
+      <p>It has been <strong>dispatched</strong> and should arrive within <strong>3–5 working days</strong>.</p>
+      <p>Once your card arrives, it will be activated automatically. You can also activate it from the Cards section in your app.</p>`;
+    await send({ to, subject: `Your card has been shipped | Lumina Bank`, html: layout('Card Shipped', body) });
+  },
+
+  async sendCardActivated(to: string, last4: string): Promise<void> {
+    const body = `
+      <p>Your Lumina Bank card ending in <strong>${last4}</strong> is now <strong>active</strong> and ready to use.</p>
+      <p>You can start making purchases, withdrawals, and online payments straight away.</p>
+      <p class="note">Manage your card settings, spending limits, and controls from the Cards section in your app.</p>`;
+    await send({ to, subject: `Your card is now active | Lumina Bank`, html: layout('Card Activated', body) });
+  },
+
   async sendAccountFrozen(to: string): Promise<void> {
     const body = `
       <p>Your Lumina Bank account has been <strong>temporarily frozen</strong>.</p>

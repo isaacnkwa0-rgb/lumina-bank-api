@@ -266,6 +266,14 @@ export class AdminController {
     } catch (err) { next(err); }
   }
 
+  async updateCardStatus(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { status } = req.body as { status: 'PROCESSING' | 'SHIPPED' | 'ACTIVE' };
+      const data = await adminService.updateCardStatus(req.params.id as string, status);
+      sendSuccess(res, data, `Card status updated to ${status}`);
+    } catch (err) { next(err); }
+  }
+
   // ── Transactions ─────────────────────────────────────────────────────────────
 
   async getAdminTransactions(req: Request, res: Response, next: NextFunction) {

@@ -762,6 +762,40 @@ export class AdminService {
     return updated;
   }
 
+  async updateCardStatus(id: string, status: 'PROCESSING' | 'SHIPPED' | 'ACTIVE') {
+    const card = await prisma.card.findUnique({ where: { id }, include: { user: { select: { email: true } } } });
+    if (!card) throw new AppError('Card not found', 404, ErrorCodes.NOT_FOUND);
+
+    const validTransitions: Record<string, string[]> = {
+      PENDING:    ['PROCESSING'],
+      PROCESSING: ['SHIPPED'],
+      SHIPPED:    ['ACTIVE'],
+    };
+    const allowed = validTransitions[card.status];
+    if (!allowed || !allowed.includes(status)) {
+      throw new AppError(`Cannot transition card from ${card.status} to ${status}`, 400, ErrorCodes.CONFLICT);
+    }
+
+    const updated = await prisma.card.update({ where: { id }, data: { status: status as CardStatus } });
+    const last4 = card.maskedPan.slice(-4);
+
+    const notifMessages: Record<string, string> = {
+      PROCESSING: `Your card ending ${last4} is being prepared and will be dispatched soon.`,
+      SHIPPED:    `Your card ending ${last4} has been shipped and is on its way to you.`,
+      ACTIVE:     `Your card ending ${last4} is now active and ready to use.`,
+    };
+
+    await prisma.notification.create({
+      data: { userId: card.userId, type: NotificationType.SYSTEM, title: 'Card Update', body: notifMessages[status] },
+    });
+
+    if (status === 'PROCESSING') mailService.sendCardProcessing(card.user.email, last4).catch(() => {});
+    if (status === 'SHIPPED')    mailService.sendCardShipped(card.user.email, last4).catch(() => {});
+    if (status === 'ACTIVE')     mailService.sendCardActivated(card.user.email, last4).catch(() => {});
+
+    return updated;
+  }
+
   // ── Transactions ─────────────────────────────────────────────────────────────
 
   async getAdminTransactions(filters: { page?: number; limit?: number; status?: string; type?: string }) {
