@@ -26,8 +26,17 @@ export function globalErrorHandler(
   res: Response,
   _next: NextFunction
 ): void {
-  if ((err as any).code === 'P2002') {
+  const code = (err as any).code as string | undefined;
+
+  if (code === 'P2002') {
     sendError(res, ErrorCodes.ACCT_004, 'An account of this type already exists', 409, undefined, req.requestId);
+    return;
+  }
+
+  // Prisma connection / DB unavailable errors (P1xxx) — Neon cold-start or network blip
+  if (code?.startsWith('P1') || (err as any).errorCode?.startsWith('P1')) {
+    logger.warn('Database connection error', { error: err.message, path: req.path });
+    sendError(res, ErrorCodes.SYS_001, 'Service temporarily unavailable. Please try again.', 503, undefined, req.requestId);
     return;
   }
 
