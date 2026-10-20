@@ -837,7 +837,7 @@ export class AdminService {
     return prisma.portfolio.findMany({
       include: {
         user: { select: { id: true, firstName: true, lastName: true, email: true } },
-        investments: { orderBy: { createdAt: 'desc' } },
+        holdings: { orderBy: { createdAt: 'desc' } },
       },
       orderBy: { createdAt: 'desc' },
     });
