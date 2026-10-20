@@ -6,7 +6,8 @@ declare global {
   var __prisma: ReturnType<typeof createPrisma> | undefined;
 }
 
-const RETRY_DELAYS_MS = [500, 1000, 2000]; // exponential back-off: 0.5s → 1s → 2s
+// Neon free-tier cold-start can take up to ~25 s — give it enough headroom before giving up
+const RETRY_DELAYS_MS = [1000, 2000, 4000, 6000, 8000, 8000];
 
 function sleep(ms: number) {
   return new Promise<void>((resolve) => setTimeout(resolve, ms));

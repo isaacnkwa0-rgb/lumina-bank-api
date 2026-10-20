@@ -36,7 +36,8 @@ export function globalErrorHandler(
   // Prisma connection / DB unavailable errors (P1xxx) — Neon cold-start or network blip
   if (code?.startsWith('P1') || (err as any).errorCode?.startsWith('P1')) {
     logger.warn('Database connection error', { error: err.message, path: req.path });
-    sendError(res, ErrorCodes.SYS_001, 'Service temporarily unavailable. Please try again.', 503, undefined, req.requestId);
+    res.setHeader('Retry-After', '10');
+    sendError(res, ErrorCodes.SYS_WARMING, 'Server is warming up. Retrying…', 503, undefined, req.requestId, 10);
     return;
   }
 

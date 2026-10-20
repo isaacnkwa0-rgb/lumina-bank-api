@@ -23,6 +23,7 @@ export interface ApiErrorResponse {
     code: string;
     message: string;
     details?: Array<{ field: string; message: string }>;
+    retryAfter?: number;
   };
   requestId?: string;
 }
@@ -57,7 +58,8 @@ export function sendError(
   message: string,
   statusCode = 400,
   details?: Array<{ field: string; message: string }>,
-  requestId?: string
+  requestId?: string,
+  retryAfter?: number
 ): Response {
   const body: ApiErrorResponse = {
     success: false,
@@ -65,6 +67,7 @@ export function sendError(
     requestId,
   };
   if (details) body.error.details = details;
+  if (retryAfter !== undefined) body.error.retryAfter = retryAfter;
   return res.status(statusCode).json(body);
 }
 
@@ -101,6 +104,7 @@ export const ErrorCodes = {
   VAL_001: 'VAL_001',
   // System
   SYS_001: 'SYS_001',
+  SYS_WARMING: 'SYS_WARMING',
   NOT_FOUND: 'NOT_FOUND',
   FORBIDDEN: 'FORBIDDEN',
   CONFLICT: 'CONFLICT',
