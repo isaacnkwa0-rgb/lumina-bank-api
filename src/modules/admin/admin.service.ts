@@ -1382,11 +1382,22 @@ export class AdminService {
   async sendBulkEmail(opts: {
     subject: string;
     body: string;
-    recipientType: 'ALL' | 'SINGLE' | 'SELECTED' | 'KYC_PENDING' | 'KYC_VERIFIED' | 'KYC_REJECTED' | 'TIER_STANDARD' | 'TIER_PREMIUM' | 'TIER_ELITE' | 'TIER_PRIVATE' | 'TIER_BUSINESS' | 'MARKETING_CONSENT' | 'SUSPENDED';
+    recipientType: 'ALL' | 'SINGLE' | 'SELECTED' | 'MANUAL' | 'KYC_PENDING' | 'KYC_VERIFIED' | 'KYC_REJECTED' | 'TIER_STANDARD' | 'TIER_PREMIUM' | 'TIER_ELITE' | 'TIER_PRIVATE' | 'TIER_BUSINESS' | 'MARKETING_CONSENT' | 'SUSPENDED';
     userId?: string;
     userIds?: string[];
+    manualEmails?: string[];
   }) {
-    const { subject, body, recipientType, userId, userIds } = opts;
+    const { subject, body, recipientType, userId, userIds, manualEmails } = opts;
+
+    if (recipientType === 'MANUAL') {
+      const recipients = (manualEmails ?? []).map((email) => ({ email, firstName: undefined as string | undefined }));
+      const results = await Promise.allSettled(
+        recipients.map((r) => mailService.sendBulkEmail(r.email, { subject, body })),
+      );
+      const sent = results.filter((r) => r.status === 'fulfilled').length;
+      const failed = results.filter((r) => r.status === 'rejected').length;
+      return { total: recipients.length, sent, failed };
+    }
 
     const baseWhere: Prisma.UserWhereInput = { role: 'USER', isEmailVerified: true };
 
