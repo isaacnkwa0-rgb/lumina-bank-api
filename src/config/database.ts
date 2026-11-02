@@ -7,25 +7,29 @@ declare global {
 }
 
 // Neon free-tier cold-start can take up to ~25 s — give it enough headroom before giving up
-const RETRY_DELAYS_MS = [1000, 2000, 4000, 6000, 8000, 8000];
+export const RETRY_DELAYS_MS = [1000, 2000, 4000, 6000, 8000, 8000];
 
 function sleep(ms: number) {
   return new Promise<void>((resolve) => setTimeout(resolve, ms));
 }
 
-function isTransientError(err: unknown): boolean {
+export function isTransientError(err: unknown): boolean {
   const msg = (err instanceof Error ? err.message : String(err)).toLowerCase();
   const code = (err as any)?.code as string | undefined;
+  const errorCode = (err as any)?.errorCode as string | undefined;
   return (
     msg.includes('terminating connection') ||
     msg.includes('connection timed out') ||
     msg.includes('connection pool timeout') ||
+    msg.includes("can't reach database") ||
     msg.includes('econnreset') ||
     msg.includes('etimedout') ||
     msg.includes('socket hang up') ||
     msg.includes('server closed the connection') ||
     msg.includes('prepared statement') ||
-    (code !== undefined && code.startsWith('P1'))
+    (err as any)?.name === 'PrismaClientInitializationError' ||
+    (code !== undefined && code.startsWith('P1')) ||
+    (errorCode !== undefined && errorCode.startsWith('P1'))
   );
 }
 

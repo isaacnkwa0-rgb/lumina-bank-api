@@ -33,8 +33,13 @@ export function globalErrorHandler(
     return;
   }
 
-  // Prisma connection / DB unavailable errors (P1xxx) — Neon cold-start or network blip
-  if (code?.startsWith('P1') || (err as any).errorCode?.startsWith('P1')) {
+  // Prisma connection / DB unavailable errors — Neon cold-start or network blip.
+  // In Prisma v6, PrismaClientInitializationError.errorCode is undefined, so check by name too.
+  const isPrismaConnectionError =
+    code?.startsWith('P1') ||
+    (err as any).errorCode?.startsWith('P1') ||
+    (err as any).name === 'PrismaClientInitializationError';
+  if (isPrismaConnectionError) {
     logger.warn('Database connection error', { error: err.message, path: req.path });
     res.setHeader('Retry-After', '10');
     sendError(res, ErrorCodes.SYS_WARMING, 'Server is warming up. Retrying…', 503, undefined, req.requestId, 10);
